@@ -1,0 +1,27 @@
+{
+  "name": "tira-rpg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namuuu/tira-rpg.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/namuuu/tira-rpg/issues"
+  },
+  "homepage": "https://github.com/namuuu/tira-rpg#readme",
+  "dependencies": {
+    "discord.js": "^13.10.2",
+    "dotenv": "^16.0.1",
+    "mongodb": "4.8"
+  },
+  "devDependencies": {
+    "eslint": "^8.22.0"
+  }
+}
