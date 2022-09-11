@@ -1,11 +1,49 @@
-const { fs } = require('fs');
+// load json files
+const { MessageEmbed } = require('discord.js');
+const classJson = require('./../data/classes.json');
+const db = require('./databaseUtils.js');
 
+exports.setClass = async function(className, interaction) {
+    console.log(interaction);
+
+    const { user, channel, mesage } = interaction;
+    const result = await db.setClass(user.id, className);
+
+    if(result) {
+        const newClassEmbed = new MessageEmbed()
+            .setColor("00ff00")
+            .addFields( 
+                { name: 'Félicitations !', value: "Vous possédez dorénavant la classe **" + classJson[className].name + "** !" },
+             )
+            
+        interaction.reply({embeds: [newClassEmbed], ephemeral: true});
+        return;
+    } else {
+        interaction.reply("Vous possédez déjà une classe + " + user.username + " !", )
+        return;
+    }
+
+    
+}
 
 exports.getClassData = function(className) {
-    const classes = fs.readFileSync('./data/classes.json');
-    let classesObject = JSON.parse(classes);
+    if(className != null) {
+        return classJson[className];
+    }
+    return classJson;
+}
 
-    console.log(classesObject);
+exports.calculateExpToNextLevel = function(level) {
+    expToNextLevel = 4*level*level + 6*level + 10;
+    return expToNextLevel;
+}
 
-    return classesObject;
+exports.calculateNewLevelExp = function(level, exp) {
+    expToNextLevel = 4*level*level + 6*level + 10;
+    while(exp >= expToNextLevel) {
+        level += 1;
+        exp -= expToNextLevel;
+        expToNextLevel = 4*level*level + 6*level + 10;
+    }
+    return { level: level, exp: exp };
 }

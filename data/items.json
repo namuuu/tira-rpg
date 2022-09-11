@@ -1,0 +1,10 @@
+{
+    "apple": {
+        "name": "Pomme",
+        "description": "Une pomme. Donne 5 points de vie."
+    },
+    "bread": {
+        "name": "Baguette",
+        "description": "Une baguette. Donne 10 points de vie."
+    }
+}

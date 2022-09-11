@@ -1,0 +1,65 @@
+{
+    "noclass": {
+        "name": "No Class"
+    },
+    "warrior": {
+        "name": "Guerrier",
+        "description": "Les guerriers sont des unités équilibrées, possédant des options viables dans la plupart des situations.",
+        "base_stats": {
+            "strength": 10,
+            "vitality": 10,
+            "resistance": 10,
+            "dexterity": 10,
+            "agility": 10,
+            "intellligence": 10
+        }
+    },
+    "assassin": {
+        "name": "Rôdeur",
+        "description": "Les rôdeurs sont des unités rapides, mais plus fragiles. Elles peuvent créer des situations très avantageuses si elles parviennent à exécuter leur plan.",
+        "base_stats": {
+            "strength": 10,
+            "vitality": 10,
+            "resistance": 10,
+            "dexterity": 10,
+            "agility": 10,
+            "intellligence": 10
+        }
+    },
+    "magician": {
+        "name": "Magicien",
+        "description": "Les magiciens se servent d'attaques élémentaires pour se battre, cela leur permettant  d'accroître le potentiel offensif de ses alliés, ou gêner ses adversaires.",
+        "base_stats": {
+            "strength": 10,
+            "vitality": 10,
+            "resistance": 10,
+            "dexterity": 10,
+            "agility": 10,
+            "intellligence": 10
+        }
+    },
+    "ranger": {
+        "name": "Tireur",
+        "description": "Les tireurs ont besoin d'utiliser des munitions afin de réaliser des dégâts, et bien que puissants la gestoin de leur stock est un élément primordial pour tout bon tireur.",
+        "base_stats": {
+            "strength": 10,
+            "vitality": 10,
+            "resistance": 10,
+            "dexterity": 10,
+            "agility": 10,
+            "intellligence": 10
+        }
+    },
+    "healer": {
+        "name": "Soigneur",
+        "description": "Les soigneurs possédent des sorts au même titre que les magiciens, mais ceux-ci ont des capacitées plus démarquées, au prix de dégâts plus faibles.",
+        "base_stats": {
+            "strength": 10,
+            "vitality": 10,
+            "resistance": 10,
+            "dexterity": 10,
+            "agility": 10,
+            "intellligence": 10
+        }
+    }
+}

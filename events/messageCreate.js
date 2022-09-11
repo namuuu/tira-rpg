@@ -47,6 +47,8 @@ module.exports = {
                     }
                 })
                 
+            } else {
+                client.commands.get(command).execute(message, args);
             }
         } catch(error) {
             // Catch the error if there's a dev issue
