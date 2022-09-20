@@ -1,5 +1,9 @@
 node_modules
 .env
 .vscode
+
 .replit
 replit.nix
+
+package.json
+package-lock.json

@@ -2,25 +2,33 @@ const { Client, MessageEmbed } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
 
 module.exports = {
-    name: "delete",
-    aliases: [],
-    description: "",
-    requireCharacter: true,
-    execute(message, args) {
+  name: "delete",
+  aliases: [],
+  description: "",
+  execute(message, args) {
+    console.log(args);
 
-        const arg = message.mentions.members.first().id;
-        dbUtils.doesPlayerExists(arg).then(exists => {
-            if(exists) {
-                dbUtils.removePlayer(arg);
-                message.reply('debug: deleted player');
+    if (args.length < 1)
+      return;
 
-                return;
+    const arg = message.mentions.members.first();
 
-            } else {
+    if (!arg)
+      return;
 
-                message.reply('debug: no player to delete');
-                return;
-            }
-        });
-    }
+    const id = arg.id;
+    dbUtils.doesPlayerExists(id).then(exists => {
+      if (exists) {
+        dbUtils.removePlayer(id);
+        message.reply('debug: deleted player');
+
+        return;
+
+      } else {
+
+        message.reply('debug: no player to delete');
+        return;
+      }
+    });
+  }
 }
