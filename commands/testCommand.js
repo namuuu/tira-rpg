@@ -9,10 +9,6 @@ module.exports = {
     description: "",
     requireCharacter: false,
     execute(message, args) {
-        authorId = message.author.id;
-
-        // dbUtils.awardExp(authorId, 100, message.channel);
-        // dbUtils.giveItem(authorId, "apple", 1);
-        messageTemplateUtils.sendChooseClassSelector(message.channel);
+        console.log(message);
     }
 }
