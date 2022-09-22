@@ -2,9 +2,13 @@ const skillMap = new Map();
 
 module.exports = {
   map: skillMap,
-  setupSkills(client) {
+  setupSkills() {
+    console.log("-- SKILLS --");
+    console.log("Setting up Skills...");
     skillMap.set("heal", heal);
     skillMap.set("damage", damage);
+
+    console.log("Skills are all setup !");
   },
   
 }

@@ -1,5 +1,11 @@
-const { default: Collection } = require("@discordjs/collection");
+const skillData = require("../setup/skillSetup.js");
 
-let SkillEffects = new Collection();
 
-module.exports
+module.exports = {
+  execute(skillName, channel, combat, quantity) {
+    return (skillData.map.get(skillName))(channel, combat, quantity);
+  },
+  get(skillName) {
+    return skillData.map.get(skillName);
+  }
+}

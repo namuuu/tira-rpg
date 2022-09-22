@@ -2,7 +2,7 @@ const { Client, MessageEmbed } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 const messageTemplateUtils = require('../utils/messageTemplateUtils.js');
-const skill = require('../setup/skillSetup.js');
+const skill = require('../utils/skillUtils.js');
 
 module.exports = {
   name: "test",
@@ -16,6 +16,6 @@ module.exports = {
     //dbUtils.giveItem(authorId, "apple", 1);
     //messageTemplateUtils.sendChooseClassSelector(message.channel);
 
-    (skill.map.get("heal"))(-1);
+    skill.execute("heal");
   }
 }
