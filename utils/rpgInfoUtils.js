@@ -3,6 +3,10 @@ const { MessageEmbed } = require('discord.js');
 const classJson = require('./../data/classes.json');
 const db = require('./databaseUtils.js');
 
+/**
+  Adds a Class to a specific user that interacted with a Slider.
+  The setClass checks if the user has no class in order to work.
+**/
 exports.setClass = async function(className, interaction) {
     console.log(interaction);
 
@@ -26,6 +30,9 @@ exports.setClass = async function(className, interaction) {
     
 }
 
+/**
+  Get the classData (json/classes.json).
+**/
 exports.getClassData = function(className) {
     if(className != null) {
         return classJson[className];

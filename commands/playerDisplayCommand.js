@@ -1,7 +1,7 @@
 const { Client, MessageEmbed } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
-const itemData = require('../data/items.json');
+//const itemData = require('../data/items.json');
 
 module.exports = {
     name: "display",

@@ -4,7 +4,9 @@ const { Collection } = require('discord.js');
 
 module.exports = {
   setupCommands(client) {
+    console.log("-- COMMANDS --")
     client.commands = new Collection(); 
+    // Get every JS command file
     const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
     // Setup a new collection for the commands
