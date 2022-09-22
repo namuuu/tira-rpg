@@ -4,8 +4,12 @@ const permsUtils = require('../utils/permsUtils.js');
 module.exports = {
     name : "add",
     aliases: [],
+<<<<<<< HEAD
     requiredPermission: ["admin.add"],
     description: "Ajouter des permissions admin à une commande",
+=======
+    description: "",
+>>>>>>> origin/main
 
     execute(message, args) {
         console.log(args);
@@ -13,8 +17,13 @@ module.exports = {
         if (args.length < 1)
             return;
 
+<<<<<<< HEAD
         permsUtils.addAdmin(args[0]);
         message.reply('debug: added admin permission');
+=======
+        permsUtils.addAdmin(args);
+        message.reply('debug: added admin perm to command');
+>>>>>>> origin/main
 
         // dbUtils.doesCommandExists(args).then(exists => {
         //     if(!exists) {

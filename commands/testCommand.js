@@ -5,6 +5,7 @@ const messageTemplateUtils = require('../utils/messageTemplateUtils.js');
 const skill = require('../utils/skillUtils.js');
 
 module.exports = {
+<<<<<<< HEAD
   name: "test",
   aliases: [],
   description: "",
@@ -18,4 +19,13 @@ module.exports = {
 
     skill.execute("heal");
   }
+=======
+    name: "test",
+    aliases: [],
+    description: "",
+    requireCharacter: false,
+    execute(message, args) {
+        console.log(message);
+    }
+>>>>>>> origin/main
 }
