@@ -12,12 +12,12 @@ As the bot is currently in development, you currently cannot add the bot to your
 
 ### Pre-requirements
 
-1. Node Package Manager
-https://nodejs.org/en/
+1. Node Package Manager (https://nodejs.org/en/)
+
 Type `node -v` to make sure it's installed
 
-2. Git
-https://git-scm.com/downloads
+2. Git (https://git-scm.com/downloads)
+
 Type `git --version` to make sure it's installed
 
 ### Cloning the project
@@ -29,7 +29,7 @@ git clone https://github.com/namuuu/tira-rpg.git
 
 ### Installing packages
 
-Some packages are required for the bot to work. Make sure the Command Prompt is in the correct folder (named by default tira-rpg), and type :
+Some packages are required in order for the bot to work. Make sure the Command Prompt is in the correct folder (named by default tira-rpg), and type :
 
 ```
 npm init -y
@@ -41,6 +41,7 @@ npm install mongodb@4.10
 
 Create a file called `.env` in the project's parent folder. This file will contain tokens both for the discord bot account, and to login into the MongoDB database.
 > We will note provide you this file, as leaking those information would just enable everyone to run code onto our bot. If you want to try it out, please use your own bot application.
+
 This file follows the following pattern :
 ```
 BOT_TOKEN = <BOT_TOKEN HERE>
@@ -52,7 +53,10 @@ In the bot's parent folder, run `node ./` to launch the bot. If you see `Tira's 
 
 # Contributors
 
-Namu, head developer
-Firquen, head developer
-Roxyrooky, developer
-Canfrixe, developer
+| User | Role |
+| --- | --- |
+| Namu | Head Developer |
+| Firquen | Head Developer |
+| Roxyrooky | Developer |
+| Canfrixe | Developer |
+| Az' | Game Designer |
