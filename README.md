@@ -51,6 +51,12 @@ MONGO_URI = <MONGO_URI HERE>
 ### Actually running the bot
 In the bot's parent folder, run `node ./` to launch the bot. If you see `Tira's RPG is ready to work into the Command Prompt`, you're all set up !
 
+# Common Errors / FAQ
+
+### Cannot find module 'node:events'
+
+Your node.js version is probably outdated. Node.js needs to be at least 16.6.0 for discord.js.
+
 # Contributors
 
 | User | Role |
