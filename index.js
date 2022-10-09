@@ -1,10 +1,10 @@
 // Require the necessary discord.js classes
-const { Client, Intents } = require('discord.js');
+const { Client, GatewayIntentBits } = require('discord.js');
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
 // Create a new client instance
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
 // Setup commands
 const { setupCommands } = require('./setup/commandSetup.js');
