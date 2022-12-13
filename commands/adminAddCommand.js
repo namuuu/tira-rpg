@@ -14,16 +14,13 @@ module.exports = {
         if (args.length < 1)
             return;
             
-        permsUtils.addAdmin(args[0]);
-        message.reply('debug: added admin permission');
-
-        // dbUtils.doesCommandExists(args).then(exists => {
-        //     if(!exists) {
-        //         dbUtils.addAdmin(args);
-        //         message.reply('debug: added admin perm to command');
-        //     } else {
-        //         message.reply('debug: command already has admin perm ');
-        //     }
-        // });
+            permsUtils.doesPermExists(args).then(exists => {
+                if(!exists) {
+                    permsUtils.addAdmin(args[0]);
+                    message.reply('debug: added admin perm to this command to the user');
+                } else {
+                    message.reply('debug: user already has admin perm for this command');
+                }
+            });
     }
 }

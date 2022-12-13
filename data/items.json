@@ -6,7 +6,7 @@
   "bread": {
     "name": "Baguette",
     "description": "Une baguette. Donne 10 points de vie."
-  }
+  },
   "frites_ru": {
     "name": "Frites du Restaurant Universitaire",
     "description": "Donne 5 points de vie, mais poison pendant 27 ans. Se stack"
