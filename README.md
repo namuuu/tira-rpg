@@ -61,13 +61,13 @@ Your node.js version is probably outdated. Node.js needs to be at least 16.6.0 f
 
 In the root folder, run
 
-### TypeError: Cannot read properties of undefined (reading 'Guilds')
-
-Your discord.js version is outdated (Needed version is at least discordjs v14). Please reinstall it with `npm install discord.js@^14.0.2`
-
 ```
 npm install dotenv
 ```
+
+### TypeError: Cannot read properties of undefined (reading 'Guilds')
+
+Your discord.js version is outdated (Needed version is at least discordjs v14). Please reinstall it with `npm install discord.js@^14.0.2`
 
 # Contributors
 
