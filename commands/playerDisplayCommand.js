@@ -1,6 +1,7 @@
 const { Client, MessageEmbed } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
+const { EmbedBuilder } = require('discord.js');
 //const itemData = require('../data/items.json');
 
 module.exports = {
@@ -49,8 +50,8 @@ module.exports = {
 
         console.log(inventoryDisplay);
 
-        const displayEmbed = new MessageEmbed()
-            .setColor(author.accentColor)
+        const displayEmbed = new EmbedBuilder()
+            .setColor(0x0099FF)
             .setAuthor({name: 'Interface du joueur'})
             .addFields( 
                 { name: 'Nom', value:  author.username },
