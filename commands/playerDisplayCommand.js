@@ -49,7 +49,10 @@ module.exports = {
         }
 
         console.log(inventoryDisplay);
-
+        /*
+        Il manque à ajouter les valeurs réelles des HP, argent, equipement,skills et inventaire
+        Affichage clarifié de l'equipement,skills et inventaire
+        */
         const displayEmbed = new EmbedBuilder()
             .setTitle('Inventory')
             .setColor(0x0099FF)
