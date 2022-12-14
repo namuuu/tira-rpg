@@ -1,10 +1,17 @@
-{
-  "apple": {
-    "name": "Pomme",
-    "description": "Une pomme. Donne 5 points de vie."
+[
+ {
+    "name": "Fireball",
+    "id":"136",
+    "description": "Une boule de feu. Fait 20 points de dégats."
   },
-  "bread": {
+  {
     "name": "Baguette",
-    "description": "Une baguette. Donne 10 points de vie."
+    "id":"100",
+    "description": "Une coup de baguette. Fait 1 point de dégats."
+  },
+  {
+    "name": "Snowball",
+    "id":"2512",
+    "description": "Lancé de boule de neige ! Fait 100 points de dégats."
   }
-}
+]

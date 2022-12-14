@@ -1,7 +1,8 @@
 const { Client, MessageEmbed } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Events} = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} = require('discord.js');
+const skillsData = require('../data/skills.json');
 //const itemData = require('../data/items.json');
 
 module.exports = {
@@ -47,8 +48,25 @@ module.exports = {
         if(inventoryDisplay == "") {
             inventoryDisplay = "Vide";
         }
+        //console.log(inventoryDisplay);
 
-        console.log(inventoryDisplay);
+        // Skills display
+        var skillsDisplay = "";
+        try {
+            var skillsLength= skillsData.length
+
+            for(var i = 0; i < skillsLength; i++) {
+                skillsDisplay += `# ${skillsData[i].id} - ${skillsData[i].name}\n`;
+            }
+        } catch(err) {
+            console.log(err);
+        }
+        if(skillsDisplay == "") {
+            skillsDisplay = "Vide";
+        }
+
+        //console.log(skillsDisplay);
+
         /*
         Il manque à ajouter les valeurs réelles des HP, argent, equipement,skills et inventaire
         Affichage clarifié de l'equipement,skills et inventaire
@@ -69,7 +87,7 @@ module.exports = {
                 { name: 'Agilité', value: playerStats.agility + " ", inline: true },
                 { name: 'Intelligence', value: playerStats.intelligence + " ", inline: true },
                 { name: 'Equipement', value:  inventoryDisplay },
-                { name: 'Skills', value:  inventoryDisplay },
+                { name: 'Skills', value:  skillsDisplay },
                 { name: 'Inventaire', value:  inventoryDisplay }
              )
             .setThumbnail('https://fortnite-api.com/images/cosmetics/br/bid_161_snowboardfemale/icon.png');
