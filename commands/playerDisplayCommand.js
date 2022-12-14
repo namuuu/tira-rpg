@@ -1,7 +1,7 @@
 const { Client, MessageEmbed } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
-const { EmbedBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Events} = require('discord.js');
 //const itemData = require('../data/items.json');
 
 module.exports = {
@@ -51,10 +51,12 @@ module.exports = {
         console.log(inventoryDisplay);
 
         const displayEmbed = new EmbedBuilder()
+            .setTitle('Inventory')
             .setColor(0x0099FF)
-            .setAuthor({name: 'Interface du joueur'})
+            .setAuthor({name: author.username,iconURL: 'https://media.discordapp.net/attachments/1021799485069873152/1039900731345485844/DALLE_2022-11-09_14.53.50_-_middle_ages_storyteller_digital_art.png?width=890&height=890'})
             .addFields( 
-                { name: 'Nom', value:  author.username },
+                { name: 'HP', value: "97/100 (97%)", inline: true },
+                { name: 'Argent', value:  "100 💵" , inline: true},
                 { name: 'Niveau ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
                 { name: 'Classe', value:  classData.name + " " },
                 { name: 'Force', value: playerStats.strength + " ", inline: true },
@@ -63,11 +65,32 @@ module.exports = {
                 { name: 'Dextérité', value: playerStats.dexterity + " ", inline: true },
                 { name: 'Agilité', value: playerStats.agility + " ", inline: true },
                 { name: 'Intelligence', value: playerStats.intelligence + " ", inline: true },
+                { name: 'Equipement', value:  inventoryDisplay },
+                { name: 'Skills', value:  inventoryDisplay },
                 { name: 'Inventaire', value:  inventoryDisplay }
              )
-             .setThumbnail(author.displayAvatarURL());
-            
-            message.channel.send({embeds: [displayEmbed]});
+            .setThumbnail('https://fortnite-api.com/images/cosmetics/br/bid_161_snowboardfemale/icon.png');
+
+            const row = new ActionRowBuilder()
+			    .addComponents(
+				    new ButtonBuilder()
+                        .setCustomId('inventoryButton')
+                        .setLabel('Display your inventory')
+                        .setStyle(ButtonStyle.Secondary),
+
+                    new ButtonBuilder()
+                        .setCustomId('skillsButton')
+                        .setLabel('Display your skills')
+                        .setStyle(ButtonStyle.Secondary),
+                        
+                    new ButtonBuilder()
+                        .setCustomId('equipementButton')
+                        .setLabel('Display your equipement')
+                        .setStyle(ButtonStyle.Secondary),
+			);
+
+
+            message.channel.send({embeds: [displayEmbed], components: [row]});
             return;
     }
 }
