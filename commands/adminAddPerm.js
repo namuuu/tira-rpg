@@ -4,7 +4,7 @@ const dbUtils = require('../utils/databaseUtils.js');
 
 
 module.exports = {
-    name : "addPerm",
+    name : "addperm",
     aliases: [],
     requiredPermission: ["admin.addPerm"],
     description: "",

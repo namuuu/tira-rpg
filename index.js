@@ -10,7 +10,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds,
 
 // Setup commands
 const { setupCommands } = require('./setup/commandSetup.js');
-setupCommands(client);
+setupCommands(client, process.env.BOT_TOKEN, process.env.APP_ID);
 
 // Setup events
 const { setupEvents } = require('./setup/eventSetup.js');
