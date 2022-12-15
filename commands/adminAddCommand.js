@@ -9,7 +9,6 @@ module.exports = {
 
 
     execute(message, args) {
-        console.log(args);
 
         if (args.length < 1)
             return;

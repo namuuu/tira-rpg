@@ -32,7 +32,9 @@ exports.doesPermExists = async function(commandName) {
 
     return new Promise( resolve => { 
         admin.listIndexes({name: commandName}).toArray(function(err, collections) {
+            console.log(admin.listIndexes({name: commandName}));
             if(collections.length > 0) {
+                console.log("Poggo");
                 resolve(true);
             } else {
                 resolve(false);
