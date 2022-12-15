@@ -1,12 +1,13 @@
 {
-  "fireball": {
-    "name": "Fireball",
-    "number":"69",
-    "description": "Une pomme. Donne 5 points de vie."
-  },
   "baguette": {
     "name": "Baguette",
     "number":"100",
-    "description": "Une baguette. Donne 10 points de vie."
+    "required_class":"warrior",
+    "required_level": 1,
+    "description": "Une baguette. Donne 10 points de vie.",
+    "effects": {
+      "heal": 10,
+      "damage": 0
+    }
   }
 }

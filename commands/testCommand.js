@@ -18,6 +18,6 @@ module.exports = {
 
     dbUtils.giveSkill(authorId, "baguette");
 
-    skill.execute("heal");
+    skill.execute("baguette", message.channel, "combatId");
   }
 }
