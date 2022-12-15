@@ -1,8 +1,9 @@
 const { Client } = require('discord.js');
 const perms = require('../data/perms.json');
+const permsUtils = require('../utils/permsUtils.js');
 
 exports.addAdmin = async function(commandName) {
-    const admin = Client.mongoDB.db('perm-data').collection('admin');
+    const admin = Client.mongoDB.db('perm-data').collection(commandName);
 
     const data = [
         { name: commandName, users : [] }
@@ -10,10 +11,10 @@ exports.addAdmin = async function(commandName) {
     
     const result = await admin.insertMany(data);
     console.log("BRO CA ADDADMIN OU PAS ???" + result);
-}
+}   
 
 exports.addToCommand = async function(commandName, userName) {
-    const admin = Client.mongoDB.db('perm-data').collection('admin');
+    const admin = Client.mongoDB.db('perm-data').collection(commandName);
 
     const filter = { name: commandName };
 
@@ -28,13 +29,11 @@ exports.addToCommand = async function(commandName, userName) {
 }
 
 exports.doesPermExists = async function(commandName) {
-    const admin = Client.mongoDB.db('perm-data').collection('admin');
+    const admin = Client.mongoDB.db('perm-data');
 
     return new Promise( resolve => { 
-        admin.listIndexes({name: commandName}).toArray(function(err, collections) {
-            console.log(admin.listIndexes({name: commandName}));
+        admin.listCollections({name: commandName}).toArray(function(err, collections) {
             if(collections.length > 0) {
-                console.log("Poggo");
                 resolve(true);
             } else {
                 resolve(false);
@@ -44,17 +43,52 @@ exports.doesPermExists = async function(commandName) {
 }
 
 
+exports.hasPerms = async function(commandName, userName) {
+
+    return new Promise( resolve => { 
+        permsUtils.doesPermExists(commandName).then(exists => {
+            if (!exists) {
+                console.log("perm non trouvee ");
+                resolve(true);
+            }
+
+            const admin = Client.mongoDB.db('perm-data').collection(commandName);
+
+            const query = { users: userName};
+
+            admin.findOne(query).then(exists => {
+                console.log(exists);
+                if (!exists) {
+                    resolve(false);
+                }
+
+                resolve(true);
+            })
+        })
+    });
+}
+
 exports.checkPerms = async function(commandName, userName) {
-    const admin = Client.mongoDB.db('perm-data').collection('admin');
 
-    const query = { name: commandName };
-    const options = { users: userName};
+    return new Promise( resolve => { 
+        permsUtils.doesPermExists(commandName).then(exists => {
+            if (!exists) {
+                console.log("perm non trouvee ");
+                resolve(false);
+            }
 
-    const result = await admin.findOne(query, options);
+            const admin = Client.mongoDB.db('perm-data').collection(commandName);
 
-    if (result == null) {
-        return false;
-    }
-    
-    return true;
+            const query = { users: userName};
+
+            admin.findOne(query).then(exists => {
+                console.log(exists);
+                if (!exists) {
+                    resolve(false);
+                }
+
+                resolve(true);
+            })
+        })
+    });
 }

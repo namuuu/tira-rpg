@@ -10,7 +10,6 @@ exports.doesPlayerExists = async function(id) {
     return new Promise( resolve => { 
         playerDatabase.listCollections({name: id}).toArray(function(err, collections) {
             if(collections.length > 0) {
-                console.log(playerDatabase.listCollections({name: id}));
                 resolve(true);
             } else {
                 resolve(false);

@@ -18,6 +18,7 @@ module.exports = {
       return;
 
     const id = arg.id;
+    
     dbUtils.doesPlayerExists(id).then(exists => {
       if (exists) {
         dbUtils.removePlayer(id);

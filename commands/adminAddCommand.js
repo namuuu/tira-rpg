@@ -13,13 +13,13 @@ module.exports = {
         if (args.length < 1)
             return;
             
-            permsUtils.doesPermExists(args).then(exists => {
+            permsUtils.doesPermExists(args[0]).then(exists => {
                 if(!exists) {
                     permsUtils.addAdmin(args[0]);
-                    message.reply('debug: added admin perm to this command to the user');
+                    message.reply('debug: added admin perm to this command');
                 } else {
                     message.reply('debug: user already has admin perm for this command');
                 }
-            });
+        });
     }
 }

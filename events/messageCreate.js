@@ -1,5 +1,5 @@
 const { prefix } = require('./../config.json');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Embed, EmbedBuilder } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
 
 module.exports = {
@@ -18,7 +18,7 @@ module.exports = {
         // If the command is not in the collection, return
         if (!client.commands.has(command) || message.author.bot) {
 
-            const unknownEmbed = new MessageEmbed()
+            const unknownEmbed = new EmbedBuilder()
             .setColor('F08080')
             .setAuthor({name: 'I don\'t know that command !'})
             .addFields( { name: 'You may have mistyped the command, or you may have used a command that is not yet implemented.', value: 'If you are unsure, please use the `help` command.' } );
