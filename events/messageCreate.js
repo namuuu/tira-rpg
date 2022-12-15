@@ -37,7 +37,7 @@ module.exports = {
                         client.commands.get(command).execute(message, args);
                     } else {
                         // If it doesn't exist, send a message to the user
-                        const noCharacterEmbed = new MessageEmbed()
+                        const noCharacterEmbed = new EmbedBuilder()
                             .setColor('F08080')
                             .setAuthor({name: 'You do not have a character!'})
                             .addFields( { name: 'You need to create a character before you can use this command.', value: 'Use the `start` command to create a character.' })
@@ -53,7 +53,7 @@ module.exports = {
         } catch(error) {
             // Catch the error if there's a dev issue
             console.error(error);
-            const errorEmbed = new MessageEmbed()
+            const errorEmbed = new EmbedBuilder()
             .setColor('FF0000')
             .setAuthor({name: 'Error!'})
             .addFields( { name: 'Something went wrong!', value: 'Please try again later.' });

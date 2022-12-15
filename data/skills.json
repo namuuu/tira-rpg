@@ -1,17 +1,13 @@
-[
- {
-    "name": "Fireball",
-    "id":"136",
-    "description": "Une boule de feu. Fait 20 points de dégats."
-  },
-  {
+{
+  "baguette": {
     "name": "Baguette",
-    "id":"100",
-    "description": "Une coup de baguette. Fait 1 point de dégats."
-  },
-  {
-    "name": "Snowball",
-    "id":"2512",
-    "description": "Lancé de boule de neige ! Fait 100 points de dégats."
+    "number":"100",
+    "required_class":"warrior",
+    "required_level": 1,
+    "description": "Une baguette. Donne 10 points de vie.",
+    "effects": {
+      "heal": 10,
+      "damage": 0
+    }
   }
-]
+}

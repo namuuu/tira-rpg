@@ -24,7 +24,7 @@ exports.createPlayer = async function(id) {
     const data = [
         { name: "info", class: "noclass", level: 0, exp: 0 },
         { name: "stats", strength: 0, vitality: 0, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
-        { name: "inventory", items: [], quantity: [] },
+        { name: "inventory", items: [], quantity: [], skills: [] },
     ]
 
     const options = { ordered: true };
@@ -85,7 +85,7 @@ exports.giveItem = async function(id, item, quantity) {
 
     const query = { name: "inventory" };
     let options = { 
-        projection: {_id: 0},
+        projection: {_id: 0, skills: 0},
     };
 
     const inventory = await playerCollection.findOne(query, options);
@@ -106,6 +106,26 @@ exports.giveItem = async function(id, item, quantity) {
     }
 
     console.log("[DEBUG] Item " + item + " added to user " + id + ".");
+}
+
+exports.giveSkill = async function(id, skill_id)  {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+
+    const query = { name: "inventory" };
+    let options = { 
+        projection: {_id: 0, items: 0, quantity: 0},
+    };
+
+    const inventory = await playerCollection.findOne(query, options);
+    
+    if(inventory.skills.includes(skill_id)) {
+        console.log("[DEBUG] Skill " + skill_id + " already exists for user " + id + ".");
+    } else {
+        const newItems = inventory.skills.concat(skill_id);
+        const update = { $set: { skills: newItems } };
+        options = { upsert: true };
+        const result = await playerCollection.updateOne(query, update, options);
+    }
 }
 
 exports.setClass = async function(id, className) {

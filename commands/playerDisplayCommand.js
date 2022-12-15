@@ -3,7 +3,7 @@ const dbUtils = require('../utils/databaseUtils.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} = require('discord.js');
 const skillsData = require('../data/skills.json');
-//const itemData = require('../data/items.json');
+const itemData = require('../data/items.json');
 
 module.exports = {
     name: "display",
@@ -32,6 +32,9 @@ module.exports = {
             expBar += "▱";
         }
 
+
+        // console.log(playerInventory.items);
+
         // Inventory display
         var inventoryDisplay = "";
         try {
@@ -53,10 +56,8 @@ module.exports = {
         // Skills display
         var skillsDisplay = "";
         try {
-            var skillsLength= skillsData.length
-
-            for(var i = 0; i < skillsLength; i++) {
-                skillsDisplay += `# ${skillsData[i].id} - ${skillsData[i].name}\n`;
+            for(const skill of playerInventory.skills) {
+                skillsDisplay += `# ${skillsData[skill].number} - ${skillsData[skill].name}\n`;
             }
         } catch(err) {
             console.log(err);

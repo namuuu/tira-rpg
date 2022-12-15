@@ -14,9 +14,9 @@ module.exports = {
 }
 
 function heal(channel, combatId, quantity) {
-  console.log("Healed " + quantity);
+  channel.send("Healed " + quantity);
 }
 
 function damage(channel, combatid, quantity) {
-  console.log("Damaged " + quantity);
+  channel.send("Damaged " + quantity);
 }

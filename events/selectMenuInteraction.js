@@ -6,7 +6,7 @@ const rpg = require('../utils/rpgInfoUtils.js');
 module.exports = {
     name: 'interactionCreate',
     trigger(interaction, client) {
-        if (!interaction.isSelectMenu()) return;
+        if (!interaction.isStringSelectMenu()) return;
 	    
         const { user, customId } = interaction;
 
