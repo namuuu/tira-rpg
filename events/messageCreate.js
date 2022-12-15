@@ -1,5 +1,5 @@
 const { prefix } = require('./../config.json');
-const { MessageEmbed, EmbedBuilder } = require('discord.js');
+const { MessageEmbed, Embed, EmbedBuilder } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
 
 module.exports = {
