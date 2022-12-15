@@ -16,6 +16,8 @@ module.exports = {
     //dbUtils.giveItem(authorId, "apple", 1);
     //messageTemplateUtils.sendChooseClassSelector(message.channel);
 
+    dbUtils.giveSkill(authorId, "baguette");
+
     skill.execute("heal");
   }
 }
