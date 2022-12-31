@@ -9,5 +9,13 @@
       "heal": 10,
       "damage": 0
     }
+  },
+  "debugger": {
+    "name": "The Debugger",
+    "number":"0",
+    "description": "A skill only used when the developers need to test something. Unobtainable.",
+    "effects": {
+      "heal": 100000
+    }
   }
 }

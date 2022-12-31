@@ -5,7 +5,7 @@ const messageTemplateUtils = require('../utils/messageTemplateUtils.js');
 const skill = require('../utils/skillUtils.js');
 
 module.exports = {
-  name: "Debug",
+  name: "debug",
   aliases: [],
   description: "Debug command. Usage for developer only.",
   requireCharacter: true,
@@ -15,26 +15,44 @@ module.exports = {
         return;
     }
 
-    // Flag to indicate if the debug is succesful or not.
-    let debugIssue = null;
+    // Setting up useful data
+    const authorId = message.author.id;
 
     // Checks the first argument, considered as the "debug command"
-    switch(args[0]) {
-        case "giveskill":
-            debugIssue = dbUtils.learnSkill(authorId, "baguette");
-            break;
-
-
-        default:
-            message.reply("Debug Command not found. Please specify a debug command according to the document.");
-            break;
+    try {
+        switch(args[0]) {
+            case "learn-skill":
+                if(args.length == 2)
+                    dbUtils.learnSkill(authorId, args[1]);
+                else
+                    dbUtils.learnSkill(authorId, "debugger");
+                break;
+            case "unlearn-skill":
+                if(args.length == 2)
+                    dbUtils.unlearnSkill(authorId, args[1]);
+                else
+                    dbUtils.unlearnSkill(authorId, "debugger");
+                break;
+            case "select-skill":
+                if(args.length == 2)
+                    dbUtils.selectActiveSkill(authorId, args[1]);
+                else
+                    dbUtils.selectActiveSkill(authorId, "debugger");
+                break;
+            case "unselect-skill":
+                if(args.length == 2)
+                    dbUtils.unselectSkill(authorId, args[1]);
+                else
+                    dbUtils.unselectSkill(authorId, "debugger");
+                break;
+            default:
+                message.reply("Debug Command not found. Please specify a debug command according to the document.");
+                break;
+        }
+    } catch (error) {
+        console.log(error);
     }
-
-    if(debugIssue == true)
-        message.reply("Debug command issued succesfully.");
-
-    if(debugIssue == false)
-    message.reply("Something went wrong during debug command.");
+    
 
     return;
   }

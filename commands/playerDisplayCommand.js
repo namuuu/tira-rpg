@@ -56,7 +56,7 @@ module.exports = {
         // Skills display
         var skillsDisplay = "";
         try {
-            for(const skill of playerInventory.skills) {
+            for(const skill of playerInventory.activeSkills) {
                 skillsDisplay += `# ${skillsData[skill].number} - ${skillsData[skill].name}\n`;
             }
         } catch(err) {
@@ -88,7 +88,7 @@ module.exports = {
                 { name: 'Agilité', value: playerStats.agility + " ", inline: true },
                 { name: 'Intelligence', value: playerStats.intelligence + " ", inline: true },
                 { name: 'Equipement', value:  inventoryDisplay },
-                { name: 'Skills', value:  skillsDisplay },
+                { name: 'Skills actifs', value:  skillsDisplay },
                 { name: 'Inventaire', value:  inventoryDisplay }
              )
             .setThumbnail('https://fortnite-api.com/images/cosmetics/br/bid_161_snowboardfemale/icon.png');
