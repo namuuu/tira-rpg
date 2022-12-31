@@ -203,7 +203,7 @@ exports.selectActiveSkill = async function(user_id, skill_id) {
     return true;
 }
 
-exports.unselectSkill = async function(user_id, skill_id) {
+exports.unselectActiveSkill = async function(user_id, skill_id) {
     const playerCollection = Client.mongoDB.db('player-data').collection(user_id);
 
     const query = { name: "inventory" };

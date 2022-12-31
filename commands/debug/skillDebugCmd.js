@@ -1,7 +1,4 @@
-const { Client, MessageEmbed, SlashCommandBuilder } = require('discord.js');
 const dbUtils = require('../../utils/databaseUtils.js');
-const rpgInfoUtils = require('../../utils/rpgInfoUtils.js');
-const messageTemplateUtils = require('../../utils/messageTemplateUtils.js');
 const skill = require('../../utils/skillUtils.js');
 
 module.exports = {
@@ -17,33 +14,28 @@ module.exports = {
 
     // Setting up useful data
     const authorId = message.author.id;
+    let skillQuery = "debugger";
+    if(args.length >= 2)
+        skillQuery = args[1];
 
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
             case "learn":
-                if(args.length == 2)
-                    dbUtils.learnSkill(authorId, args[1]);
-                else
-                    dbUtils.learnSkill(authorId, "debugger");
+                dbUtils.learnSkill(authorId, skillQuery);
                 break;
             case "unlearn":
-                if(args.length == 2)
-                    dbUtils.unlearnSkill(authorId, args[1]);
-                else
-                    dbUtils.unlearnSkill(authorId, "debugger");
+                dbUtils.unlearnSkill(authorId, skillQuery);
                 break;
             case "select":
-                if(args.length == 2)
-                    dbUtils.selectActiveSkill(authorId, args[1]);
-                else
-                    dbUtils.selectActiveSkill(authorId, "debugger");
+                dbUtils.selectActiveSkill(authorId, skillQuery);
                 break;
             case "unselect":
-                if(args.length == 2)
-                    dbUtils.unselectSkill(authorId, args[1]);
-                else
-                    dbUtils.unselectSkill(authorId, "debugger");
+                dbUtils.unselectActiveSkill(authorId, skillQuery);
+                break;
+            case "get":
+                const queryResult = skill.searchSkill(skillQuery);
+                message.reply({embeds: [skill.displaySkill(queryResult)]});
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");
