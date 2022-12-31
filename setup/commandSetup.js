@@ -7,6 +7,7 @@ const { Routes } = require('discord-api-types/v9');
 
 module.exports = {
   setupCommands(client, token, APP_ID) {
+    console.log(commandFolders);
     console.log("-- COMMANDS --")
     client.commands = new Collection(); 
     // Get every JS command file
@@ -30,6 +31,30 @@ module.exports = {
         client.commands.set(alias, command);
         /*new SlashCommandBuilder()
           .setName(alias);*/
+      }
+    }
+
+    for(const folder of commandFolders) {
+      const commandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
+      // Setup a new collection for the commands
+      for (const file of commandFiles) {
+        console.log(`Loading command: /${folder}/${file}`);
+        const command = require(`./../commands/${folder}/${file}`);
+        // Set a new item in the Collection
+        // With the key as the command name and the value as the exported module
+        client.commands.set(command.name, command);
+        /*new SlashCommandBuilder()
+          .setName(command.name);*/
+
+        if(!command.aliases)
+          continue;
+
+        for (const alias of command.aliases) {
+          console.log(`- Loading alias: ${alias}`);
+          client.commands.set(alias, command);
+          /*new SlashCommandBuilder()
+            .setName(alias);*/
+        }
       }
     }
 
