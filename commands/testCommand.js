@@ -16,7 +16,7 @@ module.exports = {
     //dbUtils.giveItem(authorId, "apple", 1);
     //messageTemplateUtils.sendChooseClassSelector(message.channel);
 
-    dbUtils.giveSkill(authorId, "baguette");
+    dbUtils.learnSkill(authorId, "baguette");
 
     skill.execute("baguette", message.channel, "combatId");
   }
