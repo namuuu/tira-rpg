@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { Collection, SlashCommandBuilder } = require('discord.js');
+const { commandFolders } = require("../config.json");
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 
