@@ -22,9 +22,10 @@ exports.createPlayer = async function(id) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
     const data = [
-        { name: "info", class: "noclass", level: 0, exp: 0 },
-        { name: "stats", strength: 0, vitality: 0, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
+        { name: "info", class: "noclass", level: 0, exp: 0, health: 10 },
+        { name: "stats", strength: 0, vitality: 10, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
         { name: "inventory", items: [], quantity: [], skills: [] , activeSkills: []},
+        { name: "misc", lastRegen: Date.now()},
     ]
 
     const options = { ordered: true };
@@ -51,6 +52,78 @@ exports.getPlayerData = async function(id, name) {
     const result = await playerCollection.findOne(query, options);
     
     return result;
+}
+
+exports.setHealth = async function(userID, health) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
+
+    const query = { name: "info" };
+    let options = { 
+        projection: {_id: 0, class: 0, level: 0, exp: 0},
+    };
+
+    const info = await playerCollection.findOne(query, options);
+
+    const update = { $set: { health: health } };
+    options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+}
+
+// TODO : Currently does not handle max health.
+exports.addHeath = async function(userID, health) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
+
+    const query = { name: "info" };
+    let options = { 
+        projection: {_id: 0, class: 0, level: 0, exp: 0},
+    };
+
+    const info = await playerCollection.findOne(query, options);
+    const newHealth = info.health + health;
+    
+    const update = { $set: { health: newHealth } };
+    options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+}
+
+exports.passiveRegen = async function(userID) {
+    //Math.floor(Date.now()/1000)
+    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
+
+    let maxHealth = await exports.getPlayerData(userID, "stats");
+    maxHealth = maxHealth.vitality;
+
+    let lastRegen = await exports.getPlayerData(userID, "misc");
+    lastRegen = lastRegen.lastRegen;
+
+    let health = await exports.getPlayerData(userID, "info");
+    health = health.health;
+
+    if((Date.now() - lastRegen) < 1800000)
+        return 0;
+
+    const percHealth = (Date.now() - lastRegen) / 1000000 * 17.778;
+    let newHealth = Math.round(health + maxHealth*(percHealth/100));
+    if(newHealth > maxHealth)
+        newHealth = maxHealth;
+
+    //const newHealth = maxHealth.health + health;
+
+    let query = { name: "info" };
+    
+    let update = { $set: { health: newHealth } };
+    let options = { upsert: true };
+    await playerCollection.updateOne(query, update, options);
+
+    console.log(`[DEBUG] User ID ${userID} regenerated ${newHealth - health} through ${(Math.round((Date.now() - lastRegen)/60000))} minutes`);
+
+    query = { name: "misc" };
+    
+    update = { $set: { lastRegen: Date.now() } };
+    options = { upsert: true };
+    await playerCollection.updateOne(query, update, options);
+
+    return newHealth - health;
 }
 
 exports.awardExp = async function(id, exp, channel) {

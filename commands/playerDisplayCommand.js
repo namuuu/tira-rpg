@@ -32,6 +32,8 @@ module.exports = {
             expBar += "▱";
         }
 
+        // Health percentage
+        var percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
 
         // console.log(playerInventory.items);
 
@@ -77,7 +79,7 @@ module.exports = {
             .setColor(0x0099FF)
             .setAuthor({name: author.username,iconURL: 'https://media.discordapp.net/attachments/1021799485069873152/1039900731345485844/DALLE_2022-11-09_14.53.50_-_middle_ages_storyteller_digital_art.png?width=890&height=890'})
             .addFields( 
-                { name: 'HP', value: "97/100 (97%)", inline: true },
+                { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
                 { name: 'Argent', value:  "100 💵" , inline: true},
                 { name: 'Niveau ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
                 { name: 'Classe', value:  classData.name + " " },
