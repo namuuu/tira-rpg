@@ -4,7 +4,6 @@ const permsUtils = require('../utils/permsUtils.js');
 module.exports = {
     name : "add",
     aliases: [],
-    requiredPermission: ["admin.add"],
     description: "Ajouter des permissions admin à une commande",
 
 
