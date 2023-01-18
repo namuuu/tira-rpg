@@ -33,7 +33,7 @@ module.exports = {
                 let threadId = message.channel.id;
                 if(args.length >= 3)
                     threadId = args[2];
-                await combatdb.joinFight(playerId, threadId);
+                await combatdb.joinFight(playerId, threadId, 1);
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");
