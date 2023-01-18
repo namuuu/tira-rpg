@@ -12,11 +12,13 @@ module.exports = {
   execute(message, args) {
     authorId = message.author.id;
 
+    message.reply("hey");
+
     //dbUtils.awardExp(authorId, 100, message.channel);
     //dbUtils.giveItem(authorId, "apple", 1);
     //messageTemplateUtils.sendChooseClassSelector(message.channel);
 
-    dbUtils.learnSkill(authorId, "baguette");
+    //dbUtils.learnSkill(authorId, "baguette");
 
     skill.execute("baguette", message.channel, "combatId");
   }
