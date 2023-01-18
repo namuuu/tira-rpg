@@ -5,7 +5,7 @@ module.exports = {
   name: "delete",
   aliases: [],
   description: "",
-  requiredPermission: ["admin.add"],
+  requiredPermission: [""],
   execute(message, args) {
     console.log(args);
 
