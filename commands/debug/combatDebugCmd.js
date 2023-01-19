@@ -18,10 +18,8 @@ module.exports = {
         switch(args[0]) {
             case "start":
                 message.channel.send("Join this fight !").then(async (msg) => {
-                    let thread = await combatdb.createThread(msg);
-                    await combatdb.instanciateCombat(msg.id);
+                    await combatdb.instanciateCombat(msg);
                 });
-                //combatdb.createThread(combatMessage);
                 break;
             case "delete":
                 combatdb.deleteThread(message.channel);
@@ -33,7 +31,7 @@ module.exports = {
                 let threadId = message.channel.id;
                 if(args.length >= 3)
                     threadId = args[2];
-                await combatdb.joinFight(playerId, threadId);
+                await combatdb.joinFight(playerId, threadId, 1);
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");
