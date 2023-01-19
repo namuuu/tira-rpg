@@ -24,7 +24,7 @@ exports.createPlayer = async function(id) {
     const data = [
         { name: "info", class: "noclass", level: 0, exp: 0, health: 10 },
         { name: "stats", strength: 0, vitality: 10, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
-        { name: "inventory", items: [], quantity: [], skills: [] , activeSkills: []},
+        { name: "inventory", items: [], skills: [] , activeSkills: []},
         { name: "misc", lastRegen: Date.now()},
     ]
 
@@ -69,7 +69,6 @@ exports.setHealth = async function(userID, health) {
     const result = await playerCollection.updateOne(query, update, options);
 }
 
-// TODO : Currently does not handle max health.
 exports.addHeath = async function(userID, health) {
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
@@ -120,8 +119,7 @@ exports.passiveRegen = async function(userID) {
     query = { name: "misc" };
     
     update = { $set: { lastRegen: Date.now() } };
-    options = { upsert: true };
-    await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne(query, update, {upsert: true});
 
     return newHealth - health;
 }
@@ -153,32 +151,38 @@ exports.getNewLevelRewards = async function(id, level, channel) {
     channel.send("Vous avez atteint le niveau " + level + " !");
 }
 
-exports.giveItem = async function(id, item, quantity) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+/**
+ * Adding an item to the inventory of a player or increasing the quantity of an existing item
+ * @param playerId id of the player
+ * @param {*} item item to give
+ * @param {*} quantity quantity of the item to give
+ */
+exports.giveItem = async function(playerId, item, quantity) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
 
-    const query = { name: "inventory" };
-    let options = { 
-        projection: {_id: 0, skills: 0},
-    };
-
-    const inventory = await playerCollection.findOne(query, options);
+    // Querying the inventory in the database
+    const inventory = await playerCollection.findOne(
+        {name: "inventory"}, 
+        {projection: {_id: 0, skills: 0, activeSkills: 0}}
+    );
     
-    if(inventory.items.includes(item)) {
-        const index = inventory.items.indexOf(item);
-        const newQuantity = inventory.quantity;
-        newQuantity[index] = newQuantity[index] + quantity;
-        const update = { $set: { quantity: newQuantity } };
-        options = { upsert: true };
-        const result = await playerCollection.updateOne(query, update, options);
+    // If the item is already in the inventory, we add the quantity to the existing one
+    // Else, we create a new entry for the item
+    if(inventory.items[item] != undefined) {
+        inventory.items[item].quantity += quantity;
     } else {
-        const newItems = inventory.items.concat(item);
-        const newQuantity = inventory.quantity.concat(quantity);
-        const update = { $set: { items: newItems, quantity: newQuantity } };
-        options = { upsert: true };
-        const result = await playerCollection.updateOne(query, update, options);
+        inventory.items = {
+            ...inventory.items,
+            [item]: {
+                quantity: quantity
+            }
+        }
     }
 
-    console.log("[DEBUG] Item " + item + " added to user " + id + ".");
+    // Updating the inventory in the database
+    const result = await playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
+
+    console.group("[DEBUG] Item " + item + " given to player " + playerId);
 }
 
 exports.learnSkill = async function(id, skill_id)  {
