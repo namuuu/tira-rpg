@@ -41,7 +41,6 @@ module.exports = {
         var inventoryDisplay = "";
         try {
             for(const [key, value] of Object.entries(playerInventory.items)) {
-                console.log(value);
                 inventoryDisplay += `${itemData[key].name} (x${value.quantity})\n`;
             }
         } catch(err) {
