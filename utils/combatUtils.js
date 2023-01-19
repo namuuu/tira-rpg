@@ -35,10 +35,12 @@ exports.deleteThread = async function(channel) {
 
 /**
  * Instanciates a combat in the database, note that the data is currently blank.
- * @param messageId message id that will serve as the combat id. also is the id of the thread.
+ * @param message message whose id will serve as the combat id. also is the id of the thread.
  * @returns the id in question.
  */
-exports.instanciateCombat = async function(messageId) {
+exports.instanciateCombat = async function(message) {
+    this.createThread(message);
+    const messageId = message.id;
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
 
     const combatData = [
@@ -76,15 +78,15 @@ exports.deleteCombat = async function(messageId) {
     });
 }
 
-exports.joinFight = async function(playerId, messageId, team) {
-    let combatCollection = await this.getCollection(messageId);
+exports.joinFight = async function(playerId, combatId, team) {
+    let combatCollection = await this.getCollection(combatId);
 
     if(combatCollection == null) {
         console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
         return;
     } 
 
-    combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
+    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
 
     const info = await combatCollection.findOne({}, {_id: 0});
 
@@ -130,7 +132,7 @@ exports.joinFight = async function(playerId, messageId, team) {
 
     await combatCollection.updateOne({}, update, {upsert: true});
 
-    console.log("[DEBUG] " + playerId + " joined combat " + messageId);
+    console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
 
 exports.getCollection = async function(messageId) {

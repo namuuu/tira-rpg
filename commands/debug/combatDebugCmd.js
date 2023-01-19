@@ -18,10 +18,8 @@ module.exports = {
         switch(args[0]) {
             case "start":
                 message.channel.send("Join this fight !").then(async (msg) => {
-                    let thread = await combatdb.createThread(msg);
-                    await combatdb.instanciateCombat(msg.id);
+                    await combatdb.instanciateCombat(msg);
                 });
-                //combatdb.createThread(combatMessage);
                 break;
             case "delete":
                 combatdb.deleteThread(message.channel);
