@@ -22,16 +22,16 @@ module.exports = {
     try {
         switch(args[0]) {
             case "learn":
-                dbUtils.learnSkill(authorId, skillQuery);
+                skill.learnSkill(authorId, skillQuery);
                 break;
             case "unlearn":
-                dbUtils.unlearnSkill(authorId, skillQuery);
+                skill.unlearnSkill(authorId, skillQuery);
                 break;
             case "select":
-                dbUtils.selectActiveSkill(authorId, skillQuery);
+                skill.selectActiveSkill(authorId, skillQuery);
                 break;
             case "unselect":
-                dbUtils.unselectActiveSkill(authorId, skillQuery);
+                skill.unselectActiveSkill(authorId, skillQuery);
                 break;
             case "get":
                 const queryResult = skill.searchSkill(skillQuery);

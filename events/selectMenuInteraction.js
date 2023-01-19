@@ -8,6 +8,7 @@ module.exports = {
     trigger(interaction, client) {
         if (!interaction.isStringSelectMenu()) return;
 	    
+        const authorId = interaction.user.id;
         const { user, customId } = interaction;
 
         if(!db.doesPlayerExists(user.id).then(exists => { return exists; })) {
@@ -17,8 +18,12 @@ module.exports = {
         switch(customId) {
             case 'chooseClass':
                 rpg.setClass(interaction.values[0], interaction);
+                break;
+            case 'displayInventory':
+
+                break;
             default:
-                return;
+                break;
         }
     }
 }
