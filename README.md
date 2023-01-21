@@ -53,6 +53,10 @@ In the bot's parent folder, run `node ./` to launch the bot. If you see `Tira's 
 
 # Common Errors / FAQ
 
+### Cannot read properties of undefined (reading 'startsWith') with indicator at /mongodb-connection-string-url\lib\index.js:9:30
+
+You forgot to create the `.env` file. Look at the **Setting up the different tokens** section.
+
 ### Cannot find module 'node:events'
 
 Your node.js version is probably outdated. Node.js needs to be at least 16.6.0 for discord.js. Please reinstall it from the link used in the "Pre-requirements" section.
