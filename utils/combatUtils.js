@@ -125,7 +125,7 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
         info.team2.push(player);
     }
 
-    console.log(info);
+    //console.log(info);
 
     const update = {
         $set: {
@@ -156,6 +156,58 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
 
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
+
+
+
+
+
+
+
+
+
+exports.startCombat = async function(thread) {
+    let combatId = thread.id;
+    let combatCollection = await this.getCombatCollection(combatId);
+
+    if(!thread.isThread()) {
+        console.log("[DEBUG] Attempted to start a non-thread channel. (NON_THREAD_CHANNEL_START_ATTEMPT)");
+        return;
+    }
+
+    if (combatCollection == null) {
+        console.log("[DEBUG] Attempted to start a non-existent combat. (NON_EXISTENT_COMBAT_START_ATTEMPT)");
+        return;
+    }
+
+    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
+
+    const combatData = await combatCollection.findOne({}, { _id: 0 });
+
+    if (combatData.team1.length == 0 || combatData.team2.length == 0) {
+        console.log("[DEBUG] Attempted to start a combat with less than 2 players. (COMBAT_WITH_LESS_THAN_2_PLAYERS_START_ATTEMPT)");
+        return;
+    }
+
+    const soonestFighter = this.getSoonestFighter(combatData);
+
+    if(soonestFighter.type == "human") {
+        combatData.current_action.current_player_id = soonestFighter.id;
+        thread.send("It's your turn, <@" + soonestFighter.id + "> !");
+        console.log("[DEBUG] This is the player's turn. Waiting for player input.");
+    } else {
+        console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
+
+    }
+}
+
+
+
+
+
+
+
+
+
 
 exports.getCombatCollection = async function(messageId) {
     const combatDatabase = Client.mongoDB.db('combat-data');
@@ -208,19 +260,7 @@ exports.addTimeline = async function(combatId, playerId, time) {
     await combatCollection.updateOne({}, update, { upsert: true });
 }
 
-exports.getSoonestTimelineEntity = async function(combatId) {
-    let combatCollection = await this.getCombatCollection(combatId);
-
-    if (combatCollection == null) {
-        console.log("[DEBUG] Attempted to get a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
-        return;
-    }
-
-    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
-
-    const combatInfo = await combatCollection.findOne({}, { _id: 0 });
-
-    //console.log(combatInfo);
+exports.getSoonestTimelineEntity = async function(combatInfo) {
 
     var soonestFighter;
 

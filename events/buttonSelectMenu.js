@@ -30,7 +30,7 @@ module.exports = {
                 inventoryUtil.displayInventory(authorId, interaction);
                 break;
             case 'joinFight':
-                await combatUtil.joinFight(authorId, args[0], args[1], interaction.message);
+                await combatUtil.addPlayerToCombat(authorId, args[0], args[1], interaction.message);
                 interaction.reply({ content: 'You have joined the combat!', ephemeral: true });
             default:
                 break;
