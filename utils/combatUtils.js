@@ -22,10 +22,10 @@ exports.createThread = async function(message) {
  * @param channel the thread to delete
  */
 exports.deleteThread = async function(channel) {
-    if(channel.isThread()) {
+    if (channel.isThread()) {
         this.deleteCombat(channel.id);
         channel.delete();
-        
+
         return;
     } else {
         channel.send("It doesn't seem like a thread...");
@@ -51,7 +51,7 @@ exports.instanciateCombat = async function(message) {
             current_action: {
                 current_player_id: null,
                 aim_at: null,
-                skill: null, 
+                skill: null,
             },
             team1: [],
             team2: [],
@@ -72,30 +72,30 @@ exports.deleteCombat = async function(messageId) {
 
     return new Promise(async resolve => {
         await combatCollection.drop(function(err, res) {
-            if(err) throw err;
-            if(res) console.log("[DEBUG] Combat " + messageId + " deleted.");
+            if (err) throw err;
+            if (res) console.log("[DEBUG] Combat " + messageId + " deleted.");
         });
     });
 }
 
 exports.joinFight = async function(playerId, combatId, team) {
-    let combatCollection = await this.getCollection(combatId);
+    let combatCollection = await this.getCombatCollection(combatId);
 
-    if(combatCollection == null) {
+    if (combatCollection == null) {
         console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
         return;
-    } 
+    }
 
     combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
 
-    const info = await combatCollection.findOne({}, {_id: 0});
+    const info = await combatCollection.findOne({}, { _id: 0 });
 
     playerCollection = Client.mongoDB.db('player-data').collection(playerId);
-    const playerInfo = await playerCollection.findOne({name: "info"}, {_id: 0});
-    const playerStats = await playerCollection.findOne({name: "stats"}, {_id: 0});
-    const playerInv = await playerCollection.findOne({name: "inventory"}, {_id: 0});
+    const playerInfo = await playerCollection.findOne({ name: "info" }, { _id: 0 });
+    const playerStats = await playerCollection.findOne({ name: "stats" }, { _id: 0 });
+    const playerInv = await playerCollection.findOne({ name: "inventory" }, { _id: 0 });
 
-    const player = { 
+    const player = {
         id: playerId,
         type: "human",
         class: playerInfo.class,
@@ -114,23 +114,25 @@ exports.joinFight = async function(playerId, combatId, team) {
         items: playerInv.items,
     }
 
-    if(team == 1) {
+    if (team == 1) {
         info.team1.push(player);
-    } else if(team == 2) {
+    } else if (team == 2) {
         info.team2.push(player);
     }
 
     console.log(info);
 
-    const update = { $set: {
-        current_turn: 1,
-        team1: info.team1,
-        team2: info.team2,
-    } };
+    const update = {
+        $set: {
+            current_turn: 1,
+            team1: info.team1,
+            team2: info.team2,
+        }
+    };
 
     console.log(update);
 
-    await combatCollection.updateOne({}, update, {upsert: true});
+    await combatCollection.updateOne({}, update, { upsert: true });
 
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
@@ -139,8 +141,8 @@ exports.getCombatCollection = async function(messageId) {
     const combatDatabase = Client.mongoDB.db('combat-data');
 
     return new Promise(async resolve => {
-        combatDatabase.listCollections({name: messageId}).toArray(function(err, collections) {
-            if(collections.length > 0) {
+        combatDatabase.listCollections({ name: messageId }).toArray(function(err, collections) {
+            if (collections.length > 0) {
                 resolve(collections[0]);
             } else {
                 resolve(null);
@@ -150,18 +152,28 @@ exports.getCombatCollection = async function(messageId) {
 }
 
 exports.getSoonestTimelineEntity = async function(combatId) {
-    const combatDatabase = Client.mongoDB.db('combat-data');
+    let combatCollection = await this.getCombatCollection(combatId);
 
-    const combatInfo = combatDatabase.findOne({}, {_id: 0});
+    if (combatCollection == null) {
+        console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
+        return;
+    }
+
+    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
+
+    const combatInfo = await combatCollection.findOne({}, { _id: 0 });
 
     var soonestFighter;
-    var fighterList = new Array (
-        info.team1.values(),
-        info.team2.values(),
-        // ... where values() (or something equivalent) would push the individual values into the array, rather than the array itself
-     );
 
-    for(const fighter of fighterList) {
+    var fighterList = new Array(
+        combatInfo.team1.values(),
+        combatInfo.team2.values(),
+    );
+
+    console.log(fighterList);
+
+    for (const fighter of fighterList) {
+        console.log(fighter);
         soonestFighter = this.compareTimelines(soonestFighter, fighter);
     }
 
@@ -175,15 +187,15 @@ exports.getSoonestTimelineEntity = async function(combatId) {
  * @returns the fastest player. or the player who exists if one is not defined.
  */
 exports.compareTimelines = function(player1, player2) {
-    if(player1 == null || player1 == undefined)
+    if (player1 == null || player1 == undefined)
         return player2;
-    if(player2 == null || player2 == undefined)
+    if (player2 == null || player2 == undefined)
         return player1;
 
-    if(player1.timeline < player2.timeline)
+    if (player1.timeline < player2.timeline)
         return player1;
-    else if(player1.timeline > player2.timeline)
+    else if (player1.timeline > player2.timeline)
         return player2;
-    
+
     return player1;
 }
