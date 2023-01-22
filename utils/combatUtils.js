@@ -135,7 +135,7 @@ exports.joinFight = async function(playerId, combatId, team) {
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
 
-exports.getCollection = async function(messageId) {
+exports.getCombatCollection = async function(messageId) {
     const combatDatabase = Client.mongoDB.db('combat-data');
 
     return new Promise(async resolve => {
@@ -147,4 +147,43 @@ exports.getCollection = async function(messageId) {
             }
         })
     });
+}
+
+exports.getSoonestTimelineEntity = async function(combatId) {
+    const combatDatabase = Client.mongoDB.db('combat-data');
+
+    const combatInfo = combatDatabase.findOne({}, {_id: 0});
+
+    var soonestFighter;
+    var fighterList = new Array (
+        info.team1.values(),
+        info.team2.values(),
+        // ... where values() (or something equivalent) would push the individual values into the array, rather than the array itself
+     );
+
+    for(const fighter of fighterList) {
+        soonestFighter = this.compareTimelines(soonestFighter, fighter);
+    }
+
+    return soonestFighter;
+}
+
+/**
+ * Compares the relative timeline position of 2 players.
+ * @param player1 
+ * @param player2 
+ * @returns the fastest player. or the player who exists if one is not defined.
+ */
+exports.compareTimelines = function(player1, player2) {
+    if(player1 == null || player1 == undefined)
+        return player2;
+    if(player2 == null || player2 == undefined)
+        return player1;
+
+    if(player1.timeline < player2.timeline)
+        return player1;
+    else if(player1.timeline > player2.timeline)
+        return player2;
+    
+    return player1;
 }

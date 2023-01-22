@@ -33,6 +33,9 @@ module.exports = {
                     threadId = args[2];
                 await combatdb.joinFight(playerId, threadId, 1);
                 break;
+            case "fastest-player":
+                console.log(combatdb.getSoonestTimelineEntity(message.channel.id));
+                break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");
                 break;
