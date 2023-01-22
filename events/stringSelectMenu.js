@@ -1,6 +1,7 @@
-const { prefix } = require('./../config.json');
+const { prefix } = require('../config.json');
 const { MessageEmbed } = require('discord.js');
 const db = require('../utils/databaseUtils.js');
+const inv = require('../utils/inventoryUtils.js');
 const rpg = require('../utils/rpgInfoUtils.js');
 
 module.exports = {
@@ -20,7 +21,7 @@ module.exports = {
                 rpg.setClass(interaction.values[0], interaction);
                 break;
             case 'displayInventory':
-
+                inv.displayInventory(authorId, interaction);
                 break;
             default:
                 break;

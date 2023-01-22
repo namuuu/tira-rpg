@@ -33,3 +33,7 @@ exports.giveItem = async function(playerId, item, quantity) {
 
     console.group("[DEBUG] Item " + item + " given to player " + playerId);
 }
+
+exports.displayInventory = async function(playerId, interaction) {
+    interaction.reply("hello");
+}
