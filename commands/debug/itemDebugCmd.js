@@ -1,4 +1,4 @@
-const invDb = require('../../utils/databaseUtils');
+const invDb = require('../../utils/inventoryUtils.js');
 
 module.exports = {
   name: "debug-inv",

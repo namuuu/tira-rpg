@@ -94,17 +94,17 @@ module.exports = {
             const row = new ActionRowBuilder()
 			    .addComponents(
 				    new ButtonBuilder()
-                        .setCustomId('inventoryButton')
+                        .setCustomId('displayInventory')
                         .setLabel('Display your inventory')
                         .setStyle(ButtonStyle.Secondary),
 
                     new ButtonBuilder()
-                        .setCustomId('skillsButton')
+                        .setCustomId('displaySkills')
                         .setLabel('Display your skills')
                         .setStyle(ButtonStyle.Secondary),
                         
                     new ButtonBuilder()
-                        .setCustomId('equipementButton')
+                        .setCustomId('displayEquips')
                         .setLabel('Display your equipement')
                         .setStyle(ButtonStyle.Secondary),
 			);
