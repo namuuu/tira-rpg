@@ -6,7 +6,7 @@ const rpg = require('../utils/rpgInfoUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
-    trigger(interaction, client) {
+    async trigger(interaction, client) {
         console.log(interaction);
 
         if (!interaction.isButton()) return;
@@ -14,7 +14,7 @@ module.exports = {
         const authorId = interaction.user.id;
         const { user, customId } = interaction;
 
-        if(!db.doesPlayerExists(user.id).then(exists => { return exists; })) {
+        if(await !db.doesPlayerExists(user.id)) {
             return;
         }
 
