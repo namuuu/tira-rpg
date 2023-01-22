@@ -1,4 +1,5 @@
 const { Client, MessageEmbed, SlashCommandBuilder } = require('discord.js');
+const embedUtils = require('../utils/messageTemplateUtils.js');
 
 /**
  * Creates a thread from a message
@@ -7,9 +8,8 @@ const { Client, MessageEmbed, SlashCommandBuilder } = require('discord.js');
  */
 exports.createThread = async function(message) {
     const thread = await message.startThread({
-        name: 'name',
+        name: 'Combat Thread',
         autoArchiveDuration: 60,
-        reason: 'reason',
     });
 
     return new Promise(async resolve => {
@@ -38,7 +38,9 @@ exports.deleteThread = async function(channel) {
  * @param message message whose id will serve as the combat id. also is the id of the thread.
  * @returns the id in question.
  */
-exports.instanciateCombat = async function(message) {
+exports.instanciateCombat = async function(channel) {
+    const message = await channel.send("*Loading combat...*");
+    embedUtils.sendEncounterMessage(message, 'wild-encounter');
     this.createThread(message);
     const messageId = message.id;
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
@@ -46,6 +48,7 @@ exports.instanciateCombat = async function(message) {
     const combatData = [
         {
             zone: null,
+            type: 'wild-encounter',
             current_turn: 0,
             current_timeline: 0,
             current_action: {

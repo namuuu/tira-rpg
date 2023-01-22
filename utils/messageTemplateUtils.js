@@ -1,4 +1,4 @@
-const { MessageActionRow, MessageSelectMenu } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, MessageActionRow, MessageSelectMenu, ActionRowBuilder } = require('discord.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 
 // Player data management
@@ -34,4 +34,31 @@ exports.sendChooseClassSelector = async function(channel) {
 			);
 
 	await channel.send({ content: 'debug: Choisis ta classe!', components: [row] });
+}
+
+
+exports.sendEncounterMessage = async function(message, type) {
+	const mainEmbed = new EmbedBuilder()
+		.setTitle('The roar of battle is heard in the distance...')
+		.setTimestamp()
+
+	switch(type) {
+		case 'wild-encounter':
+			mainEmbed.addFields({name: 'Players', value: 'Waiting for players...'});
+			break;
+		default:
+			mainEmbed.addFields({name: 'Wrong type', value: 'Something seems to be wrong with our sysem.', inline: true});
+			break;
+	}
+
+	const row = new ActionRowBuilder()
+		.addComponents(
+			new ButtonBuilder()
+				.setCustomId('joinFight-' + message.id + '-1')
+				.setLabel('Join in !')
+				.setStyle(ButtonStyle.Secondary)
+				
+		);
+
+	return message.edit({content:'', embeds: [mainEmbed], components: [row] });
 }
