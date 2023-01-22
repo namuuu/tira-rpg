@@ -1,4 +1,4 @@
-const { Client, MessageEmbed, SlashCommandBuilder } = require('discord.js');
+const { Client, EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const embedUtils = require('../utils/messageTemplateUtils.js');
 
 /**
@@ -40,7 +40,6 @@ exports.deleteThread = async function(channel) {
  */
 exports.instanciateCombat = async function(channel) {
     const message = await channel.send("*Loading combat...*");
-    embedUtils.sendEncounterMessage(message, 'wild-encounter');
     this.createThread(message);
     const messageId = message.id;
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
@@ -66,6 +65,9 @@ exports.instanciateCombat = async function(channel) {
 
     return new Promise(async resolve => {
         const result = await combatCollection.insertMany(combatData, options)
+
+        await embedUtils.sendEncounterMessage(message, 'wild-encounter');
+
         resolve(messageId);
     });
 }
@@ -81,7 +83,7 @@ exports.deleteCombat = async function(messageId) {
     });
 }
 
-exports.joinFight = async function(playerId, combatId, team) {
+exports.joinFight = async function(playerId, combatId, team, message) {
     let combatCollection = await this.getCombatCollection(combatId);
 
     if (combatCollection == null) {
@@ -133,7 +135,22 @@ exports.joinFight = async function(playerId, combatId, team) {
         }
     };
 
-    console.log(update);
+    const messageEmbed = message.embeds[0];
+
+    if (team == 1) {
+        if(messageEmbed.fields[0].value == "Waiting for players...") 
+            messageEmbed.fields[0].value = playerId;
+        else
+            messageEmbed.fields[0].value += ", " + playerId + " ";
+    } else if (team == 2) {
+        if(messageEmbed.fields.length == 1) {
+            messageEmbed.addField("Team 2", playerId + " ");
+        } else {
+            messageEmbed.fields[1].value += playerId + " ";
+        }
+    }
+
+    message.edit({ embeds: [messageEmbed]});
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
