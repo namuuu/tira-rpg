@@ -40,12 +40,8 @@ module.exports = {
         // Inventory display
         var inventoryDisplay = "";
         try {
-            var inventoryLength = (playerInventory.items.length > 5) ? 5 : playerInventory.items.length;
-            for(var i = 0; i < inventoryLength; i++) {
-                inventoryDisplay += itemData[playerInventory.items[i]].name + " (x" + playerInventory.quantity[i] + ")";
-                if(i < inventoryLength - 1) {
-                    inventoryDisplay += ", ";
-                }
+            for(const [key, value] of Object.entries(playerInventory.items)) {
+                inventoryDisplay += `${itemData[key].name} (x${value.quantity})\n`;
             }
         } catch(err) {
             console.log(err);
@@ -89,7 +85,7 @@ module.exports = {
                 { name: 'Dextérité', value: playerStats.dexterity + " ", inline: true },
                 { name: 'Agilité', value: playerStats.agility + " ", inline: true },
                 { name: 'Intelligence', value: playerStats.intelligence + " ", inline: true },
-                { name: 'Equipement', value:  inventoryDisplay },
+                { name: 'Equipement', value:  " " },
                 { name: 'Skills actifs', value:  skillsDisplay },
                 { name: 'Inventaire', value:  inventoryDisplay }
              )
