@@ -83,7 +83,7 @@ exports.deleteCombat = async function(messageId) {
     });
 }
 
-exports.joinFight = async function(playerId, combatId, team, message) {
+exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
     let combatCollection = await this.getCombatCollection(combatId);
 
     if (combatCollection == null) {
@@ -135,8 +135,8 @@ exports.joinFight = async function(playerId, combatId, team, message) {
         }
     };
 
+    // Modifying the main embed to represent the players
     const messageEmbed = message.embeds[0];
-
     if (team == 1) {
         if(messageEmbed.fields[0].value == "Waiting for players...") 
             messageEmbed.fields[0].value = playerId;
@@ -255,3 +255,5 @@ exports.compareTimelines = function(player1, player2) {
 
     return player1;
 }
+
+
