@@ -30,7 +30,7 @@ module.exports = {
                     playerId = args[1];
                 if(args.length >= 3)
                     threadId = args[2];
-                await combatdb.joinFight(playerId, combatId, 1);
+                await combatdb.joinFight(playerId, combatId, 1, message.channel.fetchStarterMessage());
                 break;
             case "add-time":
                 let time = 50;
