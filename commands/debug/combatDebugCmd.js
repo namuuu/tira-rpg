@@ -13,6 +13,9 @@ module.exports = {
         return;
     }
 
+    let playerId = message.author.id;
+    let combatId = message.channel.id;
+
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
@@ -25,16 +28,27 @@ module.exports = {
                 combatdb.deleteThread(message.channel);
                 break;
             case "joinfight":
-                let playerId = message.author.id;
                 if(args.length >= 2)
                     playerId = args[1];
-                let threadId = message.channel.id;
                 if(args.length >= 3)
                     threadId = args[2];
-                await combatdb.joinFight(playerId, threadId, 1);
+                await combatdb.joinFight(playerId, combatId, 1);
+                break;
+            case "add-time":
+                let time = 50;
+                if(args.length >= 2)
+                    time = parseInt(args[1]);
+                if(args.length >= 3)
+                    playerId = parseInt(args[2]);
+                await combatdb.addTimeline(combatId, playerId, time);
+                var fastestPlayer = await combatdb.getSoonestTimelineEntity(message.channel.id);
+
+                message.reply("The fastest player's id is now " + fastestPlayer.id + " and his timeline is " + fastestPlayer.timeline + ".");
                 break;
             case "fastest-player":
-                console.log(await combatdb.getSoonestTimelineEntity(message.channel.id));
+                var fastestPlayer = await combatdb.getSoonestTimelineEntity(message.channel.id);
+                console.log(fastestPlayer);
+                message.reply("The fastest player's id is " + fastestPlayer.id + " and his timeline is " + fastestPlayer.timeline + ".");
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");

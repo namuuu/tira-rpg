@@ -151,11 +151,18 @@ exports.getCombatCollection = async function(messageId) {
     });
 }
 
-exports.getSoonestTimelineEntity = async function(combatId) {
+/**
+ * adds time to a player's timeline
+ * @param {*} combatId the combat concerned
+ * @param {*} playerId the id of the player to add the timeline to
+ * @param {*} time the time to be added onto the player's timeline
+ * @returns 
+ */
+exports.addTimeline = async function(combatId, playerId, time) {
     let combatCollection = await this.getCombatCollection(combatId);
 
     if (combatCollection == null) {
-        console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
+        console.log("[DEBUG] Attempted to modify a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
         return;
     }
 
@@ -163,17 +170,46 @@ exports.getSoonestTimelineEntity = async function(combatId) {
 
     const combatInfo = await combatCollection.findOne({}, { _id: 0 });
 
+    var fighterList = combatInfo.team1.concat(combatInfo.team2);
+
+    for (const fighter of fighterList) {
+        if (fighter.id == playerId) {
+            fighter.timeline += time;
+        }
+    }
+
+    const update = {
+        $set: {
+            team1: combatInfo.team1,
+            team2: combatInfo.team2,
+        }
+    };
+
+    await combatCollection.updateOne({}, update, { upsert: true });
+}
+
+exports.getSoonestTimelineEntity = async function(combatId) {
+    let combatCollection = await this.getCombatCollection(combatId);
+
+    if (combatCollection == null) {
+        console.log("[DEBUG] Attempted to get a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
+        return;
+    }
+
+    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
+
+    const combatInfo = await combatCollection.findOne({}, { _id: 0 });
+
+    //console.log(combatInfo);
+
     var soonestFighter;
 
-    var fighterList = new Array(
-        combatInfo.team1.values(),
-        combatInfo.team2.values(),
-    );
+    var fighterList = combatInfo.team1.concat(combatInfo.team2);
 
     console.log(fighterList);
 
     for (const fighter of fighterList) {
-        console.log(fighter);
+        //console.log(fighter);
         soonestFighter = this.compareTimelines(soonestFighter, fighter);
     }
 
