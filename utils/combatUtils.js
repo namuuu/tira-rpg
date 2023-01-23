@@ -1,5 +1,6 @@
-const { Client, EmbedBuilder, SlashCommandBuilder } = require('discord.js');
+const { Client, EmbedBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const embedUtils = require('../utils/messageTemplateUtils.js');
+const skillList = require('../data/skills.json');
 
 /**
  * Creates a thread from a message
@@ -139,14 +140,14 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
     const messageEmbed = message.embeds[0];
     if (team == 1) {
         if(messageEmbed.fields[0].value == "Waiting for players...") 
-            messageEmbed.fields[0].value = playerId;
+            messageEmbed.fields[0].value = " <@" + playerId + ">";
         else
-            messageEmbed.fields[0].value += ", " + playerId + " ";
+            messageEmbed.fields[0].value += ", <@" + playerId + "> ";
     } else if (team == 2) {
         if(messageEmbed.fields.length == 1) {
-            messageEmbed.addField("Team 2", playerId + " ");
+            messageEmbed.addField("Team 2", "<@" + playerId + ">");
         } else {
-            messageEmbed.fields[1].value += playerId + " ";
+            messageEmbed.fields[1].value += ", <@" + playerId + ">";
         }
     }
 
@@ -157,6 +158,62 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
 
+exports.addDummyEntityToCombat = async function(thread) {
+    let combatId = thread.id;
+    let combatCollection = await this.getCombatCollection(combatId);
+    let originMessage = await thread.fetchStarterMessage();
+
+    if (combatCollection == null) {
+        console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
+        return;
+    }
+
+    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
+
+    const info = await combatCollection.findOne({}, { _id: 0 });
+
+    const dummy = {
+        id: "dummy",
+        type: "dummy",
+        class: "dummy",
+        health: 100,
+        timeline: 0,
+        stats: {
+            vitality: 100,
+            strength: 100,
+            dexterity: 100,
+            resistance: 100,
+            intelligence: 100,
+            agility: 100,
+        },
+        equipment: {},
+        skills: [],
+        items: [],
+    }
+
+    info.team2.push(dummy);
+
+    const update = {
+        $set: {
+            current_turn: 1,
+            team2: info.team2,
+        }
+    };
+
+    // Modifying the main embed to represent the players
+    let messageEmbed = originMessage.embeds[0];
+    if(messageEmbed.fields.length == 1) {
+        messageEmbed.fields.push({name: "Ennemies", value: "dummy"});
+    } else {
+        messageEmbed.fields[1].value += ", dummy";
+    }
+
+    originMessage.edit({ embeds: [messageEmbed]});
+
+    await combatCollection.updateOne({}, update, { upsert: true });
+
+    console.log("[DEBUG] Dummy joined combat " + combatId); 
+}
 
 
 
@@ -188,16 +245,29 @@ exports.startCombat = async function(thread) {
         return;
     }
 
-    const soonestFighter = this.getSoonestFighter(combatData);
+    const soonestFighter = this.getSoonestTimelineEntity(combatData);
+
+    console.log(soonestFighter);
 
     if(soonestFighter.type == "human") {
         combatData.current_action.current_player_id = soonestFighter.id;
-        thread.send("It's your turn, <@" + soonestFighter.id + "> !");
+        combatData.current_action.aim_at = null;
+        combatData.current_action.skill = null;
+        this.sendSkillSelector(soonestFighter, thread);
         console.log("[DEBUG] This is the player's turn. Waiting for player input.");
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
 
     }
+
+    const update = {
+        $set: {
+            current_turn: 1,
+            current_action: combatData.current_action,
+        }
+    };
+
+    await combatCollection.updateOne({}, update, { upsert: true });
 }
 
 
@@ -260,13 +330,44 @@ exports.addTimeline = async function(combatId, playerId, time) {
     await combatCollection.updateOne({}, update, { upsert: true });
 }
 
-exports.getSoonestTimelineEntity = async function(combatInfo) {
+exports.sendSkillSelector = async function(player, thread) {
+
+    const stringSelectOptions = [];
+
+    for (const skillId of player.skills) {
+        const skill = skillList[skillId];
+        stringSelectOptions.push({
+            label: skill.name,
+            value: skillId,
+            description: skill.description,
+        });
+    }
+
+    console.log(stringSelectOptions);
+
+    const row = new ActionRowBuilder()
+        .addComponents(
+            new StringSelectMenuBuilder()
+                .setCustomId('combat_skill_selector')
+                .setPlaceholder('Choose a skill !')
+                .addOptions(stringSelectOptions)
+        );
+
+
+
+    const embed = new EmbedBuilder()
+        .setDescription("It's your turn, <@" + player.id + "> !")
+
+    await thread.send({ embeds: [embed], components: [row] });
+}
+
+exports.getSoonestTimelineEntity = function(combatInfo) {
 
     var soonestFighter;
 
     var fighterList = combatInfo.team1.concat(combatInfo.team2);
 
-    console.log(fighterList);
+    //console.log(fighterList);
 
     for (const fighter of fighterList) {
         //console.log(fighter);

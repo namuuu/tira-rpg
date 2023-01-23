@@ -12,8 +12,8 @@ module.exports = {
 
         if (!interaction.isButton()) return;
 	    
-        const authorId = interaction.user.id;
         const { user, customId } = interaction;
+        const userId = user.id;
 
         const args = customId.split('-');
         const command = args.shift();
@@ -27,11 +27,12 @@ module.exports = {
 
         switch(command) {
             case 'displayInventory':
-                inventoryUtil.displayInventory(authorId, interaction);
+                inventoryUtil.displayInventory(userId, interaction);
                 break;
             case 'joinFight':
-                await combatUtil.addPlayerToCombat(authorId, args[0], args[1], interaction.message);
+                await combatUtil.addPlayerToCombat(userId, args[0], args[1], interaction.message);
                 interaction.reply({ content: 'You have joined the combat!', ephemeral: true });
+                break;
             default:
                 break;
         }

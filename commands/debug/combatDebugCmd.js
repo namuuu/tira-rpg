@@ -28,7 +28,7 @@ module.exports = {
             case "start":
                 await combatdb.startCombat(message.channel);
                 break;
-            case "joinfight":
+            case "add-player":
                 if(args.length >= 2)
                     playerId = args[1];
                 if(args.length >= 3)
@@ -36,16 +36,8 @@ module.exports = {
                 const startMessage = await message.channel.fetchStarterMessage();
                 await combatdb.addPlayerToCombat(playerId, combatId, 1, startMessage);
                 break;
-            case "add-time":
-                let time = 50;
-                if(args.length >= 2)
-                    time = parseInt(args[1]);
-                if(args.length >= 3)
-                    playerId = parseInt(args[2]);
-                await combatdb.addTimeline(combatId, playerId, time);
-                var fastestPlayer = await combatdb.getSoonestTimelineEntity(message.channel.id);
-
-                message.reply("The fastest player's id is now " + fastestPlayer.id + " and his timeline is " + fastestPlayer.timeline + ".");
+            case "add-dummy":
+                combatdb.addDummyEntityToCombat(message.channel);
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");

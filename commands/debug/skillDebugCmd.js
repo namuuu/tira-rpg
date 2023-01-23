@@ -1,4 +1,3 @@
-const dbUtils = require('../../utils/databaseUtils.js');
 const skill = require('../../utils/skillUtils.js');
 
 module.exports = {
@@ -17,6 +16,8 @@ module.exports = {
     let skillQuery = "debugger";
     if(args.length >= 2)
         skillQuery = args[1];
+
+    console.log(skill);
 
     // Checks the first argument, considered as the "debug command"
     try {
