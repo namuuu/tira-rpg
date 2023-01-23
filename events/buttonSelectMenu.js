@@ -8,7 +8,6 @@ const combatUtil = require('../utils/combatUtils.js');
 module.exports = {
     name: 'interactionCreate',
     async trigger(interaction, client) {
-        console.log(interaction);
 
         if (!interaction.isButton()) return;
 	    

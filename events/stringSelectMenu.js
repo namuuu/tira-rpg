@@ -3,6 +3,7 @@ const { MessageEmbed } = require('discord.js');
 const db = require('../utils/databaseUtils.js');
 const inv = require('../utils/inventoryUtils.js');
 const rpg = require('../utils/rpgInfoUtils.js');
+const combat = require('../utils/combatUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -22,6 +23,12 @@ module.exports = {
                 break;
             case 'displayInventory':
                 inv.displayInventory(authorId, interaction);
+                break;
+            case 'combat_skill_selector':
+                combat.receiveSkillSelector(interaction);
+                break;
+            case 'combat_target_selector':
+                combat.receiveTargetSelector(interaction);
                 break;
             default:
                 break;
