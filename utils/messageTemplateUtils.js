@@ -1,37 +1,42 @@
-const { MessageActionRow, MessageSelectMenu } = require('discord.js');
+const { Client } = require('discord.js');
+const { ActionRowBuilder, Events, StringSelectMenuBuilder } = require('discord.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
+const databaseUtils = require('../utils/databaseUtils.js');
+const messageCreate = require('../events/messageCreate.js');
 
 // Player data management
 
-exports.sendChooseClassSelector = async function(channel) {
-    const row = new MessageActionRow()
+exports.generateSelector = async function(message) {
+		const row = new ActionRowBuilder()
 			.addComponents(
-				new MessageSelectMenu()
-					.setCustomId('chooseClass')
-					.setPlaceholder('Aucune classe sélectionnée')
-					.addOptions([
+				new StringSelectMenuBuilder()
+					.setCustomId('classChoice')
+					.setPlaceholder('Nothing selected')
+						.addOptions(
 						{
-							label: 'Guerrier',
+							label: 'Warrior',
 							value: 'warrior',
 						},
 						{
-							label: 'Rôdeur',
+							label: 'Assassin',
 							value: 'assassin',
 						},
-                        {
-							label: 'Magicien',
+						{
+							label: 'Mage',
 							value: 'magician',
 						},
-                        {
-							label: 'Tireur',
+						{
+							label: 'Ranger',
 							value: 'ranger',
 						},
-                        {
-							label: 'Soigneur',
+						{
+							label: 'Healer',
 							value: 'healer',
 						},
-					]),
+					),
 			);
 
-	await channel.send({ content: 'debug: Choisis ta classe!', components: [row] });
-}
+		return message.reply({content: 'Choose a class ! Poyo', components: [row] });
+	}
+
+

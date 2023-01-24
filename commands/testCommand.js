@@ -1,16 +1,15 @@
 const { Client, MessageEmbed, SlashCommandBuilder } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
-const messageTemplateUtils = require('../utils/messageTemplateUtils.js');
+const messageUtils = require('../utils/messageTemplateUtils.js');
 const skill = require('../utils/skillUtils.js');
 
 module.exports = {
-  name: "test",
+  name: "test-selector",
   aliases: [],
   description: "Test command",
   requireCharacter: false,
   execute(message, args) {
-    authorId = message.author.id;
 
     //dbUtils.awardExp(authorId, 100, message.channel);
     //dbUtils.giveItem(authorId, "apple", 1);
@@ -18,6 +17,5 @@ module.exports = {
 
     dbUtils.learnSkill(authorId, "baguette");
 
-    skill.execute("baguette", message.channel, "combatId");
   }
 }

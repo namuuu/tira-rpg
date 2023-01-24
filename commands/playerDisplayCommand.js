@@ -33,9 +33,6 @@ module.exports = {
             expBar += "▱";
         }
 
-
-        // console.log(playerInventory.items);
-
         // Inventory display
         var inventoryDisplay = "";
         try {
@@ -112,6 +109,7 @@ module.exports = {
                         .setStyle(ButtonStyle.Secondary),
 			);
 
+            console.log('?????');
 
             message.channel.send({embeds: [displayEmbed], components: [row]});
             return;

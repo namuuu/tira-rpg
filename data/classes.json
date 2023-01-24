@@ -11,7 +11,7 @@
             "resistance": 10,
             "dexterity": 10,
             "agility": 10,
-            "intellligence": 10
+            "intelligence": 10
         }
     },
     "assassin": {
@@ -23,7 +23,7 @@
             "resistance": 10,
             "dexterity": 10,
             "agility": 10,
-            "intellligence": 10
+            "intelligence": 10
         }
     },
     "magician": {
@@ -35,7 +35,7 @@
             "resistance": 10,
             "dexterity": 10,
             "agility": 10,
-            "intellligence": 10
+            "intelligence": 10
         }
     },
     "ranger": {
@@ -47,7 +47,7 @@
             "resistance": 10,
             "dexterity": 10,
             "agility": 10,
-            "intellligence": 10
+            "intelligence": 10
         }
     },
     "healer": {
@@ -59,7 +59,7 @@
             "resistance": 10,
             "dexterity": 10,
             "agility": 10,
-            "intellligence": 10
+            "intelligence": 10
         }
     }
 }
