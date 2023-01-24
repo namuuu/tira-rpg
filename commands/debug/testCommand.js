@@ -9,17 +9,13 @@ module.exports = {
   aliases: [],
   description: "Test command",
   requireCharacter: false,
-  execute(message, args) {
-    authorId = message.author.id;
+  async execute(message, args) {
+    let authorId = message.author.id;
 
-    message.reply("hey");
+    if(args.length > 0)
+      authorId = args[0];
 
-    //dbUtils.awardExp(authorId, 100, message.channel);
-    //dbUtils.giveItem(authorId, "apple", 1);
-    //messageTemplateUtils.sendChooseClassSelector(message.channel);
 
-    //dbUtils.learnSkill(authorId, "baguette");
-
-    skill.execute("baguette", message.channel, "combatId");
+    console.log(await dbUtils.doesPlayerExists(authorId));
   }
 }
