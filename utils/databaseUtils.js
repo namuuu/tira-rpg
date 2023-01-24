@@ -7,15 +7,9 @@ const classes = require('../data/classes.json');
 exports.doesPlayerExists = async function(id) {
     const playerDatabase = Client.mongoDB.db('player-data');
 
-    return new Promise( resolve => { 
-        playerDatabase.listCollections({name: id}).toArray(function(err, collections) {
-            if(collections.length > 0) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        })
-    });
+    const find = await playerDatabase.listCollections({ name: id }).toArray();
+    
+    return find.length > 0;
 }
 
 exports.createPlayer = async function(id) {

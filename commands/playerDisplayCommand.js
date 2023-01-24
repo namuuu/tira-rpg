@@ -10,7 +10,7 @@ module.exports = {
     aliases: [],
     description: "",
     requireCharacter: true,
-    
+
     async execute(message, args) {
         const author = message.author;
 
