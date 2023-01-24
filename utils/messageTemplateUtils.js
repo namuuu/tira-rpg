@@ -10,7 +10,7 @@ exports.generateSelector = async function(message) {
 		const row = new ActionRowBuilder()
 			.addComponents(
 				new StringSelectMenuBuilder()
-					.setCustomId('select')
+					.setCustomId('classChoice')
 					.setPlaceholder('Nothing selected')
 						.addOptions(
 						{
