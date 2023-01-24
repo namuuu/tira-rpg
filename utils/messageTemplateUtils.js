@@ -21,6 +21,18 @@ exports.generateSelector = async function(message) {
 							label: 'Assassin',
 							value: 'assassin',
 						},
+						{
+							label: 'Mage',
+							value: 'magician',
+						},
+						{
+							label: 'Ranger',
+							value: 'ranger',
+						},
+						{
+							label: 'Healer',
+							value: 'healer',
+						},
 					),
 			);
 
