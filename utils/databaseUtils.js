@@ -146,5 +146,36 @@ exports.setClass = async function(id, className) {
     options = { upsert: true };
     const result = await playerCollection.updateOne(query, update, options);
 
+    this.updateStats(id, className);
+
     return true;
+}
+
+exports.updateStats = async function(id, className) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+
+    console.log(classes[className]);
+
+    const strength = classes[className].base_stats.strength;
+    const vitality = classes[className].base_stats.vitality;
+    const resistance = classes[className].base_stats.resistance;
+    const dexterity = classes[className].base_stats.dexterity;
+    const agility = classes[className].base_stats.agility;
+    const intelligence = classes[className].base_stats.intelligence;
+
+    console.log(strength);
+
+    const query = { name : "stats"};
+    const update = { $set: { strength: strength,
+                             vitality: vitality,
+                             resistance: resistance,
+                             dexterity: dexterity,
+                             agility: agility,
+                             intelligence: intelligence, }};
+    const result = await playerCollection.updateOne(query, update, {upsert: false});
+
+    console.log(result);
+
+    return true;
+    
 }

@@ -1,5 +1,6 @@
 const { Client, MessageEmbed } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
+const messageUtils = require('../utils/messageTemplateUtils.js');
 const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
@@ -12,6 +13,9 @@ module.exports = {
             const author = message.author;
             
             if(!exists) {
+
+                messageUtils.generateSelector();
+                
                 dbUtils.createPlayer(message.author.id);
                 message.reply('debug: created player');
 
@@ -40,6 +44,8 @@ module.exports = {
                 return;
 
             }
+
+            
         });
     }
 }
