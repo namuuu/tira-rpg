@@ -54,8 +54,10 @@ module.exports = {
         // Skills display
         var skillsDisplay = "";
         try {
-            for(const skill of playerInventory.activeSkills) {
-                skillsDisplay += `# ${skillsData[skill].number} - ${skillsData[skill].name}\n`;
+            if(playerInventory.activeSkills != undefined || playerInventory.activeSkills != null){
+                for(const skill of playerInventory.activeSkills) {
+                    skillsDisplay += `# ${skillsData[skill].number} - ${skillsData[skill].name}\n`;
+                }
             }
         } catch(err) {
             console.log(err);
