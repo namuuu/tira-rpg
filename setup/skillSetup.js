@@ -1,4 +1,5 @@
 const skillMap = new Map();
+const combatUtils = require('../utils/combatUtils.js');
 
 module.exports = {
   map: skillMap,
@@ -7,16 +8,31 @@ module.exports = {
     console.log("Setting up Skills...");
     skillMap.set("heal", heal);
     skillMap.set("damage", damage);
+    skillMap.set("cooldown", cooldown);
 
     console.log("Skills are all setup !");
   },
   
 }
 
-function heal(channel, combatId, quantity) {
-  channel.send("Healed " + quantity);
+function heal(exeData, quantity, log) {
 }
 
-function damage(channel, combatid, quantity) {
-  channel.send("Damaged " + quantity);
+function damage(exeData, quantity, log) {
+  const { combat, targetId, thread } = exeData;
+
+  const target = combatUtils.getPlayerInCombat(targetId, combat);
+  target.health -= quantity;
+
+  if(combatUtils.getLogger(log, targetId).damage == undefined)
+    combatUtils.getLogger(log, targetId).damage = quantity;
+  else
+    combatUtils.getLogger(log, targetId).damage += quantity;
+}
+
+function cooldown(exeData, quantity, log) {
+  const { combat, casterId, thread } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+  caster.timeline += quantity;
 }

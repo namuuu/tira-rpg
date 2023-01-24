@@ -33,15 +33,16 @@ module.exports = {
             expBar += "▱";
         }
 
+        // Health percentage
+        var percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
+
+        // console.log(playerInventory.items);
+
         // Inventory display
         var inventoryDisplay = "";
         try {
-            var inventoryLength = (playerInventory.items.length > 5) ? 5 : playerInventory.items.length;
-            for(var i = 0; i < inventoryLength; i++) {
-                inventoryDisplay += itemData[playerInventory.items[i]].name + " (x" + playerInventory.quantity[i] + ")";
-                if(i < inventoryLength - 1) {
-                    inventoryDisplay += ", ";
-                }
+            for(const [key, value] of Object.entries(playerInventory.items)) {
+                inventoryDisplay += `${itemData[key].name} (x${value.quantity})\n`;
             }
         } catch(err) {
             console.log(err);
@@ -54,8 +55,10 @@ module.exports = {
         // Skills display
         var skillsDisplay = "";
         try {
-            for(const skill of playerInventory.activeSkills) {
-                skillsDisplay += `# ${skillsData[skill].number} - ${skillsData[skill].name}\n`;
+            if(playerInventory.activeSkills != undefined || playerInventory.activeSkills != null){
+                for(const skill of playerInventory.activeSkills) {
+                    skillsDisplay += `# ${skillsData[skill].number} - ${skillsData[skill].name}\n`;
+                }
             }
         } catch(err) {
             console.log(err);
@@ -75,7 +78,7 @@ module.exports = {
             .setColor(0x0099FF)
             .setAuthor({name: author.username,iconURL: 'https://media.discordapp.net/attachments/1021799485069873152/1039900731345485844/DALLE_2022-11-09_14.53.50_-_middle_ages_storyteller_digital_art.png?width=890&height=890'})
             .addFields( 
-                { name: 'HP', value: "97/100 (97%)", inline: true },
+                { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
                 { name: 'Argent', value:  "100 💵" , inline: true},
                 { name: 'Niveau ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
                 { name: 'Classe', value:  classData.name + " " },
@@ -85,7 +88,7 @@ module.exports = {
                 { name: 'Dextérité', value: playerStats.dexterity + " ", inline: true },
                 { name: 'Agilité', value: playerStats.agility + " ", inline: true },
                 { name: 'Intelligence', value: playerStats.intelligence + " ", inline: true },
-                { name: 'Equipement', value:  inventoryDisplay },
+                { name: 'Equipement', value:  " " },
                 { name: 'Skills actifs', value:  skillsDisplay },
                 { name: 'Inventaire', value:  inventoryDisplay }
              )
@@ -94,17 +97,17 @@ module.exports = {
             const row = new ActionRowBuilder()
 			    .addComponents(
 				    new ButtonBuilder()
-                        .setCustomId('inventoryButton')
+                        .setCustomId('displayInventory')
                         .setLabel('Display your inventory')
                         .setStyle(ButtonStyle.Secondary),
 
                     new ButtonBuilder()
-                        .setCustomId('skillsButton')
+                        .setCustomId('displaySkills')
                         .setLabel('Display your skills')
                         .setStyle(ButtonStyle.Secondary),
                         
                     new ButtonBuilder()
-                        .setCustomId('equipementButton')
+                        .setCustomId('displayEquips')
                         .setLabel('Display your equipement')
                         .setStyle(ButtonStyle.Secondary),
 			);

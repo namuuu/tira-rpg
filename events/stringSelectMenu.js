@@ -1,14 +1,17 @@
-const { prefix } = require('./../config.json');
+const { prefix } = require('../config.json');
 const { MessageEmbed } = require('discord.js');
 const db = require('../utils/databaseUtils.js');
+const inv = require('../utils/inventoryUtils.js');
 const rpg = require('../utils/rpgInfoUtils.js');
 const { EmbedBuilder } = require('discord.js');
+const combat = require('../utils/combatUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
     async trigger(interaction, client) {
         if (!interaction.isStringSelectMenu()) return;
-            
+	    
+        const authorId = interaction.user.id;
         const { user, customId } = interaction;
 
         if(!db.doesPlayerExists(user.id).then(exists => { return exists; })) {

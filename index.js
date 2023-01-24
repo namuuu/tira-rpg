@@ -4,9 +4,10 @@ const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds, 
-                                      GatewayIntentBits.GuildMessages,
-                                     GatewayIntentBits.MessageContent] });
+const client = new Client({ 
+  intents: [GatewayIntentBits.Guilds, 
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent]});
 
 // Setup commands
 const { setupCommands } = require('./setup/commandSetup.js');
