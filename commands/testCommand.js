@@ -10,8 +10,8 @@ module.exports = {
   description: "Test command",
   requireCharacter: false,
   execute(message, args) {
+    dbUtils.learnSkill(authorId, "baguette");
 
-    messageUtils.generateSelector(message);
-
+    skill.execute("baguette", message.channel, "combatId");
   }
 }
