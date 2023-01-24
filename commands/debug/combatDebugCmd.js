@@ -22,7 +22,7 @@ module.exports = {
     try {
         switch(args[0]) {
             case "create":
-                combatManager.instanciateCombat(message.channel);
+                combatManager.instanciateCombat(message);
                 break;
             case "delete":
                 combatManager.deleteCombat(message.channel);
@@ -40,6 +40,10 @@ module.exports = {
                 break;
             case "add-dummy":
                 combatManager.addDummyEntityToCombat(message.channel);
+                break;
+            case "test":
+                const combatCollection = await combatUtil.getCombatCollection(combatId);
+                console.log(combatCollection);
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");

@@ -1,4 +1,5 @@
 const { prefix } = require('../config.json');
+const Client = require('discord.js');
 const { MessageEmbed } = require('discord.js');
 const db = require('../utils/databaseUtils.js');
 const inventoryUtil = require('../utils/inventoryUtils.js');
@@ -8,7 +9,7 @@ const combatManager = require('../manager/combatManager.js');
 module.exports = {
     name: 'interactionCreate',
     async trigger(interaction, client) {
-
+        if(interaction.message.author.id != client.user.id) return;
         if (!interaction.isButton()) return;
 	    
         const { user, customId } = interaction;
@@ -17,9 +18,7 @@ module.exports = {
         const args = customId.split('-');
         const command = args.shift();
 
-        if(await !db.doesPlayerExists(user.id)) {
-            return;
-        }
+        if(await !db.doesPlayerExists(user.id)) return;
 
         // console.log("Command: " + command);
         // console.log("Args: " + args);
