@@ -1,6 +1,7 @@
 const { prefix } = require('./../config.json');
 const { MessageEmbed, Embed, EmbedBuilder } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
+const permsUtils = require('../utils/permsUtils.js');
 
 module.exports = {
     name: 'messageCreate',
@@ -46,7 +47,25 @@ module.exports = {
                         return;
                     }
                 })
-                
+            }
+
+            if(client.commands.get(command).requirePerm) {
+                permsUtils.checkPerms(command, message.author.id).then(exists => {
+                    console.log("message create response  :" + exists);
+                    // If it exists, execute the command
+                    if(exists) {
+                        client.commands.get(command).execute(message, args);
+                    } else {
+                        // If it doesn't exist, send a message to the user
+                        const noPermEmbed = new EmbedBuilder()
+                            .setColor('F08080')
+                            .setAuthor({name: 'You do not have the permissions to use this command'})
+                            .addFields( { name: 'Ask an admin !', value: 'They need to use the permadd command to give you the permissions' })
+                        
+                        message.channel.send({embeds: [noPermEmbed]});
+                        return;
+                    }
+                })
             } else {
                 client.commands.get(command).execute(message, args);
             }
