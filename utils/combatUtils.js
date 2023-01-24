@@ -41,17 +41,13 @@ exports.deleteThread = async function(channel) {
 
 
 
-exports.getCombatCollection = async function(messageId) {
-    const combatDatabase = Client.mongoDB.db('combat-data');
+exports.getCombatCollection = async function(threadId) {
+    const combatDatabase = Client.mongoDB.db('combat-data').collection(threadId);
+
+    const find = await combatDatabase.findOne({}, { _id: 0 });
 
     return new Promise(async resolve => {
-        combatDatabase.listCollections({ name: messageId }).toArray(function(err, collections) {
-            if (collections.length > 0) {
-                resolve(collections[0]);
-            } else {
-                resolve(null);
-            }
-        })
+        resolve(find);
     });
 }
 
@@ -63,16 +59,12 @@ exports.getCombatCollection = async function(messageId) {
  * @returns 
  */
 exports.addTimeline = async function(combatId, playerId, time) {
-    let combatCollection = await this.getCombatCollection(combatId);
+    let combatInfo = await this.getCombatCollection(combatId);
 
-    if (combatCollection == null) {
+    if (combatInfo == null) {
         console.log("[DEBUG] Attempted to modify a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
         return;
     }
-
-    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
-
-    const combatInfo = await combatCollection.findOne({}, { _id: 0 });
 
     var fighterList = combatInfo.team1.concat(combatInfo.team2);
 
@@ -125,16 +117,12 @@ exports.sendSkillSelector = async function(player, thread) {
 
 exports.receiveSkillSelector = async function(interaction) {
     const thread = interaction.channel;
-    let combatCollection = await this.getCombatCollection(thread.id);
+    let combatInfo = await this.getCombatCollection(thread.id);
 
-    if (combatCollection == null) {
+    if (combatInfo == null) {
         console.log("[DEBUG] Attempted to modify a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
         return;
     }
-
-    combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
-
-    const combatInfo = await combatCollection.findOne({}, { _id: 0 });
 
     const skillId = interaction.values[0];
 
@@ -161,7 +149,6 @@ exports.receiveSkillSelector = async function(interaction) {
 exports.sendTargetSelector = async function(combat, player, thread) {
     const enemyTeam = this.getPlayerEnemyTeam(player.id, combat);
 
-    //console.log(enemyTeam);
 
     const stringSelectOptions = [];
     let i = 0;
@@ -171,7 +158,6 @@ exports.sendTargetSelector = async function(combat, player, thread) {
             label: enemy.id,
             value: enemy.id,
             description: "HP: " + enemy.health + " / " + enemy.stats.vitality,
-            //description: enemy.health + " / " + enemy.stats.vitality + " HP",
         });
         i = i + 1;
     }
@@ -192,16 +178,13 @@ exports.sendTargetSelector = async function(combat, player, thread) {
 
 exports.receiveTargetSelector = async function(interaction) {
     const thread = interaction.channel;
-    let combatCollection = await this.getCombatCollection(thread.id);
+    let combatInfo = await this.getCombatCollection(thread.id);
 
-    if (combatCollection == null) {
+    if (combatInfo
+         == null) {
         console.log("[DEBUG] Attempted to modify a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
         return;
     }
-
-    combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
-
-    const combatInfo = await combatCollection.findOne({}, { _id: 0 });
 
     const targetId = interaction.values[0];
 

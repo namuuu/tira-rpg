@@ -10,9 +10,21 @@ const skillList = require('../data/skills.json');
  * @param message message whose id will serve as the combat id. also is the id of the thread.
  * @returns the id in question.
  */
-exports.instanciateCombat = async function(channel) {
+exports.instanciateCombat = async function(orderMessage) {
+    const channel = orderMessage.channel;
+
+    if(channel.isThread()) {
+        console.log("[ERROR] Tried to instanciate a combat in a thread channel.");
+        orderMessage.reply("You can't instanciate a combat in a thread channel.").then(msg => {
+            setTimeout(() => msg.delete(), 5000);
+        });
+        return;
+    }
+
     const message = await channel.send("*Loading combat...*");
+
     util.createThread(message);
+
     const messageId = message.id;
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
 
@@ -290,5 +302,8 @@ exports.finishTurn = async function(exeData, log) {
 }
 
 exports.callForVictory = async function(combat, thread) {
-    thread.send("The combat is over !");
+    thread.send("The combat is over !").then((message) => {
+        message.react("🎉");
+        setTimeout(() => thread.setLocked(true), 5000);
+    });
 }
