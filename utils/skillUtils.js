@@ -7,14 +7,14 @@ exports.execute = function(exeData) {
     //console.log(exeData);
 
     const skillEffectList = exeData.skill["effects"];
-    let result = [];
+    let log = [];
 
     // Apply the attack's effects
     for(const effect of Object.entries(skillEffectList)) {
-        skillEffect.map.get(effect[0])(exeData, effect[1], result); 
+        skillEffect.map.get(effect[0])(exeData, effect[1], log); 
     }
     
-    return { exeData: exeData, result: result };
+    return log;
 }
 
 exports.getSkill = function(skillName) {

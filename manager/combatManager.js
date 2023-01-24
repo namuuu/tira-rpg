@@ -232,7 +232,7 @@ exports.startCombat = async function(thread) {
 exports.combatLoop = async function(thread, combatData) {
     const soonestFighter = util.getSoonestTimelineEntity(combatData);
 
-    console.log(soonestFighter);
+    //console.log(soonestFighter);
 
     if(soonestFighter.type == "human") {
         combatData.current_action.current_player_id = soonestFighter.id;
@@ -245,16 +245,50 @@ exports.combatLoop = async function(thread, combatData) {
         util.executeSkill(combatData, thread, "default", soonestFighter.id, combatData.team1[0].id);
     }
 
+    combatData.current_turn++;
+
     const update = {
         $set: {
-            current_turn: 1,
+            current_turn: combatData.current_turn,
             current_action: combatData.current_action,
         }
     };
 
-    console.log(combatData.current_action);
-
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
     await combatCollection.updateOne({}, update, { upsert: true });
+}
+
+exports.finishTurn = async function(exeData, log) {
+    const { combat, thread, casterId, targetId, skill } = exeData;
+    const caster = util.getPlayerInCombat(casterId, combat);
+    const target = util.getPlayerInCombat(targetId, combat);
+    let embed = new EmbedBuilder();
+    let casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.id;
+    let targetName = target.type == "human" ? "<@" + target.id + ">" : target.id;
+    
+    embed.setDescription(casterName + " used " + skill.name + " on " + targetName + " !");
+
+    let hasDied = false;
+
+    for(player of log) {
+        if(util.logResults(embed, log, util.getPlayerInCombat(player.id, combat)) == true) {
+            hasDied = true;
+        }
+    }
+
+    thread.send({ embeds: [embed] });
+
+    if(hasDied) {
+        const alive = util.checkForVictory(combat);
+        if(alive != 0) {
+            this.callForVictory(combat, thread, alive);
+            return;
+        }
+    } 
+    this.combatLoop(thread, combat);
+}
+
+exports.callForVictory = async function(combat, thread) {
+    thread.send("The combat is over !");
 }

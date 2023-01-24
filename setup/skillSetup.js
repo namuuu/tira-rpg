@@ -15,21 +15,23 @@ module.exports = {
   
 }
 
-function heal(exeData, quantity, result) {
-  exeData.thread.send("Healed " + quantity);
+function heal(exeData, quantity, log) {
 }
 
-function damage(exeData, quantity, result) {
+function damage(exeData, quantity, log) {
   const { combat, targetId, thread } = exeData;
-  thread.send("Damaged " + quantity);
 
   const target = combatUtils.getPlayerInCombat(targetId, combat);
   target.health -= quantity;
+
+  if(combatUtils.getLogger(log, targetId).damage == undefined)
+    combatUtils.getLogger(log, targetId).damage = quantity;
+  else
+    combatUtils.getLogger(log, targetId).damage += quantity;
 }
 
-function cooldown(exeData, quantity, result) {
+function cooldown(exeData, quantity, log) {
   const { combat, casterId, thread } = exeData;
-  thread.send("Cooldown " + quantity);
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
   caster.timeline += quantity;

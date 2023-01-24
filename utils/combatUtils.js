@@ -242,14 +242,7 @@ exports.executeSkill = async function(combatInfo, thread, skillId, casterId, tar
 
     //console.log(exeData);
 
-    skillUtil.execute(exeData);
-
-    combatInfo.current_action = {
-        current_player_id: null,
-        current_player_team: null,
-        skill: null,
-        aim_at: null,
-    }
+    let log = skillUtil.execute(exeData);
 
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
@@ -262,7 +255,7 @@ exports.executeSkill = async function(combatInfo, thread, skillId, casterId, tar
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
-    manager.combatLoop(thread, exeData.combat);
+    manager.finishTurn(exeData, log);
 }
 
 exports.getSoonestTimelineEntity = function(combatInfo) {
@@ -337,6 +330,78 @@ exports.getPlayerEnemyTeam = function(playerId, combat) {
         return combat.team1;
     }
     return null;
+}
+
+exports.getLogger = function(log, playerId) {
+    let playerLog = log.find(player => player.id == playerId);
+    if(playerLog == null || playerLog == undefined) {
+        playerLog = {
+            id: playerId,
+        };
+        log.push(playerLog);
+    }
+    return playerLog;
+}
+
+/**
+ * Logs the effects an entity suffered into an embed (in argument).
+ * @param {*} embed the embed to log to (it adds a field)
+ * @param {*} log the list that logs
+ * @param {*} entity the entity that suffered the effects and is being logged
+ * @returns true if the entity died, false otherwise
+ */
+exports.logResults = function(embed, log, entity) {
+    let title = "";
+    let description = "";
+
+    if(entity.type == "player") {
+        title = "<@" + entity.id + ">";
+    } else {
+        title = entity.id;
+    }
+
+    console.log(entity);
+
+    for (const [effect, value] of Object.entries(log.find(player => player.id == entity.id))) {
+        switch(effect) {
+            case "damage":
+                description += "Lost " + value + " HP (" + entity.health + " left) \n";
+                break;
+        }
+    }
+
+    if(entity.health <= 0) {
+        description += "Died\n";
+        embed.addFields({name: title, value: description});
+        return true;
+    }
+
+    embed.addFields({name: title, value: description});
+    return false;
+}
+
+exports.checkForVictory = function(combat) {
+    let team1Alive = false;
+    let team2Alive = false;
+
+    for (const player of combat.team1) {
+        if(player.health > 0) {
+            team1Alive = true;
+        }
+    }
+
+    for (const player of combat.team2) {
+        if(player.health > 0) {
+            team2Alive = true;
+        }
+    }
+
+    if(team1Alive) {
+        return 1;
+    } else if(team2Alive) {
+        return 2;
+    }
+    return 0;
 }
 
 
