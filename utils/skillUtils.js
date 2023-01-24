@@ -3,14 +3,20 @@ const skills = require("../data/skills.json");
 const { Client, EmbedBuilder } = require('discord.js');
 
 
-exports.execute = function(skillName, channel, combat) {
-    const skillEffectList = skills[skillName]["effects"];
-    console.log(typeof skillEffectList);
+exports.execute = function(exeData) {
+    //console.log(exeData);
+
+    const skillEffectList = exeData.skill["effects"];
+    let result = [];
+
+    // Apply the attack's effects
     for(const effect of Object.entries(skillEffectList)) {
-        skillEffect.map.get(effect[0])(channel, combat, effect[1]); 
+        skillEffect.map.get(effect[0])(exeData, effect[1], result); 
     }
-    //return (skillEffect.map.get(skillName))(channel, combat, quantity);
+    
+    return { exeData: exeData, result: result };
 }
+
 exports.getSkill = function(skillName) {
     return skills[skillName];
 }

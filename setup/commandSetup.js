@@ -7,7 +7,7 @@ const { Routes } = require('discord-api-types/v9');
 
 module.exports = {
   setupCommands(client, token, APP_ID) {
-    console.log(commandFolders);
+    //console.log(commandFolders);
     console.log("-- COMMANDS --")
     client.commands = new Collection(); 
     // Get every JS command file
