@@ -109,7 +109,6 @@ module.exports = {
                         .setStyle(ButtonStyle.Secondary),
 			);
 
-            console.log('?????');
 
             message.channel.send({embeds: [displayEmbed], components: [row]});
             return;
