@@ -135,7 +135,7 @@ exports.receiveSkillSelector = async function(interaction) {
     }
 
     if(interaction.user.id != combatInfo.current_action.current_player_id) {
-        console.log(interaction.user.id);
+        //console.log(interaction.user.id);
         interaction.reply("I'm afraid it's not your turn yet...");
         return;
     }
@@ -364,7 +364,7 @@ exports.logResults = function(embed, log, entity) {
         title = entity.id;
     }
 
-    console.log(entity);
+    //console.log(entity);
 
     for (const [effect, value] of Object.entries(log.find(player => player.id == entity.id))) {
         switch(effect) {
