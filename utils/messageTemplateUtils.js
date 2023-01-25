@@ -1,5 +1,5 @@
 const { Client } = require('discord.js');
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, MessageActionRow, MessageSelectMenu, ActionRowBuilder } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, MessageActionRow, MessageSelectMenu, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 const databaseUtils = require('../utils/databaseUtils.js');
 const messageCreate = require('../events/messageCreate.js');
