@@ -14,11 +14,14 @@ module.exports = {
         const authorId = interaction.user.id;
         const { user, customId } = interaction;
 
+        const args = customId.split('-');
+        const command = args.shift();
+
         if(!db.doesPlayerExists(user.id).then(exists => { return exists; })) {
             return;
         }
 
-        switch(customId) {
+        switch(command) {
             case 'displayInventory':
                 inv.displayInventory(authorId, interaction);
                 break;
@@ -29,6 +32,11 @@ module.exports = {
                 combat.receiveTargetSelector(interaction);
                 break;
             case 'classChoice':
+
+                if(args[0] != interaction.user.id) {
+                    return;
+                }
+                
                 await interaction.message.delete();
 
                 db.createPlayer(interaction.user.id);
