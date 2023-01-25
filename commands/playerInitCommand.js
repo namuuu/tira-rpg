@@ -1,5 +1,6 @@
 const { Client, MessageEmbed } = require('discord.js');
 const dbUtils = require('../utils/databaseUtils.js');
+const messageUtils = require('../utils/messageTemplateUtils.js');
 const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
@@ -12,18 +13,9 @@ module.exports = {
             const author = message.author;
             
             if(!exists) {
-                dbUtils.createPlayer(message.author.id);
-                message.reply('debug: created player');
 
-                const displayEmbed = new EmbedBuilder()
-                .setColor(0x0099FF)
-                .setTitle(':crossed_swords: Ton voyage commence ! :crossed_swords:')
-                .addFields( 
-                    { name: 'Est ce que ton épopée sera écrite dans l\'\histoire ?', value: "Ton personnage a été créé, " + author.username }
-                )
-                .setThumbnail(author.displayAvatarURL());
+                messageUtils.generateSelector(message);
         
-                message.channel.send({embeds: [displayEmbed]});
                 return;
 
             } else {

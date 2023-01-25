@@ -6,6 +6,7 @@
     "required_level": 1,
     "description": "Une baguette. Donne 10 points de vie.",
     "effects": {
+      "cooldown": 50,
       "heal": 10,
       "damage": 0
     }
@@ -15,7 +16,16 @@
     "number":"0",
     "description": "A skill only used when the developers need to test something. Unobtainable.",
     "effects": {
-      "heal": 100000
+      "cooldown": 1,
+      "damage": 50
+    }
+  },
+  "default": {
+    "name": "Default",
+    "number":"1",
+    "description": "A skill that does nothing. Unobtainable.",
+    "effects": {
+      "cooldown": 1
     }
   }
 }
