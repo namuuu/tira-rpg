@@ -10,7 +10,7 @@ exports.generateSelector = async function(message) {
 	const row = new ActionRowBuilder()
 		.addComponents(
 			new StringSelectMenuBuilder()
-				.setCustomId('classChoice')
+				.setCustomId('classChoice-' + message.author.id)
 				.setPlaceholder('Nothing selected')
 					.addOptions(
 					{
@@ -36,7 +36,7 @@ exports.generateSelector = async function(message) {
 				),
 		);
 
-	return message.reply({content: 'Choose a class ! Poyo', components: [row] });
+	return message.reply({content: 'Choose a class to start your adventure !', components: [row] });
 }
 
 
