@@ -1,4 +1,4 @@
 {
     "prefix": "t.",
-    "commandFolders": [ "management", "miscellaneous" ]
+    "commandFolders": [ "debug" ]
 }

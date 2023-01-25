@@ -5,7 +5,7 @@ const permsUtils = require('../utils/permsUtils.js');
 
 module.exports = {
     name: 'messageCreate',
-    trigger(message, client) {
+    async trigger(message, client) {
         if (message.author.bot) return;
         if (!message.content.startsWith(prefix)) return;
 
@@ -28,47 +28,32 @@ module.exports = {
             return;
         };
         
-        // Executing the command
-        try {
-            // Check if the command requires a character to exist in the database
-            if(client.commands.get(command).requireCharacter) {
-                dbUtils.doesPlayerExists(message.author.id).then(exists => {
-                    // If it exists, execute the command
-                    if(exists) {
-                        client.commands.get(command).execute(message, args);
-                    } else {
-                        // If it doesn't exist, send a message to the user
-                        const noCharacterEmbed = new EmbedBuilder()
-                            .setColor('F08080')
-                            .setAuthor({name: 'You do not have a character!'})
-                            .addFields( { name: 'You need to create a character before you can use this command.', value: 'Use the `start` command to create a character.' })
-                        
-                        message.channel.send({embeds: [noCharacterEmbed]});
-                        return;
-                    }
-                })
-            }
+        // Check if the command requires a character to exist in the database
+        if(client.commands.get(command).requireCharacter && await dbUtils.doesPlayerExists(message.author.id) == false) {
+            // If it doesn't exist, send a message to the user
+            const noCharacterEmbed = new EmbedBuilder()
+                .setColor('F08080')
+                .setAuthor({name: 'You do not have a character!'})
+                .addFields({ name: 'You need to create a character before you can use this command.', value: 'Use the `start` command to create a character.' })
+            
+            message.channel.send({embeds: [noCharacterEmbed]});
+            return;
+        }
 
-            if(client.commands.get(command).requirePerm) {
-                permsUtils.checkPerms(command, message.author.id).then(exists => {
-                    console.log("message create response  :" + exists);
-                    // If it exists, execute the command
-                    if(exists) {
-                        client.commands.get(command).execute(message, args);
-                    } else {
-                        // If it doesn't exist, send a message to the user
-                        const noPermEmbed = new EmbedBuilder()
-                            .setColor('F08080')
-                            .setAuthor({name: 'You do not have the permissions to use this command'})
-                            .addFields( { name: 'Ask an admin !', value: 'They need to use the permadd command to give you the permissions' })
+        // Check if the command requires a permission to be executed
+        if(client.commands.get(command).requirePerm && await permsUtils.checkPerms(command, message.author.id) == false) {
+            const noPermEmbed = new EmbedBuilder()
+                .setColor('F08080')
+                .setAuthor({name: 'You do not have the permissions to use this command'})
+                .addFields( { name: 'Ask an admin !', value: 'They need to use the permadd command to give you the permissions' })
                         
-                        message.channel.send({embeds: [noPermEmbed]});
-                        return;
-                    }
-                })
-            } else {
-                client.commands.get(command).execute(message, args);
-            }
+            message.channel.send({embeds: [noPermEmbed]});
+            return;
+        }
+        
+
+        try {
+            client.commands.get(command).execute(message, args);
         } catch(error) {
             // Catch the error if there's a dev issue
             console.error(error);
