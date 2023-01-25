@@ -86,3 +86,4 @@ Your discord.js version is outdated (Needed version is at least discordjs v14). 
 | Roxyrooky | Developer |
 | Canfrixe | Developer |
 | Az' | Game Designer |
+| Viixyy | Game Designer |
