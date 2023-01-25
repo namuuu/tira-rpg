@@ -36,7 +36,7 @@ exports.generateSelector = async function(message) {
 				),
 		);
 
-	return message.reply({content: 'Choose a class ! Poyo', components: [row] });
+	return message.reply({content: 'Choose a class to start your adventure !', components: [row] });
 }
 
 

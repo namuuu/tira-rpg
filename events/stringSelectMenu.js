@@ -34,9 +34,10 @@ module.exports = {
             case 'classChoice':
 
                 if(args[0] != interaction.user.id) {
+                    interaction.channel.send("If you would like to start your own adventure, please use the t.init commande yourself ! " + "<@" + interaction.user.id + ">");
                     return;
                 }
-                
+
                 await interaction.message.delete();
 
                 db.createPlayer(interaction.user.id);
