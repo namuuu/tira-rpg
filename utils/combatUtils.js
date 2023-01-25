@@ -336,6 +336,15 @@ exports.getPlayerEnemyTeam = function(playerId, combat) {
     return null;
 }
 
+exports.announceNewTurn = async function(thread, player) {
+
+    const embed = new EmbedBuilder()
+        .setDescription('It\'s ' + player.id + '\'s turn!')
+        .setColor("#ffffff");
+
+    thread.send({ embeds: [embed] });
+}
+
 exports.getLogger = function(log, playerId) {
     let playerLog = log.find(player => player.id == playerId);
     if(playerLog == null || playerLog == undefined) {

@@ -226,7 +226,7 @@ exports.startCombat = async function(thread) {
 exports.combatLoop = async function(thread, combatData) {
     const soonestFighter = util.getSoonestTimelineEntity(combatData);
 
-    //console.log(soonestFighter);
+    await util.announceNewTurn(thread, soonestFighter);
 
     if(soonestFighter.type == "human") {
         combatData.current_action.current_player_id = soonestFighter.id;
