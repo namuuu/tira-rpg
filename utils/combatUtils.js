@@ -1,4 +1,4 @@
-const { Client, EmbedBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+const { Client, EmbedBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const embedUtils = require('../utils/messageTemplateUtils.js');
 const manager = require('../manager/combatManager.js');
 const skillUtil = require('../utils/skillUtils.js');
@@ -97,6 +97,15 @@ exports.sendSkillSelector = async function(player, thread) {
         });
     }
 
+    if(stringSelectOptions.length == 0) {
+        const skill = skillList["default"];
+        stringSelectOptions.push({
+            label: skill.name,
+            value: "default",
+            description: skill.description,
+        });
+    }
+
     //console.log(stringSelectOptions);
 
     const row = new ActionRowBuilder()
@@ -117,10 +126,17 @@ exports.sendSkillSelector = async function(player, thread) {
 
 exports.receiveSkillSelector = async function(interaction) {
     const thread = interaction.channel;
+    const combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
     let combatInfo = await this.getCombatCollection(thread.id);
 
     if (combatInfo == null) {
         console.log("[DEBUG] Attempted to modify a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
+        return;
+    }
+
+    if(interaction.user.id != combatInfo.current_action.current_player_id) {
+        console.log(interaction.user.id);
+        interaction.reply("I'm afraid it's not your turn yet...");
         return;
     }
 
@@ -178,11 +194,16 @@ exports.sendTargetSelector = async function(combat, player, thread) {
 
 exports.receiveTargetSelector = async function(interaction) {
     const thread = interaction.channel;
+    const combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
     let combatInfo = await this.getCombatCollection(thread.id);
 
-    if (combatInfo
-         == null) {
+    if (combatInfo == null) {
         console.log("[DEBUG] Attempted to modify a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
+        return;
+    }
+
+    if(interaction.user.id != combatInfo.current_action.current_player_id) {
+        interaction.reply("I'm afraid it's not your turn yet...");
         return;
     }
 
@@ -394,12 +415,36 @@ exports.updateMainMessage = async function(combatInfo, message, state) {
 		.setTitle('The roar of battle is heard in the distance...')
 		.setTimestamp()
 
+    const components = [];
+
     switch(state) {
         case "prebattle":
             embed.setDescription("A battle is about to begin! All valid players can join the battle by clicking on the Join button.");
+            components.push(
+                new ActionRowBuilder()
+		            .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('joinFight-' + message.id + '-1')
+                            .setLabel('Join in !')
+                            .setStyle(ButtonStyle.Secondary)
+                    )
+				);
             break;
         case "battle":
             embed.setDescription("Current turn: " + combatInfo.current_turn);
+            break;
+        case "victory":
+            embed.setDescription("Our fierce warriors have won the battle!");
+            break;
+        case "defeat":
+            embed.setDescription("Our warriors have been defeated...");
+            break;
+        case "cancelled":
+            embed.setTitle("The gods of battle seem displeased...");
+            embed.setDescription("The battle has been cancelled.");
+            break;
+        case "end":
+            embed.setDescription("The battle has found its victor!");
         default:
             break;
     }
@@ -443,16 +488,21 @@ exports.updateMainMessage = async function(combatInfo, message, state) {
         }
     }
 
-    switch(combatInfo.type) {
-        case "wild-encounter":
-            embed.addField("Players", team1);
-            embed.addField("Monsters", team2);
-            break;
-        default:
-            embed.addField("Team 1", team1);
-            embed.addField("Team 2", team2);
-            break;
-    }
+    let team1Value = (team1.length > 0) ? team1 : "Waiting for players...";
+    let team2Value = (team2.length > 0) ? team2 : "Waiting for players...";
 
-    message.edit({ embeds: [messageEmbed]}); 
+    if(state != "cancelled")
+        switch(combatInfo.type) {
+            case "wild-encounter":
+                embed.addFields({name: "Players", value: team1Value});
+                if(team2.length > 0)
+                    embed.addFields({name: "Monsters", value: team2Value});
+                break;
+            default:
+                embed.addFields({name: "Team 1", value: team1Value});
+                embed.addFields({name: "Team 2", value: team2Value});
+                break;
+        }
+
+    message.edit({ embeds: [embed], components: components}); 
 }
