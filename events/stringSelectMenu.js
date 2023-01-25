@@ -43,7 +43,7 @@ module.exports = {
                 )
                 .setThumbnail(interaction.user.displayAvatarURL());
             
-                await interaction.reply({embeds: [displayEmbed]});
+                await interaction.channel.send({embeds: [displayEmbed]});
             default:
                 return;
         }   
