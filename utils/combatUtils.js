@@ -443,21 +443,16 @@ exports.updateMainMessage = async function(combatInfo, message, state) {
         }
     }
 
+    switch(combatInfo.type) {
+        case "wild-encounter":
+            embed.addField("Players", team1);
+            embed.addField("Monsters", team2);
+            break;
+        default:
+            embed.addField("Team 1", team1);
+            embed.addField("Team 2", team2);
+            break;
+    }
 
-// // Modifying the main embed to represent the players
-//     const messageEmbed = message.embeds[0];
-//     if (team == 1) {
-//         if(messageEmbed.fields[0].value == "Waiting for players...") 
-//             messageEmbed.fields[0].value = " <@" + playerId + ">";
-//         else
-//             messageEmbed.fields[0].value += ", <@" + playerId + "> ";
-//     } else if (team == 2) {
-//         if(messageEmbed.fields.length == 1) {
-//             messageEmbed.addField("Team 2", "<@" + playerId + ">");
-//         } else {
-//             messageEmbed.fields[1].value += ", <@" + playerId + ">";
-//         }
-//     }
-
-//     message.edit({ embeds: [messageEmbed]});
+    message.edit({ embeds: [messageEmbed]}); 
 }
