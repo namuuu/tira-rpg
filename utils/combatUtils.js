@@ -388,3 +388,76 @@ exports.checkForVictory = function(combat) {
 }
 
 
+exports.updateMainMessage = async function(combatInfo, message, state) {
+
+    const embed = new EmbedBuilder()
+		.setTitle('The roar of battle is heard in the distance...')
+		.setTimestamp()
+
+    switch(state) {
+        case "prebattle":
+            embed.setDescription("A battle is about to begin! All valid players can join the battle by clicking on the Join button.");
+            break;
+        case "battle":
+            embed.setDescription("Current turn: " + combatInfo.current_turn);
+        default:
+            break;
+    }
+
+    let team1 = "";
+    let team2 = "";
+
+    for (const player of combatInfo.team1) {
+        switch(player.type) {
+            case "human":
+                team1 += "<@" + player.id + "> ";
+                break;
+            case "monster":
+            case "dummy":
+                team1 += player.id + " ";
+                break;
+        }
+
+        if(player.health <= 0) {
+            team1 += "(KO)\n";
+        } else {
+            team1 += "(" + player.health + " HP)\n";
+        }
+    }
+
+    for (const player of combatInfo.team2) {
+        switch(player.type) {
+            case "human":
+                team2 += "<@" + player.id + ">";
+                break;
+            case "monster":
+            case "dummy":
+                team2 += player.id + " ";
+                break;
+        }
+
+        if(player.health <= 0) {
+            team2 += "(KO)\n";
+        } else {
+            team2 += "(" + player.health + " HP)\n";
+        }
+    }
+
+
+// // Modifying the main embed to represent the players
+//     const messageEmbed = message.embeds[0];
+//     if (team == 1) {
+//         if(messageEmbed.fields[0].value == "Waiting for players...") 
+//             messageEmbed.fields[0].value = " <@" + playerId + ">";
+//         else
+//             messageEmbed.fields[0].value += ", <@" + playerId + "> ";
+//     } else if (team == 2) {
+//         if(messageEmbed.fields.length == 1) {
+//             messageEmbed.addField("Team 2", "<@" + playerId + ">");
+//         } else {
+//             messageEmbed.fields[1].value += ", <@" + playerId + ">";
+//         }
+//     }
+
+//     message.edit({ embeds: [messageEmbed]});
+}
