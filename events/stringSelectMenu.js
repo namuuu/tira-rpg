@@ -19,9 +19,6 @@ module.exports = {
         }
 
         switch(customId) {
-            case 'chooseClass':
-                rpg.setClass(interaction.values[0], interaction);
-                break;
             case 'displayInventory':
                 inv.displayInventory(authorId, interaction);
                 break;
@@ -31,7 +28,7 @@ module.exports = {
             case 'combat_target_selector':
                 combat.receiveTargetSelector(interaction);
                 break;
-            case 'class-choice':
+            case 'classChoice':
                 await interaction.message.delete();
 
                 db.createPlayer(interaction.user.id);
