@@ -1,7 +1,3 @@
-
-const dbUtils = require('../../utils/databaseUtils.js');
-const combatUtil = require('../../utils/combatUtils.js');
-
 const combatManager = require('../../manager/combatManager.js');
 
 module.exports = {
@@ -40,10 +36,6 @@ module.exports = {
                 break;
             case "add-dummy":
                 combatManager.addDummyEntityToCombat(message.channel);
-                break;
-            case "test":
-                const combatCollection = await combatUtil.getCombatCollection(combatId);
-                console.log(combatCollection);
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");

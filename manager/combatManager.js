@@ -1,9 +1,6 @@
-const { Client, EmbedBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+const { Client, EmbedBuilder } = require('discord.js');
 const util = require('../utils/combatUtils.js');
 const embedUtils = require('../utils/messageTemplateUtils.js');
-const skillUtil = require('../utils/skillUtils.js');
-const skillList = require('../data/skills.json');
-
 
 /**
  * Instanciates a combat in the database, note that the data is currently blank.
@@ -49,7 +46,6 @@ exports.instanciateCombat = async function(orderMessage) {
 
 
     return new Promise(async resolve => {
-        const result = await combatCollection.insertMany(combatData, options)
 
         await embedUtils.sendEncounterMessage(message, 'wild-encounter');
 

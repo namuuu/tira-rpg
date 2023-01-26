@@ -1,4 +1,4 @@
-const dbUtils = require('../../utils/databaseUtils.js');
+const player = require('../../utils/playerUtils.js');
 const skill = require('../../utils/skillUtils.js');
 
 module.exports = {
@@ -22,10 +22,10 @@ module.exports = {
     try {
         switch(args[0]) {
             case "add-health":
-                dbUtils.addHeath(authorId, query);
+                player.health.add(authorId, query);
                 break;
             case "set-health":
-                dbUtils.setHealth(authorId, query);
+                player.health.set(authorId, query);
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");

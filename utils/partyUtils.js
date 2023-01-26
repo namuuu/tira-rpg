@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("@discordjs/builders")
-const db = require("../utils/databaseUtils.js")
+const player = require("../utils/playerUtils.js")
 
 /**
  * Basic error message for the party command
@@ -44,7 +44,7 @@ exports.sendHelp = function(message) {
  * @returns 
  */
 exports.displayParty = async function(message, id) {
-    const playerData = await db.getPlayerData(id, "misc");
+    const playerData = await player.getPlayerData(id, "misc");
 
     if(!playerData) {
         this.sendError(message, "This player does not exist !");
@@ -70,8 +70,8 @@ exports.displayParty = async function(message, id) {
 exports.invite = async function(message, id) {
     const author = message.author;
 
-    const authorData = await db.getPlayerData(author.id, "misc");
-    const targetData = await db.getPlayerData(id, "misc");
+    const authorData = await player.getData(author.id, "misc");
+    const targetData = await player.getData(id, "misc");
 
     if(!authorData || !targetData) {
         this.sendError(message, "You or the target's player does not exist !");

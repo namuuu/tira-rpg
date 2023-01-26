@@ -1,5 +1,4 @@
-const { Client, MessageEmbed } = require('discord.js');
-const dbUtils = require('../utils/databaseUtils.js');
+const player = require('../utils/playerUtils.js');
 const messageUtils = require('../utils/messageTemplateUtils.js');
 const { EmbedBuilder } = require('discord.js');
 
@@ -9,13 +8,11 @@ module.exports = {
     description: "",
     requireCharacter: false,
     execute(message, args) {
-        dbUtils.doesPlayerExists(message.author.id).then(exists => {
+        player.doesPlayerExists(message.author.id).then(exists => {
             const author = message.author;
             
             if(!exists) {
-
                 messageUtils.generateSelector(message);
-        
                 return;
 
             } else {

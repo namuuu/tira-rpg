@@ -1,12 +1,10 @@
-// load json files
-const { MessageEmbed } = require('discord.js');
 const classJson = require('./../data/classes.json');
-const db = require('./databaseUtils.js');
-
 
 /**
-  Get the classData (json/classes.json).
-**/
+ * Get classData
+ * @param {*} className 
+ * @returns the data read from the JSON
+ */
 exports.getClassData = function(className) {
     if(className != null) {
         return classJson[className];

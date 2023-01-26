@@ -1,4 +1,3 @@
-const { Client, MessageEmbed, SlashCommandBuilder } = require('discord.js');
 const party = require('../utils/partyUtils.js');
 
 module.exports = {
