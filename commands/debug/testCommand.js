@@ -10,12 +10,5 @@ module.exports = {
   description: "Test command",
   requireCharacter: false,
   async execute(message, args) {
-    let authorId = message.author.id;
-
-    if(args.length > 0)
-      authorId = args[0];
-
-    playerUtil.health.set(authorId, 5);
-    //console.log(await dbUtils.doesPlayerExists(authorId));
   }
 }

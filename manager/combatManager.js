@@ -49,8 +49,12 @@ exports.instanciateCombat = async function(orderMessage) {
 }
 
 exports.deleteCombat = async function(channel) {
-    util.deleteThread(channel);
     const combatCollection = Client.mongoDB.db('combat-data').collection(channel.id);
+    const combatData = await util.getCombatCollection(channel.id);
+
+    util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
+
+    util.deleteThread(channel);
 
     await combatCollection.drop(function(err, res) {
         if (err) throw err;
@@ -58,7 +62,8 @@ exports.deleteCombat = async function(channel) {
     });
 }
 
-exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
+exports.addPlayerToCombat = async function(playerId, combatId, team, interaction) {
+    let message = interaction.message;
     let combatCollection = await util.getCombatCollection(combatId);
 
     if (combatCollection == null) {
@@ -76,7 +81,7 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
 
     if(util.getPlayerInCombat(playerId, info) != null) {
         console.log("[DEBUG] Attempted to join a combat with an already existing player. (ALREADY_EXISTING_PLAYER_JOIN_ATTEMPT)");
-        message.reply("You're already in this combat!");
+        interaction.reply({ content:"You're already in this combat!", ephemeral: true});
         return;
     }
 
@@ -124,6 +129,7 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
+    interaction.reply({ content: 'You have joined the combat!', ephemeral: true });
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
 
@@ -175,7 +181,7 @@ exports.addDummyEntityToCombat = async function(thread) {
     };
 
     // Modifying the main embed to represent the players
-    util.updateCombatMessage(info, originMessage, "prebattle");
+    util.updateMainMessage(info, originMessage, "prebattle");
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
@@ -211,7 +217,7 @@ exports.startCombat = async function(thread) {
 exports.combatLoop = async function(thread, combatData) {
     const soonestFighter = util.getSoonestTimelineEntity(combatData);
 
-    //console.log(soonestFighter);
+    await util.announceNewTurn(thread, soonestFighter);
 
     if(soonestFighter.type == "human") {
         combatData.current_action.current_player_id = soonestFighter.id;
@@ -232,6 +238,9 @@ exports.combatLoop = async function(thread, combatData) {
             current_action: combatData.current_action,
         }
     };
+    
+    const startMessage = await thread.fetchStarterMessage();
+    util.updateMainMessage(combatData, startMessage, "battle");
 
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
@@ -268,7 +277,21 @@ exports.finishTurn = async function(exeData, log) {
     this.combatLoop(thread, combat);
 }
 
-exports.callForVictory = async function(combat, thread) {
+exports.callForVictory = async function(combat, thread, victor) {
+    switch(combat.type) {
+        case "wild-encounter":
+            if(victor == 1) {
+                util.updateMainMessage(combat, await thread.fetchStarterMessage(), "victory");
+            } else {
+                util.updateMainMessage(combat, await thread.fetchStarterMessage(), "defeat");
+            }
+            break;
+        case "pvp":
+            util.updateMainMessage(combat, await thread.fetchStarterMessage(), "end");
+            break;
+    }
+
+
     thread.send("The combat is over !").then((message) => {
         message.react("🎉");
         setTimeout(() => thread.setLocked(true), 5000);
