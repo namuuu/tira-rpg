@@ -129,22 +129,7 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
         }
     };
 
-    // Modifying the main embed to represent the players
-    const messageEmbed = message.embeds[0];
-    if (team == 1) {
-        if(messageEmbed.fields[0].value == "Waiting for players...") 
-            messageEmbed.fields[0].value = " <@" + playerId + ">";
-        else
-            messageEmbed.fields[0].value += ", <@" + playerId + "> ";
-    } else if (team == 2) {
-        if(messageEmbed.fields.length == 1) {
-            messageEmbed.addField("Team 2", "<@" + playerId + ">");
-        } else {
-            messageEmbed.fields[1].value += ", <@" + playerId + ">";
-        }
-    }
-
-    message.edit({ embeds: [messageEmbed]});
+    util.updateCombatMessage(info, message, "prebattle");
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
@@ -198,17 +183,8 @@ exports.addDummyEntityToCombat = async function(thread) {
         }
     };
 
-    //console.log(this.getPlayerInCombat("dummy-" + i, info));
-
     // Modifying the main embed to represent the players
-    let messageEmbed = originMessage.embeds[0];
-    if(messageEmbed.fields.length == 1) {
-        messageEmbed.fields.push({name: "Ennemies", value: "dummy"});
-    } else {
-        messageEmbed.fields[1].value += ", dummy";
-    }
-
-    originMessage.edit({ embeds: [messageEmbed]});
+    util.updateCombatMessage(info, originMessage, "prebattle");
 
     await combatCollection.updateOne({}, update, { upsert: true });
 

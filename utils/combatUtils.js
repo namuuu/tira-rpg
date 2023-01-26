@@ -388,3 +388,71 @@ exports.checkForVictory = function(combat) {
 }
 
 
+exports.updateMainMessage = async function(combatInfo, message, state) {
+
+    const embed = new EmbedBuilder()
+		.setTitle('The roar of battle is heard in the distance...')
+		.setTimestamp()
+
+    switch(state) {
+        case "prebattle":
+            embed.setDescription("A battle is about to begin! All valid players can join the battle by clicking on the Join button.");
+            break;
+        case "battle":
+            embed.setDescription("Current turn: " + combatInfo.current_turn);
+        default:
+            break;
+    }
+
+    let team1 = "";
+    let team2 = "";
+
+    for (const player of combatInfo.team1) {
+        switch(player.type) {
+            case "human":
+                team1 += "<@" + player.id + "> ";
+                break;
+            case "monster":
+            case "dummy":
+                team1 += player.id + " ";
+                break;
+        }
+
+        if(player.health <= 0) {
+            team1 += "(KO)\n";
+        } else {
+            team1 += "(" + player.health + " HP)\n";
+        }
+    }
+
+    for (const player of combatInfo.team2) {
+        switch(player.type) {
+            case "human":
+                team2 += "<@" + player.id + ">";
+                break;
+            case "monster":
+            case "dummy":
+                team2 += player.id + " ";
+                break;
+        }
+
+        if(player.health <= 0) {
+            team2 += "(KO)\n";
+        } else {
+            team2 += "(" + player.health + " HP)\n";
+        }
+    }
+
+    switch(combatInfo.type) {
+        case "wild-encounter":
+            embed.addField("Players", team1);
+            embed.addField("Monsters", team2);
+            break;
+        default:
+            embed.addField("Team 1", team1);
+            embed.addField("Team 2", team2);
+            break;
+    }
+
+    message.edit({ embeds: [messageEmbed]}); 
+}
