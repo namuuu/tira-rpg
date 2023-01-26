@@ -30,14 +30,6 @@ module.exports = {
             case "start":
                 combatManager.startCombat(message.channel);
                 break;
-            case "add-player":
-                if(args.length >= 2)
-                    playerId = args[1];
-                if(args.length >= 3)
-                    threadId = args[2];
-                const startMessage = await message.channel.fetchStarterMessage();
-                await combatManager.addPlayerToCombat(playerId, combatId, 1, startMessage);
-                break;
             case "add-dummy":
                 combatManager.addDummyEntityToCombat(message.channel);
                 break;

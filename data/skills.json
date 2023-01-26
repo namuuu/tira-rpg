@@ -16,16 +16,16 @@
     "number":"0",
     "description": "A skill only used when the developers need to test something. Unobtainable.",
     "effects": {
-      "cooldown": 1,
-      "damage": 50
+      "cooldown": 10,
+      "damage": 40
     }
   },
   "default": {
-    "name": "Default",
+    "name": "Struggle",
     "number":"1",
-    "description": "A skill that does nothing. Unobtainable.",
+    "description": "Is just struggling",
     "effects": {
-      "cooldown": 1
+      "cooldown": 10
     }
   }
 }
