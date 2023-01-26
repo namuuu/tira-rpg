@@ -1,6 +1,6 @@
 const { Client, EmbedBuilder } = require('discord.js');
 const util = require('../utils/combatUtils.js');
-const embedUtils = require('../utils/messageTemplateUtils.js');
+const embed = require('../utils/messageTemplateUtils.js');
 
 /**
  * Instanciates a combat in the database, note that the data is currently blank.
@@ -42,15 +42,10 @@ exports.instanciateCombat = async function(orderMessage) {
         }
     ];
 
-    const options = { ordered: true };
+    await combatCollection.insertMany(combatData, { ordered: true});
+    await embed.sendEncounterMessage(message, 'wild-encounter');
 
-
-    return new Promise(async resolve => {
-
-        await embedUtils.sendEncounterMessage(message, 'wild-encounter');
-
-        resolve(messageId);
-    });
+    return messageId;
 }
 
 exports.deleteCombat = async function(channel) {
@@ -125,7 +120,7 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, message) {
         }
     };
 
-    util.updateCombatMessage(info, message, "prebattle");
+    util.updateMainMessage(info, message, "prebattle");
 
     await combatCollection.updateOne({}, update, { upsert: true });
 

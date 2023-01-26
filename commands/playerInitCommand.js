@@ -8,7 +8,7 @@ module.exports = {
     description: "",
     requireCharacter: false,
     execute(message, args) {
-        player.doesPlayerExists(message.author.id).then(exists => {
+        player.doesExists(message.author.id).then(exists => {
             const author = message.author;
             
             if(!exists) {
