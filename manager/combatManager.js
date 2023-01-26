@@ -1,9 +1,6 @@
-const { Client, EmbedBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+const { Client, EmbedBuilder } = require('discord.js');
 const util = require('../utils/combatUtils.js');
-const embedUtils = require('../utils/messageTemplateUtils.js');
-const skillUtil = require('../utils/skillUtils.js');
-const skillList = require('../data/skills.json');
-
+const embed = require('../utils/messageTemplateUtils.js');
 
 /**
  * Instanciates a combat in the database, note that the data is currently blank.
@@ -45,16 +42,10 @@ exports.instanciateCombat = async function(orderMessage) {
         }
     ];
 
-    const options = { ordered: true };
+    await combatCollection.insertMany(combatData, { ordered: true});
+    await embed.sendEncounterMessage(message, 'wild-encounter');
 
-
-    return new Promise(async resolve => {
-        const result = await combatCollection.insertMany(combatData, options)
-
-        await embedUtils.sendEncounterMessage(message, 'wild-encounter');
-
-        resolve(messageId);
-    });
+    return messageId;
 }
 
 exports.deleteCombat = async function(channel) {

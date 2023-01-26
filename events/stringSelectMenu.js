@@ -1,14 +1,11 @@
-const { prefix } = require('../config.json');
-const { MessageEmbed } = require('discord.js');
-const db = require('../utils/databaseUtils.js');
+const player = require('../utils/playerUtils.js');
 const inv = require('../utils/inventoryUtils.js');
-const rpg = require('../utils/rpgInfoUtils.js');
 const { EmbedBuilder } = require('discord.js');
 const combat = require('../utils/combatUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
-    async trigger(interaction, client) {
+    async trigger(interaction) {
         if (!interaction.isStringSelectMenu()) return;
 	    
         const authorId = interaction.user.id;
@@ -17,22 +14,23 @@ module.exports = {
         const args = customId.split('-');
         const command = args.shift();
 
-        if(!db.doesPlayerExists(user.id).then(exists => { return exists; })) {
-            return;
-        }
+        //console.log(command);
+        //console.log(args);
 
         switch(command) {
             case 'displayInventory':
+                if(!(await player.doesExists(user.id))) return;
                 inv.displayInventory(authorId, interaction);
                 break;
             case 'combat_skill_selector':
+                if(!(await player.doesExists(user.id))) return;
                 combat.receiveSkillSelector(interaction);
                 break;
             case 'combat_target_selector':
+                if(!(await player.doesExists(user.id))) return;
                 combat.receiveTargetSelector(interaction);
                 break;
             case 'classChoice':
-
                 if(args[0] != interaction.user.id) {
                     interaction.channel.send("If you would like to start your own adventure, please use the t.init commande yourself ! " + "<@" + interaction.user.id + ">");
                     return;
@@ -40,9 +38,9 @@ module.exports = {
 
                 await interaction.message.delete();
 
-                db.createPlayer(interaction.user.id);
+                player.create(interaction.user.id);
 
-                db.setClass(interaction.user.id, interaction.values[0]);
+                player.setClass(interaction.user.id, interaction.values[0]);
 
                 const displayEmbed = new EmbedBuilder()
                 .setColor(0x0099FF)

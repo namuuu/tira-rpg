@@ -1,7 +1,6 @@
-const { Client, MessageEmbed } = require('discord.js');
-const dbUtils = require('../utils/databaseUtils.js');
-const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} = require('discord.js');
+const player = require('../utils/playerUtils.js');
+const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 const skillsData = require('../data/skills.json');
 const itemData = require('../data/items.json');
 
@@ -15,9 +14,9 @@ module.exports = {
         const author = message.author;
 
         // Get data from MongoDB
-        const playerInfo = await dbUtils.getPlayerData(author.id, "info");
-        const playerStats = await dbUtils.getPlayerData(author.id, "stats");
-        const playerInventory = await dbUtils.getPlayerData(author.id, "inventory");
+        const playerInfo = await player.getData(author.id, "info");
+        const playerStats = await player.getData(author.id, "stats");
+        const playerInventory = await player.getData(author.id, "inventory");
 
         // Transform JSON Data
         const classData = rpgInfoUtils.getClassData(playerInfo.class);

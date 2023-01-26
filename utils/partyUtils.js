@@ -1,15 +1,24 @@
 const { EmbedBuilder } = require("@discordjs/builders")
-const db = require("../utils/databaseUtils.js")
+const player = require("../utils/playerUtils.js")
 
-exports.sendError = function(message) {
+/**
+ * Basic error message for the party command
+ * @param {*} message message to respond to
+ */
+exports.sendError = function(message, reason) {
     const embed = new EmbedBuilder()
         .setTitle("That is not how that works !")
-        .setDescription("To get more information about the party command, type `t.party help`")
+        .setDescription("Reason: " + reason)
+        .setFooter({text: "To get more information about the party command, type `t.party help`"})
         .setColor(0xb22222)
 
     message.channel.send({ embeds: [embed] });
 }
 
+/**
+ * send general help for the party command
+ * @param {*} message message to respond to 
+ */
 exports.sendHelp = function(message) {
 
     const embed = new EmbedBuilder()
@@ -28,24 +37,22 @@ exports.sendHelp = function(message) {
     message.channel.send({ embeds: [embed] });
 }
 
+/**
+ * Displays the party of the player sent in parameter
+ * @param {*} message message sent by the sender
+ * @param {*} id player id
+ * @returns 
+ */
 exports.displayParty = async function(message, id) {
-    const playerData = await db.getPlayerData(id, "misc");
+    const playerData = await player.getPlayerData(id, "misc");
 
     if(!playerData) {
-        const embed = new EmbedBuilder()
-            .setTitle("This player does not exist !")
-            .setColor(0xb22222)
-
-        message.channel.send({ embeds: [embed] });
+        this.sendError(message, "This player does not exist !");
         return;
     }
 
     if(playerData.party.members.length == 0) {
-        const embed = new EmbedBuilder()
-            .setTitle("This player is not in a party !")
-            .setColor(0xb22222)
-
-        message.channel.send({ embeds: [embed] });
+        this.sendError(message, "This player is not in a party !");
         return;
     }
 
@@ -58,4 +65,40 @@ exports.displayParty = async function(message, id) {
         )
 
     message.channel.send({ embeds: [embed] });
+}
+
+exports.invite = async function(message, id) {
+    const author = message.author;
+
+    const authorData = await player.getData(author.id, "misc");
+    const targetData = await player.getData(id, "misc");
+
+    if(!authorData || !targetData) {
+        this.sendError(message, "You or the target's player does not exist !");
+        return;
+    }
+
+    if(authorData.party.owner != author.id) {
+        this.sendError(message, "You are not the owner of your party !");
+        return;
+    }
+
+    if(targetData.party.members.length != 0) {
+        this.sendError(message, "The target is already in a party !");
+        return;
+    }
+
+    if(authorData.party.members.length >= 4) {
+        this.sendError(message, "Your party is full !");
+        return;
+    }
+
+    if(authorData.party.invitations.includes(id)) {
+        this.sendError(message, "You already invited this player !");
+        return;
+    }
+
+    authorData.party.invitations.push(id);
+    
+    
 }

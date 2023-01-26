@@ -1,5 +1,4 @@
-const { Client, MessageEmbed, SlashCommandBuilder } = require('discord.js');
-const dbUtils = require('../utils/databaseUtils.js');
+const player = require('../utils/playerUtils.js');
 
 module.exports = {
   name: "regen",
@@ -9,7 +8,7 @@ module.exports = {
   execute(message, args) {
     authorId = message.author.id;
 
-    dbUtils.passiveRegen(authorId).then(nb => {
+    player.health.passiveRegen(authorId).then(nb => {
         message.reply("Recovered HPs : " + nb);
     });
 

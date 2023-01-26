@@ -1,7 +1,4 @@
-const { Client, MessageEmbed, resolveColor } = require('discord.js');
 const permsUtils = require('../utils/permsUtils.js');
-const dbUtils = require('../utils/databaseUtils.js');
-
 
 module.exports = {
     name : "addperm",

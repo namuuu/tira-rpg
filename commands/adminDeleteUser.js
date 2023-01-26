@@ -1,5 +1,4 @@
-const { Client, MessageEmbed } = require('discord.js');
-const dbUtils = require('../utils/databaseUtils.js');
+const player = require('../utils/playerUtils');
 
 module.exports = {
   name: "delete",
@@ -20,9 +19,9 @@ module.exports = {
 
     const id = arg.id;
     
-    dbUtils.doesPlayerExists(id).then(exists => {
+    player.doesExists(id).then(exists => {
       if (exists) {
-        dbUtils.removePlayer(id);
+        player.remove(id);
         message.reply('debug: deleted player');
 
         return;

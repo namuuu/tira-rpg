@@ -1,5 +1,4 @@
 const { Client } = require('discord.js');
-const perms = require('../data/perms.json');
 const permsUtils = require('../utils/permsUtils.js');
 
 exports.addAdmin = async function(commandName) {
