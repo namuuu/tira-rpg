@@ -53,6 +53,16 @@ exports.getData = async function(id, name) {
     return result;
 }
 
+exports.updateData = async function(id, data, name) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+
+    const query = { name: name };
+    const update = { $set: data };
+    const options = { upsert: true };
+
+    playerCollection.updateOne(query, update, options);
+}
+
 exports.health.set = async function(userID, health) {
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 

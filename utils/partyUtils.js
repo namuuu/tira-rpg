@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require("@discordjs/builders")
+const { ButtonBuilder, ButtonStyle, ActionRowBuilder } = require("discord.js");
 const player = require("../utils/playerUtils.js")
 
 /**
@@ -44,7 +45,7 @@ exports.sendHelp = function(message) {
  * @returns 
  */
 exports.displayParty = async function(message, id) {
-    const playerData = await player.getPlayerData(id, "misc");
+    const playerData = await player.getData(id, "misc");
 
     if(!playerData) {
         this.sendError(message, "This player does not exist !");
@@ -70,6 +71,11 @@ exports.displayParty = async function(message, id) {
 exports.invite = async function(message, id) {
     const author = message.author;
 
+    if(id == author.id) {
+        this.sendError(message, "You cannot invite yourself !");
+        return;
+    }
+
     const authorData = await player.getData(author.id, "misc");
     const targetData = await player.getData(id, "misc");
 
@@ -78,7 +84,7 @@ exports.invite = async function(message, id) {
         return;
     }
 
-    if(authorData.party.owner != author.id) {
+    if(authorData.party.owner != author.id && authorData.party.owner != null) {
         this.sendError(message, "You are not the owner of your party !");
         return;
     }
@@ -93,12 +99,127 @@ exports.invite = async function(message, id) {
         return;
     }
 
-    if(authorData.party.invitations.includes(id)) {
-        this.sendError(message, "You already invited this player !");
+    const embed = new EmbedBuilder()
+        .setTitle("Party invitation")
+        .setDescription("You have been invited to join " + author.username + "'s party !")
+        .setColor(0x00bfff)
+
+    const button = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setLabel("Join party !") 
+                .setStyle(ButtonStyle.Secondary)
+                .setCustomId("party_accept-" + author.id + "-" + id)
+        );
+
+    message.guild.members.cache.get(id).send({ embeds: [embed], components: [button] });
+}
+
+exports.acceptInvitation = async function(accepteeId, senderId, interaction) {
+    const accepteeData = await player.getData(accepteeId, "misc");
+    const senderData = await player.getData(senderId, "misc");
+
+    if(!accepteeData || !senderData) {
+        interaction.reply("You or the sender's player does not exist !");
         return;
     }
 
-    authorData.party.invitations.push(id);
-    
-    
+    console.log(accepteeData.party.owner);
+    console.log(accepteeId);
+    if(accepteeData.party.owner != accepteeId && accepteeData.party.owner != null) {
+        interaction.reply("You already have a party !");
+        return;
+    }
+
+    senderData.party.members.push(senderId);
+    accepteeData.party.members.push(accepteeId);
+    accepteeData.party.owner = senderId;
+
+    await player.updateData(accepteeId, accepteeData, "misc");
+    await player.updateData(senderId, senderData, "misc");
+
+    const embed = new EmbedBuilder()
+        .setTitle("Party invitation accepted")
+        .setDescription("You have joined <@" + senderId + ">'s party !")
+        .setColor(0x00bfff)
+
+    interaction.reply({ embeds: [embed] });
+}
+
+exports.quit = async function(message) {
+    const author = message.author;
+
+    const authorData = await player.getData(author.id, "misc");
+
+    if(!authorData) {
+        this.sendError(message, "You don't have a player !");
+        return;
+    }
+
+    if(authorData.party.owner == null || authorData.party.members.length == 0) {
+        this.sendError(message, "You are not in a party !");
+        return;
+    }
+
+    if(authorData.party.owner == author.id) {
+        this.sendError(message, "You are the owner of the party, use `t.party disband` instead !");
+        return;
+    }
+
+    const ownerData = await player.getData(authorData.party.owner, "misc");
+
+    ownerData.party.members = ownerData.party.members.filter(id => id != author.id);
+    authorData.party.owner = author.id;
+    authorData.party.members = authorData.party.members.filter(id => id != author.id);
+
+    await player.updateData(author.id, authorData, "misc");
+
+    const embed = new EmbedBuilder()
+        .setTitle("Party")
+        .setDescription("You have left the party !")
+        .setColor(0x00bfff)
+
+    message.channel.send({ embeds: [embed] });
+}
+
+exports.disband = async function(message) { 
+    const author = message.author;
+
+    const authorData = await player.getData(author.id, "misc");
+
+    if(!authorData) {
+        this.sendError(message, "You don't have a player !");
+        return;
+    }
+
+    if(authorData.party.owner == null || authorData.party.members.length == 0) {
+        this.sendError(message, "You are not in a party !");
+        return;
+    }
+
+    if(authorData.party.owner != author.id) {
+        this.sendError(message, "You are not the owner of the party !");
+        return;
+    }
+
+    authorData.party.owner = author.id;
+    authorData.party.members = [];
+
+    for(const member of authorData.party.members) {
+        const memberData = await player.getData(member, "misc");
+
+        memberData.party.owner = member;
+        memberData.party.members = [];
+
+        await player.updateData(member, memberData, "misc");
+    }
+
+    await player.updateData(author.id, authorData, "misc");
+
+    const embed = new EmbedBuilder()
+        .setTitle("Party")
+        .setDescription("You have disbanded your party !")
+        .setColor(0x00bfff)
+
+    message.channel.send({ embeds: [embed] });
 }

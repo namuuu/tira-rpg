@@ -12,35 +12,42 @@ module.exports = {
         party.sendError(message, "You need to specify a party command!");
         return;
     }   
-
-    switch(args[0]) {
-        case "help":
-            party.sendHelp(message);
-            break;
-        case "invite":
-            if(args.length == 1) {
-                party.sendError(message, "You need to mention someone to invite them!");
-                return;
-            }
-            if(!message.mentions.members.first()) {
-                party.sendError(message, "You need to mention someone to invite them!");
-                return;
-            }
-            party.invite(message, message.mentions.members.first().id);
-        case "display":
-            if(args.length > 1) {
-                const mention = message.mentions.members.first();
-                if(!mention) {
-                    party.sendError(message, "The person you mentionned is invalid");
-                } else
-                    party.displayParty(message, mention.id);
+    try {
+        switch(args[0]) {
+            case "help":
+                party.sendHelp(message);
                 break;
-            } else 
-                party.displayParty(message, authorId);
-            break;
-        default:
-            party.sendError(message, "This party command does not exist!");
-            break;
+            case "invite":
+                if(args.length == 1) {
+                    party.sendError(message, "You need to mention someone to invite them!");
+                    return;
+                }
+                if(!message.mentions.members.first()) {
+                    party.sendError(message, "You need to mention someone to invite them!");
+                    return;
+                }
+                party.invite(message, message.mentions.members.first().id);
+                break;
+            case "display":
+                if(args.length > 1) {
+                    const mention = message.mentions.members.first();
+                    if(!mention) {
+                        party.sendError(message, "The person you mentionned is invalid");
+                    } else
+                        party.displayParty(message, mention.id);
+                } else 
+                    party.displayParty(message, authorId);
+                break;
+            case "leave":
+                party.quit(message, authorId);
+                break;
+            default:
+                party.sendError(message, "This party command does not exist!");
+                break;
+        }
+    } catch (error) {
+        console.error(error);
+        message.channel.send("An error occured while executing this command, please contact the bot owner.");
     }
   }
 }
