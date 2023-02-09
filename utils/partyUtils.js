@@ -57,12 +57,14 @@ exports.displayParty = async function(message, id) {
         return;
     }
 
+    const partyOwnerData = await player.getData(playerData.party.owner, "misc");
+
     const embed = new EmbedBuilder()
         .setTitle("Party of " + message.author.username)
-        .setDescription("Owner: " + message.guild.members.cache.get(playerData.party.owner).user.username)
+        .setDescription("Owner: <@" + partyOwnerData.party.owner + ">")
         .setColor(0x00bfff)
         .addFields(
-            { name: "Members", value: playerData.party.members.map(member => message.guild.members.cache.get(member).user.username).join("\n") }
+            { name: "Members", value: partyOwnerData.party.members.map(member => "<@" + member + ">").join("\n") }
         )
 
     message.channel.send({ embeds: [embed] });
@@ -80,7 +82,7 @@ exports.invite = async function(message, id) {
     const targetData = await player.getData(id, "misc");
 
     if(!authorData || !targetData) {
-        this.sendError(message, "You or the target's player does not exist !");
+        this.sendError(message, "The target's player does not exist !");
         return;
     }
 
@@ -124,15 +126,28 @@ exports.acceptInvitation = async function(accepteeId, senderId, interaction) {
         return;
     }
 
-    console.log(accepteeData.party.owner);
-    console.log(accepteeId);
+    //console.log(accepteeData.party.owner);
+    //console.log(accepteeId);
+    if(senderData.party.members.length >= 4) {
+        interaction.reply("Their party is full!");
+        return;
+    }
+    if(accepteeData.party.members.length != 0) {
+        interaction.reply("You are already in a party !");
+        return;
+    }
+    if(accepteeData.party.owner == senderId) {
+        interaction.reply("You are already in this party !");
+        return;
+    }
     if(accepteeData.party.owner != accepteeId && accepteeData.party.owner != null) {
         interaction.reply("You already have a party !");
         return;
     }
 
-    senderData.party.members.push(senderId);
+    senderData.party.members.push(accepteeId);
     accepteeData.party.members.push(accepteeId);
+    accepteeData.party.members.push(senderData.party.members);
     accepteeData.party.owner = senderId;
 
     await player.updateData(accepteeId, accepteeData, "misc");

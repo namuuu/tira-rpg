@@ -1,0 +1,37 @@
+{
+    "dummy": {
+        "name": "Dummy",
+        "exp": 10,
+        "base_stats": {
+            "strength": 10,
+            "vitality": 10,
+            "resistance": 10,
+            "dexterity": 10,
+            "agility": 10,
+            "intelligence": 10
+        },
+        "mod_stats": {
+            "strength": 0,
+            "vitality": 0,
+            "resistance": 50,
+            "dexterity": 0,
+            "agility": 0,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": [],
+            "helmet": [],
+            "chestplate": [],
+            "boots": []
+        },
+        "skills": [{
+            "id": "default",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "bread",
+            "pack": 1,
+            "weight": 1
+        }]
+    }
+}
