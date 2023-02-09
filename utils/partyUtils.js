@@ -161,6 +161,91 @@ exports.acceptInvitation = async function(accepteeId, senderId, interaction) {
     interaction.reply({ embeds: [embed] });
 }
 
+exports.kick = async function(message, targetId) {
+    const author = message.author;
+
+    if(targetId == author.id) {
+        this.sendError(message, "You cannot kick yourself !");
+        return;
+    }
+
+    const authorData = await player.getData(author.id, "misc");
+    const targetData = await player.getData(targetId, "misc");
+
+    if(!authorData || !targetData) {
+        this.sendError(message, "The target's player does not exist !");
+        return;
+    }
+
+    if(authorData.party.owner != author.id && authorData.party.owner != null) {
+        this.sendError(message, "You are not the owner of your party !");
+        return;
+    }
+
+    if(targetData.party.owner != author.id) {
+        this.sendError(message, "The target is not in your party !");
+        return;
+    }
+
+    authorData.party.members = authorData.party.members.filter(member => member != targetId);
+    targetData.party.owner = targetId;
+    targetData.party.members = [];
+
+    await player.updateData(targetId, targetData, "misc");
+    await player.updateData(author.id, authorData, "misc");
+
+    const embed = new EmbedBuilder()
+        .setTitle("Party kick")
+        .setDescription("<@" + targetId + "> have been kicked from <@" + author.id + ">'s party !")
+        .setColor(0x00bfff)
+
+    message.reply({ embeds: [embed] });
+}
+
+exports.disband = async function(message) {
+    const author = message.author;
+
+    const authorData = await player.getData(author.id, "misc");
+
+    if(!authorData) {
+        this.sendError(message, "You don't have a player !");
+        return;
+    }
+
+    if(authorData.party.owner != author.id) {
+        this.sendError(message, "You are not the owner of your party !");
+        return;
+    }
+
+    if(authorData.party.members.length == 0) {
+        this.sendError(message, "You are not in a party !");
+        return;
+    }
+
+    const members = authorData.party.members;
+
+    for(let i = 0; i < members.length; i++) {
+        const memberData = await player.getData(members[i], "misc");
+
+        memberData.party.owner = members[i];
+        memberData.party.members = [];
+
+        await player.updateData(members[i], memberData, "misc");
+    }
+
+    authorData.party.owner = null;
+    authorData.party.members = [];
+
+    await player.updateData(author.id, authorData, "misc");
+
+    const embed = new EmbedBuilder()
+        .setTitle("Party disband")
+        .setDescription("Your party has been disbanded !")
+        .setColor(0x00bfff)
+
+    message.reply({ embeds: [embed] });
+}
+
 exports.quit = async function(message) {
     const author = message.author;
 

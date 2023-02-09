@@ -41,6 +41,16 @@ module.exports = {
             case "leave":
                 party.quit(message, authorId);
                 break;
+            case "kick":
+                if(args.length == 1 || !message.mentions.members.first()) {
+                    party.sendError(message, "You need to mention someone to kick them!");
+                    return;
+                }
+                party.kick(message, message.mentions.members.first().id);
+                break;
+            case "disband":
+                party.disband(message, authorId);
+                break;
             default:
                 party.sendError(message, "This party command does not exist!");
                 break;
