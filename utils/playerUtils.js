@@ -24,7 +24,7 @@ exports.create = async function(id) {
         { name: "info", class: "noclass", level: 0, exp: 0, health: 10 },
         { name: "stats", strength: 0, vitality: 10, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
         { name: "inventory", items: [], skills: [] , activeSkills: []},
-        { name: "misc", lastRegen: Date.now(), party: { owner: id, members: [], invitations: [] }},
+        { name: "misc", lastRegen: Date.now(), party: { owner: id, members: [] }},
     ]
 
     const options = { ordered: true };
@@ -51,6 +51,16 @@ exports.getData = async function(id, name) {
     const result = await playerCollection.findOne(query, options);
     
     return result;
+}
+
+exports.updateData = async function(id, data, name) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+
+    const query = { name: name };
+    const update = { $set: data };
+    const options = { upsert: true };
+
+    playerCollection.updateOne(query, update, options);
 }
 
 exports.health.set = async function(userID, health) {

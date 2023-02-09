@@ -7,7 +7,7 @@ const embed = require('../utils/messageTemplateUtils.js');
  * @param message message whose id will serve as the combat id. also is the id of the thread.
  * @returns the id in question.
  */
-exports.instanciateCombat = async function(orderMessage) {
+exports.instanciateCombat = async function(orderMessage, creator) {
     const channel = orderMessage.channel;
 
     if(channel.isThread()) {
@@ -29,6 +29,7 @@ exports.instanciateCombat = async function(orderMessage) {
         {
             zone: null,
             type: 'wild-encounter',
+            creator: creator.id,
             current_turn: 0,
             current_timeline: 0,
             current_action: {
@@ -52,6 +53,11 @@ exports.deleteCombat = async function(channel) {
     const combatCollection = Client.mongoDB.db('combat-data').collection(channel.id);
     const combatData = await util.getCombatCollection(channel.id);
 
+    if(combatData == null) {
+        console.log("[DEBUG] Attempted to delete a non-existent combat. (NON_EXISTENT_COMBAT_DELETE_ATTEMPT)");
+        return;
+    }
+
     util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
 
     util.deleteThread(channel);
@@ -64,9 +70,10 @@ exports.deleteCombat = async function(channel) {
 
 exports.addPlayerToCombat = async function(playerId, combatId, team, interaction) {
     let message = interaction.message;
-    let combatCollection = await util.getCombatCollection(combatId);
+    const combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
+    let info = await util.getCombatCollection(combatId);
 
-    if (combatCollection == null) {
+    if (info == null) {
         console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
         return;
     }
@@ -74,10 +81,6 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
         console.log("[DEBUG] Attempted to join a non-existent team. (NON_EXISTENT_TEAM_JOIN_ATTEMPT)");
         return;
     }
-
-    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
-
-    const info = await combatCollection.findOne({}, { _id: 0 });
 
     if(util.getPlayerInCombat(playerId, info) != null) {
         console.log("[DEBUG] Attempted to join a combat with an already existing player. (ALREADY_EXISTING_PLAYER_JOIN_ATTEMPT)");
@@ -89,6 +92,13 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
     const playerInfo = await playerCollection.findOne({ name: "info" }, { _id: 0 });
     const playerStats = await playerCollection.findOne({ name: "stats" }, { _id: 0 });
     const playerInv = await playerCollection.findOne({ name: "inventory" }, { _id: 0 });
+    const playerMisc = await playerCollection.findOne({ name: "misc" }, { _id: 0 });
+
+    if(playerMisc.party.owner != info.creator) {
+        console.log("[DEBUG] Attempted to join a combat with a non-party member. (NON_PARTY_MEMBER_JOIN_ATTEMPT)");
+        interaction.reply({ content:"You're not in the same party as the creator of this combat!", ephemeral: true});
+        return;
+    }
 
     const player = {
         id: playerId,
@@ -115,8 +125,6 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
         info.team2.push(player);
     }
 
-    //console.log(info);
-
     const update = {
         $set: {
             current_turn: 1,
@@ -133,7 +141,11 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
 
-exports.addDummyEntityToCombat = async function(thread) {
+exports.searchForMonsters = function(interaction, combat) {
+    this.addEntityToCombat(interaction.channel, "dummy");
+}
+
+exports.addEntityToCombat = async function(thread, entity) {
     let combatId = thread.id;
     let combatCollection = await util.getCombatCollection(combatId);
     let originMessage = await thread.fetchStarterMessage();
@@ -147,29 +159,7 @@ exports.addDummyEntityToCombat = async function(thread) {
 
     const info = await combatCollection.findOne({}, { _id: 0 });
 
-    let i = 0;
-    while((player = util.getPlayerInCombat("dummy-" + i, info)) != null) {
-        i++;
-    }
-
-    const dummy = {
-        id: "dummy-" + i,
-        type: "dummy",
-        class: "dummy",
-        health: 100,
-        timeline: 0,
-        stats: {
-            vitality: 100,
-            strength: 100,
-            dexterity: 100,
-            resistance: 100,
-            intelligence: 100,
-            agility: 100,
-        },
-        equipment: {},
-        skills: ["default"],
-        items: [],
-    }
+    const dummy = util.createMonsterData(info, entity);
 
     info.team2.push(dummy);
 
@@ -188,7 +178,8 @@ exports.addDummyEntityToCombat = async function(thread) {
     console.log("[DEBUG] Dummy joined combat " + combatId); 
 }
 
-exports.startCombat = async function(thread) {
+exports.startCombat = async function(interaction) {
+    let thread = interaction.channel;
     let combatId = thread.id;
     let combatCollection = await util.getCombatCollection(combatId);
 
@@ -206,10 +197,29 @@ exports.startCombat = async function(thread) {
 
     const combatData = await combatCollection.findOne({}, { _id: 0 });
 
-    if (combatData.team1.length == 0 || combatData.team2.length == 0) {
-        console.log("[DEBUG] Attempted to start a combat with less than 2 players. (COMBAT_WITH_LESS_THAN_2_PLAYERS_START_ATTEMPT)");
-        return;
+    // Checks if the combat has enough players. For PVE, it will add monsters.
+    switch(combatData.type) {
+        case "wild-encounter":
+            if(combatData.team1.length == 0) {
+                console.log("[DEBUG] Attempted to start a combat with no players. (COMBAT_WITH_NO_PLAYERS_START_ATTEMPT)");
+                interaction.reply({ content: "You need at least one player in your team!", ephemeral: true });
+                return;
+            }
+            this.searchForMonsters(interaction, combatData);
+            break;
+        case "pvp":
+            if (combatData.team1.length == 0 || combatData.team2.length == 0) {
+                console.log("[DEBUG] Attempted to start a combat with less than 2 players. (COMBAT_WITH_LESS_THAN_2_PLAYERS_START_ATTEMPT)");
+                interaction.reply({ content: "You need at least one players in each team!", ephemeral: true });
+                return;
+            }
+            break;
+        default:
+            console.log("[DEBUG] Attempted to start a combat with an unknown type. (COMBAT_WITH_UNKNOWN_TYPE_START_ATTEMPT)");
+            return;
     }
+
+    interaction.message.delete();
 
     this.combatLoop(thread, combatData);
 }

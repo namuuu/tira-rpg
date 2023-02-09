@@ -11,23 +11,17 @@ module.exports = {
         return;
     }
 
-    let playerId = message.author.id;
-    let combatId = message.channel.id;
-
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
             case "create":
-                combatManager.instanciateCombat(message);
+                combatManager.instanciateCombat(message, message.author);
                 break;
             case "delete":
                 combatManager.deleteCombat(message.channel);
                 break;
-            case "start":
-                combatManager.startCombat(message.channel);
-                break;
             case "add-dummy":
-                combatManager.addDummyEntityToCombat(message.channel);
+                combatManager.addEntityToCombat(message.channel, "dummy");
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");

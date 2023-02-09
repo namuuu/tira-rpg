@@ -1,6 +1,7 @@
 const player = require('../utils/playerUtils.js');
 const inventory = require('../utils/inventoryUtils.js');
 const combat = require('../manager/combatManager.js');
+const party = require('../utils/partyUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -24,9 +25,13 @@ module.exports = {
                 inventory.displayInventory(userId, interaction);
                 break;
             case 'joinFight':
-                await combat.addPlayerToCombat(userId, args[0], args[1], interaction.message);
-                interaction.reply({ content: 'You have joined the combat!', ephemeral: true });
+                await combat.addPlayerToCombat(userId, args[0], args[1], interaction);
                 break;
+            case 'combat_start':
+                await combat.startCombat(interaction);
+                break;
+            case 'party_accept':
+                await party.acceptInvitation(userId, args[0], interaction);
             default:
                 break;
         }

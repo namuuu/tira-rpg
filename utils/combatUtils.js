@@ -3,6 +3,7 @@ const embedUtils = require('../utils/messageTemplateUtils.js');
 const manager = require('../manager/combatManager.js');
 const skillUtil = require('../utils/skillUtils.js');
 const skillList = require('../data/skills.json');
+const mobList = require('../data/monster.json');
 
 /**
  * Creates a thread from a message
@@ -14,6 +15,20 @@ exports.createThread = async function(message) {
         name: 'Combat Thread',
         autoArchiveDuration: 60,
     });
+
+    const embed = new EmbedBuilder()
+        .setTitle("The tension is palpable...")
+        .setDescription("When everyone is ready, the party leader can press the button below to start the combat !");
+
+    const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('combat_start')
+                .setLabel('Start Combat')
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+    await thread.send({ embeds: [embed], components: [row] });
 
     return new Promise(async resolve => {
         resolve(thread);
@@ -336,11 +351,57 @@ exports.getPlayerEnemyTeam = function(playerId, combat) {
     return null;
 }
 
+
+exports.createMonsterData = function(combat, monster) {
+
+    let i = 0;
+    while((player = this.getPlayerInCombat(monster + "-" + i, combat)) != null) {
+        i++;
+    }
+
+    const mobData = mobList[monster];
+
+    const dummy = {
+        id: monster + "-" + i,
+        type: "monster",
+        timeline: 0,
+        stats: {
+            vitality: mobData.base_stats.vitality + Math.floor(Math.random(mobData.mod_stats.vitality)),
+            strength: mobData.base_stats.strength + Math.floor(Math.random(mobData.mod_stats.strength)),
+            dexterity: mobData.base_stats.dexterity + Math.floor(Math.random(mobData.mod_stats.dexterity)),
+            resistance: mobData.base_stats.resistance + Math.floor(Math.random(mobData.mod_stats.resistance)),
+            intelligence: mobData.base_stats.intelligence + Math.floor(Math.random(mobData.mod_stats.intelligence)),
+            agility: mobData.base_stats.agility + Math.floor(Math.random(mobData.mod_stats.agility)),
+        },
+        equipment: {}
+    }
+
+    dummy.health = dummy.stats.vitality;
+
+    // Set the skills
+    dummy.skills = [];
+    for (const skill of mobData.skills) {
+        dummy.skills.push(skill.id);
+    }
+
+
+    return dummy;
+}
+
 exports.announceNewTurn = async function(thread, player) {
 
-    const embed = new EmbedBuilder()
-        .setDescription('It\'s ' + player.id + '\'s turn!')
-        .setColor("#ffffff");
+    const embed = new EmbedBuilder();
+
+    if(player.type = "human") {
+        embed
+            .setDescription('It\'s <' + player.id + '>\'s turn!')
+            .setColor("#ffffff");
+    } else {
+        embed
+            .setDescription('It\'s ' + player.id + '\'s turn!')
+            .setColor("#ffffff");
+    }
+    
 
     thread.send({ embeds: [embed] });
 }
@@ -417,7 +478,6 @@ exports.checkForVictory = function(combat) {
     return 0;
 }
 
-
 exports.updateMainMessage = async function(combatInfo, message, state) {
 
     const embed = new EmbedBuilder()
@@ -428,7 +488,7 @@ exports.updateMainMessage = async function(combatInfo, message, state) {
 
     switch(state) {
         case "prebattle":
-            embed.setDescription("A battle is about to begin! All valid players can join the battle by clicking on the Join button.");
+            embed.setDescription("A battle is about to begin! All party members can join the fight.");
             components.push(
                 new ActionRowBuilder()
 		            .addComponents(
