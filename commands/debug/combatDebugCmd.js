@@ -11,13 +11,11 @@ module.exports = {
         return;
     }
 
-    let playerId = message.author.id;
-
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
             case "create":
-                combatManager.instanciateCombat(message, playerId);
+                combatManager.instanciateCombat(message, message.author);
                 break;
             case "delete":
                 combatManager.deleteCombat(message.channel);

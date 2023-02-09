@@ -53,6 +53,11 @@ exports.deleteCombat = async function(channel) {
     const combatCollection = Client.mongoDB.db('combat-data').collection(channel.id);
     const combatData = await util.getCombatCollection(channel.id);
 
+    if(combatData == null) {
+        console.log("[DEBUG] Attempted to delete a non-existent combat. (NON_EXISTENT_COMBAT_DELETE_ATTEMPT)");
+        return;
+    }
+
     util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
 
     util.deleteThread(channel);
@@ -65,6 +70,7 @@ exports.deleteCombat = async function(channel) {
 
 exports.addPlayerToCombat = async function(playerId, combatId, team, interaction) {
     let message = interaction.message;
+    const combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
     let info = await util.getCombatCollection(combatId);
 
     if (info == null) {
