@@ -1,7 +1,3 @@
-
-const dbUtils = require('../../utils/databaseUtils.js');
-const combatUtil = require('../../utils/combatUtils.js');
-
 const combatManager = require('../../manager/combatManager.js');
 
 module.exports = {
@@ -15,35 +11,17 @@ module.exports = {
         return;
     }
 
-    let playerId = message.author.id;
-    let combatId = message.channel.id;
-
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
             case "create":
-                combatManager.instanciateCombat(message);
+                combatManager.instanciateCombat(message, message.author);
                 break;
             case "delete":
                 combatManager.deleteCombat(message.channel);
                 break;
-            case "start":
-                combatManager.startCombat(message.channel);
-                break;
-            case "add-player":
-                if(args.length >= 2)
-                    playerId = args[1];
-                if(args.length >= 3)
-                    threadId = args[2];
-                const startMessage = await message.channel.fetchStarterMessage();
-                await combatManager.addPlayerToCombat(playerId, combatId, 1, startMessage);
-                break;
             case "add-dummy":
-                combatManager.addDummyEntityToCombat(message.channel);
-                break;
-            case "test":
-                const combatCollection = await combatUtil.getCombatCollection(combatId);
-                console.log(combatCollection);
+                combatManager.addEntityToCombat(message.channel, "dummy");
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");

@@ -1,4 +1,4 @@
-const dbUtils = require('../../utils/databaseUtils.js');
+const player = require('../../utils/playerUtils.js');
 const skill = require('../../utils/skillUtils.js');
 
 module.exports = {

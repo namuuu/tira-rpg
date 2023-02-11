@@ -12,6 +12,14 @@
             "dexterity": 10,
             "agility": 10,
             "intelligence": 10
+        },
+        "mult_stats": {
+            "strength": 2,
+            "vitality": 1.5,
+            "resistance": 1.7,
+            "dexterity": 0.5,
+            "agility": 0.5,
+            "intelligence": 0.2
         }
     },
     "assassin": {
@@ -24,6 +32,14 @@
             "dexterity": 10,
             "agility": 10,
             "intelligence": 10
+        },
+        "mult_stats": {
+            "strength": 2,
+            "vitality": 1.5,
+            "resistance": 1.7,
+            "dexterity": 0.5,
+            "agility": 0.5,
+            "intelligence": 0.2
         }
     },
     "magician": {
@@ -36,6 +52,14 @@
             "dexterity": 10,
             "agility": 10,
             "intelligence": 10
+        },
+        "mult_stats": {
+            "strength": 2,
+            "vitality": 1.5,
+            "resistance": 1.7,
+            "dexterity": 0.5,
+            "agility": 0.5,
+            "intelligence": 0.2
         }
     },
     "ranger": {
@@ -48,6 +72,14 @@
             "dexterity": 10,
             "agility": 10,
             "intelligence": 10
+        },
+        "mult_stats": {
+            "strength": 2,
+            "vitality": 1.5,
+            "resistance": 1.7,
+            "dexterity": 0.5,
+            "agility": 0.5,
+            "intelligence": 0.2
         }
     },
     "healer": {
@@ -60,6 +92,14 @@
             "dexterity": 10,
             "agility": 10,
             "intelligence": 10
+        },
+        "mult_stats": {
+            "strength": 2,
+            "vitality": 1.5,
+            "resistance": 1.7,
+            "dexterity": 0.5,
+            "agility": 0.5,
+            "intelligence": 0.2
         }
     }
 }

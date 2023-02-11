@@ -1,10 +1,7 @@
-const { prefix } = require('../config.json');
-const Client = require('discord.js');
-const { MessageEmbed } = require('discord.js');
-const db = require('../utils/databaseUtils.js');
-const inventoryUtil = require('../utils/inventoryUtils.js');
-const rpg = require('../utils/rpgInfoUtils.js');
-const combatManager = require('../manager/combatManager.js');
+const player = require('../utils/playerUtils.js');
+const inventory = require('../utils/inventoryUtils.js');
+const combat = require('../manager/combatManager.js');
+const party = require('../utils/partyUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -18,19 +15,23 @@ module.exports = {
         const args = customId.split('-');
         const command = args.shift();
 
-        if(await !db.doesPlayerExists(user.id)) return;
+        if(!(await player.doesExists(user.id))) return;
 
         // console.log("Command: " + command);
         // console.log("Args: " + args);
 
         switch(command) {
             case 'displayInventory':
-                inventoryUtil.displayInventory(userId, interaction);
+                inventory.displayInventory(userId, interaction);
                 break;
             case 'joinFight':
-                await combatManager.addPlayerToCombat(userId, args[0], args[1], interaction.message);
-                interaction.reply({ content: 'You have joined the combat!', ephemeral: true });
+                await combat.addPlayerToCombat(userId, args[0], args[1], interaction);
                 break;
+            case 'combat_start':
+                await combat.startCombat(interaction);
+                break;
+            case 'party_accept':
+                await party.acceptInvitation(userId, args[0], interaction);
             default:
                 break;
         }
