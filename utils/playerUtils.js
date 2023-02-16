@@ -212,3 +212,15 @@ exports.updateStats = async function(id, className) {
     return true;
     
 }
+
+exports.setLocation = async function(id, location) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+
+    const query = { name: "info" };
+    
+    const update = { $set: { location: location } };
+    const options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+
+    return true;
+}

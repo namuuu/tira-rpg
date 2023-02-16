@@ -65,3 +65,28 @@ exports.sendEncounterMessage = async function(message, type) {
 
 	return message.edit({content:'', embeds: [mainEmbed], components: [row] });
 }
+
+exports.generateLocationSelector = async function(message) {
+	list = [];
+	for(var i = 0; i < Object.keys(locationData).length; i++) {
+		for (var j = 0; j < locationData[Object.keys(locationData)[i]].zones.length; j++) {
+			value = locationData[Object.keys(locationData)[i]].zones[j].toString();
+			console.log(value);
+			list.push({
+				label: locationData[Object.keys(locationData)[i]].name + ' - ' + zonesData[locationData[Object.keys(locationData)[i]].zones[j]].name.toString(),
+				value: locationData[Object.keys(locationData)[i]].zones[j].toString(),
+			});
+		}
+	}
+	const row = new ActionRowBuilder()
+		.addComponents(
+			new StringSelectMenuBuilder()
+				.setCustomId('locationChoice-' + message.author.id)
+				.setPlaceholder('Nothing selected')
+					.addOptions(
+					list
+				),
+		);
+
+	return message.reply({content: 'Choose the location where you want to go !', components: [row] });
+}

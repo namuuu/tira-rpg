@@ -1,0 +1,12 @@
+{
+    "serene": {
+        "name": "Serene",
+        "description": "peeYi",
+        "zones": ["temple"]
+    },
+    "moondust": {
+        "name": "Moondust Mountain",
+        "description": "Celeste gaming",
+        "zones": ["slime_lake"]
+    }
+}
