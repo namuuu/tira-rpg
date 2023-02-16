@@ -1,0 +1,40 @@
+{
+    "slime_lake": {
+        "name": "Slime Lake",
+        "description": "Yipee",
+        "required": {
+            "level": "",
+            "quests": "",
+            "items": ""
+        },
+        "monsters": {
+            "group1": {
+                "m-names": ["slime", "slime", "wolf"],
+                "spawn-chance": "50"
+            },
+            "group2": {
+                "m-names": ["slime", "wolf"],
+                "spawn-chance": "50"
+            }
+        }
+    },
+    "temple": {
+        "name": "Forgotten Temple",
+        "description": "TEMPLE RUN",
+        "required": {
+            "level": "20",
+            "quests": "",
+            "items": ""
+        },
+        "monsters": {
+            "group1": {
+                "m-names": ["bird", "slime", "bird"],
+                "spawn-chance": "50"
+            },
+            "group2": {
+                "m-names": ["delmotte"],
+                "spawn-chance": "50"
+            }
+        }
+    }
+}
