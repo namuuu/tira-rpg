@@ -1,6 +1,8 @@
 const skillEffect = require("../setup/skillSetup.js");
 const skills = require("../data/skills.json");
-const { Client, EmbedBuilder } = require('discord.js');
+const fs = require('fs');
+const { Client, ActionRowBuilder, ButtonBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const player = require('../utils/playerUtils.js');
 
 
 exports.execute = function(exeData) {
@@ -150,17 +152,135 @@ exports.unselectActiveSkill = async function(user_id, skill_id) {
     };
 
     const inventory = await playerCollection.findOne(query, options);
-    
-    if(inventory.activeSkills.includes(skill_id)) {
-        const newItems = [...(inventory.skills)];
-        const removeIndex = newItems.indexOf(skill_id);
-        if(removeIndex > -1)
-            newItems.splice(removeIndex, 1);
-        const update = { $set: { activeSkills: newItems } };
-        options = { upsert: true };
-        const result = await playerCollection.updateOne(query, update, options);
-        console.log("[DEBUG] User " + user_id + " unselected skill " + skill_id + ".");
-    } else {
+
+    if(!inventory.skills.includes(skill_id)) {
         console.error("[DEBUG] Skill " + skill_id + " hasn't been selected by user " + user_id + ". (ACTIVE_SKILL_NOT_ACTIVE)");
+        return false;
+    }
+    
+    const newItems = [...(inventory.skills)];
+    const removeIndex = newItems.indexOf(skill_id);
+    if(removeIndex > -1)
+        newItems.splice(removeIndex, 1);
+    const update = { $set: { activeSkills: newItems } };
+    options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+    console.log("[DEBUG] User " + user_id + " unselected skill " + skill_id + ".");
+
+    return true;
+}
+
+function getStringActiveSkill(skills) {
+    var data = JSON.parse(fs.readFileSync('./data/skills.json'));
+    var string = "";
+
+    if(skills.length != 0)
+        for(const skill of skills) {
+            string += `# ${data[skill].number} - ${data[skill].name}\n`;
+        }
+    else
+        string = "No active skills selected.";
+
+    return string;
+}
+
+async function sendStringAllSkills(username, userId) {
+    const playerData = await player.getData(userId, "inventory");
+    const skills = playerData.skills;
+    const activeSkills = playerData.activeSkills;
+
+    var data = JSON.parse(fs.readFileSync('./data/skills.json'));
+
+    const embed = new EmbedBuilder()
+        .setTitle(`${username}'s Skills`)
+        .setFooter({text: 'Need to get more info about a specific skill ? Type t.skill <number>'})
+
+    try {
+        embed.setDescription(skills.length != 0 ? skills.map(skill => `# ${data[skill].number} - ${data[skill].name}`).join(", ") : "No skills learned.");
+    } catch (error) {
+        embed.setDescription("No skills learned. (There may be an error!)");
+        console.error(error);
+    }
+
+    try {
+        embed.addFields({name: "Active Skills", value: getStringActiveSkill(activeSkills)});
+    } catch (error) {
+        console.error(error);
+        embed.addFields({name: "Active Skills", value: "No active skills selected. (There may be an error!)"});
+    }
+
+    return {embeds: [embed], components: [sendButtonChangeSkill(userId, skills.length != 0, activeSkills.length != 0)]};
+}
+
+function sendButtonChangeSkill(userId, skillEnable, activeSkillEnable) {
+    const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId("select_skill-" + userId)
+                .setLabel("Select Skill")
+                .setStyle("Secondary")
+                .setDisabled(!skillEnable),
+            new ButtonBuilder()
+                .setCustomId("unselect_skill-" + userId)
+                .setLabel("Unselect Skill")
+                .setStyle("Secondary")
+                .setDisabled(!activeSkillEnable),
+        );
+
+    return row;
+}
+
+exports.sendModal = function(interaction, select, userId) {
+    console.log(userId + " " + interaction.user.id);
+
+    if(interaction.user.id != userId) {
+        interaction.reply({content: "This is not your inventory! If you need to, type `t.display`.", ephemeral: true});
+        return;
+    }
+
+    const modal = new ModalBuilder()
+        .setTitle("Skill Menu")
+    
+    const skillInput = new TextInputBuilder()
+        .setCustomId("skill_input")
+        .setPlaceholder("Ex: 155 or 'fireball'")
+        .setMinLength(1)
+        .setMaxLength(20)
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+    if(select == true) {
+        modal.setCustomId("select_skill")
+        skillInput.setLabel("Indicate the skill you want to use.")
+    } else {
+        modal.setCustomId("unselect_skill")
+        skillInput.setLabel("Indicate the skill you want to unselect.")
+    }
+
+    modal.addComponents(new ActionRowBuilder().addComponents(skillInput));
+
+    interaction.showModal(modal);
+}
+
+exports.receiveModal = async function(interaction, select) {
+    const skill = interaction.fields.getTextInputValue("skill_input");
+    const userId = interaction.user.id;
+    var ret;
+
+    if(select == true)
+        ret = await exports.selectActiveSkill(userId, skill);
+    else
+        ret = await exports.unselectActiveSkill(userId, skill);
+    
+    if(ret == true) {
+        const embed = await sendStringAllSkills(interaction.user.username, userId);
+        interaction.message.edit({embeds: embed.embeds, components: embed.components});
+        interaction.reply({content: "Skill successfully selected/unselected.", ephemeral: true});
+    } else {
+        interaction.reply({content: "This action doesn't seem right.", ephemeral: true});
     }
 }
+
+exports.sendStringAllSkills = sendStringAllSkills;
+exports.getStringActiveSkill = getStringActiveSkill;
+
