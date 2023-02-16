@@ -3,36 +3,26 @@ const { EmbedBuilder, ButtonBuilder, ButtonStyle, MessageActionRow, MessageSelec
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 const databaseUtils = require('../utils/databaseUtils.js');
 const messageCreate = require('../events/messageCreate.js');
+const locationData = require('../data/location.json');
+const zonesData = require('../data/zones.json');
 
 // Player data management
 
 exports.generateSelector = async function(message) {
+	list = [];
+	for(var i = 0; i < Object.keys(classData).length; i++) {
+		list.push({
+			label: classData[Object.keys(classData)[i]].name.toString(),
+			value: Object.keys(classData)[i].toString(),
+		});
+	}
 	const row = new ActionRowBuilder()
 		.addComponents(
 			new StringSelectMenuBuilder()
 				.setCustomId('classChoice-' + message.author.id)
 				.setPlaceholder('Nothing selected')
 					.addOptions(
-					{
-						label: 'Warrior',
-						value: 'warrior',
-					},
-					{
-						label: 'Assassin',
-						value: 'assassin',
-					},
-					{
-						label: 'Mage',
-						value: 'magician',
-					},
-					{
-						label: 'Ranger',
-						value: 'ranger',
-					},
-					{
-						label: 'Healer',
-						value: 'healer',
-					},
+					list
 				),
 		);
 

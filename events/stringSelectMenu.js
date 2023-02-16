@@ -2,6 +2,7 @@ const player = require('../utils/playerUtils.js');
 const inv = require('../utils/inventoryUtils.js');
 const { EmbedBuilder } = require('discord.js');
 const combat = require('../utils/combatUtils.js');
+const zoneData = require('../data/zones.json');
 
 module.exports = {
     name: 'interactionCreate',
@@ -51,6 +52,26 @@ module.exports = {
                 .setThumbnail(interaction.user.displayAvatarURL());
             
                 await interaction.channel.send({embeds: [displayEmbed]});
+
+            case 'locationChoice':
+                if(args[0] != interaction.user.id) {
+                    interaction.channel.send("If you would like to move your own character, please use the t.move commande yourself ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                await interaction.message.delete();
+
+                db.setLocation(interaction.user.id, interaction.values[0]);
+
+                const displayEmbed2 = new EmbedBuilder()
+                .setColor(0x0099FF)
+                .setTitle(':crossed_swords: Tu as changé de lieu ! :crossed_swords:')
+                .addFields(
+                    { name: 'Tu es maintenant dans :', value: zoneData[interaction.values[0]].name }
+                )
+                .setThumbnail(interaction.user.displayAvatarURL());
+
+                await interaction.channel.send({embeds: [displayEmbed2]});
             default:
                 return;
         }   
