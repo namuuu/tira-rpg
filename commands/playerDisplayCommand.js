@@ -2,7 +2,8 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} = require('d
 const player = require('../utils/playerUtils.js');
 const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 const skillsData = require('../data/skills.json');
-const itemData = require('../data/items.json');
+const { getInventoryString } = require('../utils/inventoryUtils.js');
+const { getStringActiveSkill } = require('../utils/skillUtils.js');
 
 module.exports = {
     name: "display",
@@ -35,36 +36,11 @@ module.exports = {
         // Health percentage
         var percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
 
-        // console.log(playerInventory.items);
-
         // Inventory display
-        var inventoryDisplay = "";
-        try {
-            for(const [key, value] of Object.entries(playerInventory.items)) {
-                inventoryDisplay += `${itemData[key].name} (x${value.quantity})\n`;
-            }
-        } catch(err) {
-            console.log(err);
-        }
-        if(inventoryDisplay == "") {
-            inventoryDisplay = "Vide";
-        }
-        //console.log(inventoryDisplay);
+        var inventoryDisplay = getInventoryString(playerInventory.items);
 
         // Skills display
-        var skillsDisplay = "";
-        try {
-            if(playerInventory.activeSkills != undefined || playerInventory.activeSkills != null){
-                for(const skill of playerInventory.activeSkills) {
-                    skillsDisplay += `# ${skillsData[skill].number} - ${skillsData[skill].name}\n`;
-                }
-            }
-        } catch(err) {
-            console.log(err);
-        }
-        if(skillsDisplay == "") {
-            skillsDisplay = "Vide";
-        }
+        var skillsDisplay = getStringActiveSkill(playerInventory.activeSkills);
 
         //console.log(skillsDisplay);
 
