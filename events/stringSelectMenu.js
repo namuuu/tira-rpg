@@ -61,7 +61,7 @@ module.exports = {
 
                 await interaction.message.delete();
 
-                db.setLocation(interaction.user.id, interaction.values[0]);
+                player.setLocation(interaction.user.id, interaction.values[0]);
 
                 const displayEmbed2 = new EmbedBuilder()
                 .setColor(0x0099FF)
