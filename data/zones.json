@@ -22,9 +22,9 @@
         "name": "Forgotten Temple",
         "description": "TEMPLE RUN",
         "required": {
-            "level": "20",
+            "level": "",
             "quests": "",
-            "items": ""
+            "items": ["key"]    
         },
         "monsters": {
             "group1": {
