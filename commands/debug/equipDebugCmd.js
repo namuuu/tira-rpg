@@ -21,6 +21,16 @@ module.exports = {
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
+            case "obtain":
+                break;
+            case "trash":
+                break;
+            case "equip":
+                break;
+            case "unequip":
+                break;
+            case "info":
+                break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");
                 break;
