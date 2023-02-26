@@ -125,15 +125,15 @@ exports.selectActiveSkill = async function(user_id, skill_id) {
     
     if(!inventory.skills.includes(skill_id)) {
         console.error("[DEBUG] Skill " + skill_id + " hasn't been learned by user " + user_id + ". (ACTIVE_SKILL_NOT_LEARNED)");
-        return false;
+        return "not_learned";
     }
     if(inventory.activeSkills.length > 4) {
         console.error("[DEBUG] 4 Active Skills already used by user " + user_id + ". (ACTIVE_SKILL_MAX_SIZE)");
-        return false;
+        return "max_size";
     }
     if(inventory.activeSkills.includes(skill_id)) {
         console.error("[DEBUG] Skill " + skill_id + " already selected active by " + user_id + ". (ACTIVE_SKILL_ALREADY_ACTIVE)");
-        return false;
+        return "already_active";
     }
 
     const newItems = inventory.activeSkills.concat(skill_id);
@@ -156,7 +156,7 @@ exports.unselectActiveSkill = async function(user_id, skill_id) {
 
     if(!inventory.skills.includes(skill_id)) {
         console.error("[DEBUG] Skill " + skill_id + " hasn't been selected by user " + user_id + ". (ACTIVE_SKILL_NOT_ACTIVE)");
-        return false;
+        return "not_selected";
     }
     
     const newItems = [...(inventory.skills)];
@@ -274,9 +274,28 @@ exports.receiveModal = async function(interaction, select) {
     if(ret == true) {
         //async function typeSkills(embed, playerId, playername)
         inv.display(interaction.user, interaction, "skills", false);
-        interaction.reply({content: "Skill successfully selected/unselected.", ephemeral: true});
+        if(select)
+            interaction.reply({content: "Skill " + skill + " successfully selected.", ephemeral: true});
+        else
+            interaction.reply({content: "Skill " + skill + " successfully unselected.", ephemeral: true});
     } else {
-        interaction.reply({content: "This action doesn't seem right.", ephemeral: true});
+        console.log(ret);
+        switch(ret) {
+            case "not_learned":
+                interaction.reply({content: "You haven't learned this skill yet!", ephemeral: true});
+                break;
+            case "max_size":
+                interaction.reply({content: "You have already selected 4 skills!", ephemeral: true});
+                break;
+            case "already_active":
+                interaction.reply({content: "This skill is already active!", ephemeral: true});
+                break;
+            case "not_selected":
+                interaction.reply({content: "This skill is not currently active!", ephemeral: true});
+                break;
+            default:
+                interaction.reply({content: "This action doesn't seem right.", ephemeral: true});
+        }
     }
 }
 
