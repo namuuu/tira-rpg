@@ -23,6 +23,10 @@ module.exports = {
                 if(!(await player.doesExists(user.id))) return;
                 inv.displayInventory(authorId, interaction);
                 break;
+            case 'inventory_selector':
+                if(!(await player.doesExists(user.id)) || user.id != args[0]) return;
+                inv.display(user, interaction, interaction.values[0], true);
+                break;
             case 'combat_skill_selector':
                 if(!(await player.doesExists(user.id))) return;
                 combat.receiveSkillSelector(interaction);

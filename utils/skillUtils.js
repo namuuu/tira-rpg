@@ -3,6 +3,7 @@ const skills = require("../data/skills.json");
 const fs = require('fs');
 const { Client, ActionRowBuilder, ButtonBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const player = require('../utils/playerUtils.js');
+const inv = require("./inventoryUtils.js");
 
 
 exports.execute = function(exeData) {
@@ -231,8 +232,6 @@ function sendButtonChangeSkill(userId, skillEnable, activeSkillEnable) {
 }
 
 exports.sendModal = function(interaction, select, userId) {
-    console.log(userId + " " + interaction.user.id);
-
     if(interaction.user.id != userId) {
         interaction.reply({content: "This is not your inventory! If you need to, type `t.display`.", ephemeral: true});
         return;
@@ -273,8 +272,8 @@ exports.receiveModal = async function(interaction, select) {
         ret = await exports.unselectActiveSkill(userId, skill);
     
     if(ret == true) {
-        const embed = await sendStringAllSkills(interaction.user.username, userId);
-        interaction.message.edit({embeds: embed.embeds, components: embed.components});
+        //async function typeSkills(embed, playerId, playername)
+        inv.display(interaction.user, interaction, "skills", false);
         interaction.reply({content: "Skill successfully selected/unselected.", ephemeral: true});
     } else {
         interaction.reply({content: "This action doesn't seem right.", ephemeral: true});

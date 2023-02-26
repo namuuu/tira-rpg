@@ -1,5 +1,8 @@
-const { Client, EmbedBuilder } = require('discord.js');
+const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const fs = require('fs');
+const player = require('../utils/playerUtils.js');
+const { calculateExpToNextLevel } = require('../utils/rpgInfoUtils.js');
+const skill = require('./skillUtils.js');
 
 exports.getInventoryString = function(inventory) {
     let rawdata = fs.readFileSync('./data/items.json');
@@ -57,35 +60,178 @@ exports.giveItem = async function(playerId, item, quantity) {
     console.group("[DEBUG] Item " + item + " given to player " + playerId);
 }
 
-exports.displayInventory = async function(playerId, interaction) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
+exports.display = async function(player, interaction, type, ack) {
+    let embed = new EmbedBuilder();
+    const playerId = player.id;
 
-    // Querying the inventory in the database
-    const inventory = await playerCollection.findOne(
-        {name: "inventory"}, 
-        {projection: {_id: 0, skills: 0, activeSkills: 0}}
+    embed.setAuthor({name: "Inventory of " + player.username, iconUrl: interaction.user.avatarURL});
+
+    const componentList = [];
+
+    const row = new ActionRowBuilder();
+    row.addComponents(addSlider(playerId));
+    componentList.push(row);
+    const buttons = new ActionRowBuilder();
+
+    switch(type) {
+        case "items":
+            embed = (await typeItems(embed, playerId)).embed;
+            break;
+        case "skills":
+            ret = (await typeSkills(embed, playerId, player.username));
+            embed = ret.embeds;
+            buttons.addComponents(ret.components);
+            break;
+        case "stats":
+            embed = (await typeStats(embed, playerId)).embed;
+            break;
+        default:
+            embed = (await typeMain(embed, playerId)).embed;
+            break;
+    }
+
+    try {
+        if(buttons.components.length > 0)
+            componentList.push(buttons);
+
+        //console.log(buttons);
+
+        interaction.message.edit({ embeds: [embed], components: componentList});
+        if(ack)
+            interaction.deferUpdate();
+    } catch(err) {
+        console.log(err);
+    }
+    
+}
+
+exports.typeMain = typeMain;
+async function typeMain(embed, playerId) {
+    const playerInfo = await player.getData(playerId, "info");
+    const playerStats = await player.getData(playerId, "stats");
+
+     // Experience progress bar
+     var expBar = "";
+     var expToNextLevel = calculateExpToNextLevel(playerInfo.level);
+     var expBarLength = Math.floor((playerInfo.exp / expToNextLevel) * 10);
+     for(var i = 0; i < expBarLength; i++) {
+         expBar += "▰";
+     }
+     for(var i = expBarLength; i < 10; i++) {
+         expBar += "▱";
+     }
+
+    const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
+
+    embed.addFields(
+        { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
+        { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
+        { name: 'Money', value: 'Not implemented yet', inline: true}
     );
+
+    return {embed: embed};
+}
+
+exports.typeItems = typeItems;
+async function typeItems(embed, playerId) {
+    inventory = await player.getData(playerId, "inventory");
 
     // Reading the items
     let rawdata = fs.readFileSync('./data/items.json');
     let items = JSON.parse(rawdata);
     console.log(items);
 
-    // Creating the embed
-    const embed = new EmbedBuilder()
-        .setTitle("Inventory")
-        .setColor(0x00FF00)
-        .setFooter({text: "Inventory of " + playerId});
-
     let description = "";
 
     for (const [key, value] of Object.entries(inventory.items)) {
-        description += `${items[key].name} (x${value.quantity})\n`;
+        description += `${items[key].name} (x${value.quantity}),`;
     }
+
+    description = description.slice(0, -1);
 
     embed.setDescription(description);
 
-    // Sending the embed
-    interaction.reply({ embeds: [embed], ephemeral: true });
-    //interaction.reply("Not implemented yet.");
+    return {embed: embed};
+} 
+
+exports.typeStats = typeStats;
+async function typeStats(embed, playerId) {
+    playerStats = await player.getData(playerId, "stats");
+
+    embed.addFields(
+        {name: "Vitality", value: playerStats.vitality, inline: true},
+        {name: "Strength", value: playerStats.strength, inline: true},
+        {name: "Resistance", value: playerStats.resistance, inline: true},
+        {name: "Dexterity", value: playerStats.dexterity, inline: true},
+        {name: "Agility", value: playerStats.agility, inline: true},
+        {name: "Intelligence", value: playerStats.intelligence, inline: true},
+    );
+
+    return {embed: embed};
+}
+
+exports.typeSkills = typeSkills;
+async function typeSkills(embed, playerId, playername) {
+    const playerData = await player.getData(playerId, "inventory");
+    const skills = playerData.skills;
+    const activeSkills = playerData.activeSkills;
+
+    var data = JSON.parse(fs.readFileSync('./data/skills.json'));
+
+    embed
+        .setTitle(`${playername}'s Skills`)
+        .setFooter({text: 'Need to get more info about a specific skill ? Type t.skill <number>'})
+
+    try {
+        embed.setDescription(skills.length != 0 ? skills.map(skill => `# ${data[skill].number} - ${data[skill].name}`).join(", ") : "No skills learned.");
+    } catch (error) {
+        embed.setDescription("No skills learned. (There may be an error!)");
+        console.error(error);
+    }
+
+    try {
+        embed.addFields({name: "Active Skills", value: skill.getStringActiveSkill(activeSkills)});
+    } catch (error) {
+        console.error(error);
+        embed.addFields({name: "Active Skills", value: "No active skills selected. (There may be an error!)"});
+    }
+
+    return {embeds: embed, components: sendButtonChangeSkill(playerId, skills.length != 0, activeSkills.length != 0)};
+}
+
+function sendButtonChangeSkill(userId, skillEnable, activeSkillEnable) {
+    const components = [];
+    components.push(
+        new ButtonBuilder()
+            .setCustomId("select_skill-" + userId)
+            .setLabel("Select Skill")
+            .setStyle("Secondary")
+            .setDisabled(!skillEnable)
+    )
+    components.push(
+        new ButtonBuilder()
+            .setCustomId("unselect_skill-" + userId)
+            .setLabel("Unselect Skill")
+            .setStyle("Secondary")
+            .setDisabled(!activeSkillEnable),
+    );
+
+    return components;
+}
+
+exports.addSlider = addSlider;
+function addSlider(playerId) {    
+    const invSelector = new StringSelectMenuBuilder()
+        .setCustomId('inventory_selector-' + playerId)
+        .setPlaceholder('Nothing selected')
+            .addOptions(
+                [
+                    {label: "Main", value: "main", description: "Display your main stats!"},
+                    {label: "Items", value: "items", description: "Display every item you own!"},
+                    {label: "Skills", value: "skills", description: "Manage your skills!"},
+                    {label: "Stats", value: "stats", description: "Get a view of your stats!"},
+                ]
+        )
+
+    return invSelector;
 }
