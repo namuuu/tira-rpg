@@ -158,13 +158,15 @@ exports.typeStats = typeStats;
 async function typeStats(embed, playerId) {
     playerStats = await player.getData(playerId, "stats");
 
+    console.log(playerStats);
+
     embed.addFields(
-        {name: "Vitality", value: playerStats.vitality, inline: true},
-        {name: "Strength", value: playerStats.strength, inline: true},
-        {name: "Resistance", value: playerStats.resistance, inline: true},
-        {name: "Dexterity", value: playerStats.dexterity, inline: true},
-        {name: "Agility", value: playerStats.agility, inline: true},
-        {name: "Intelligence", value: playerStats.intelligence, inline: true},
+        {name: "Vitality", value: playerStats.vitality + " ", inline: true},
+        {name: "Strength", value: playerStats.strength + " ", inline: true},
+        {name: "Resistance", value: playerStats.resistance + " ", inline: true},
+        {name: "Dexterity", value: playerStats.dexterity + " ", inline: true},
+        {name: "Agility", value: playerStats.agility + " ", inline: true},
+        {name: "Intelligence", value: playerStats.intelligence + " ", inline: true},
     );
 
     return {embed: embed};
