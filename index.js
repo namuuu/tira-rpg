@@ -21,6 +21,9 @@ setupEvents(client);
 const { setupSkills } = require('./setup/skillSetup.js');
 setupSkills(client);
 
+const { setupCaracteristics } = require('./setup/caracteristicsSetup.js');
+setupCaracteristics(client);
+
 // Setup mongo
 Client.mongoDB = new MongoClient(process.env.MONGO_URI);
 

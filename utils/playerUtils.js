@@ -17,12 +17,21 @@ exports.doesExists = async function(id) {
     return find.length > 0;
 }
 
-exports.create = async function(id) {
+exports.create = async function(id, className) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
+    const classData = classes[className];
+
     const data = [
-        { name: "info", class: "noclass", level: 0, exp: 0, health: 10 },
-        { name: "stats", strength: 0, vitality: 10, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
+        { name: "info", class: className, level: 0, exp: 0, health: classData.base_stats.vitality, location: "tutorial" },
+        { name: "stats", 
+            strength: classData.base_stats.strength,
+            vitality: classData.base_stats.vitality, 
+            resistance: classData.base_stats.resistance, 
+            dexterity: classData.base_stats.dexterity,
+            agility: classData.base_stats.agility,
+            intelligence: classData.base_stats.intelligence,
+        },
         { name: "inventory", items: [], skills: [] , activeSkills: []},
         { name: "misc", lastRegen: Date.now(), party: { owner: id, members: [] }},
     ]
@@ -160,30 +169,6 @@ exports.exp.getLevelRewards = async function(id, level, channel) {
     channel.send("Vous avez atteint le niveau " + level + " !");
 }
 
-
-exports.setClass = async function(id, className) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(id);
-
-    const query = { name: "info" };
-    let options = { 
-        projection: {_id: 0},
-    };
-
-    const info = await playerCollection.findOne(query, options);
-
-    // if(info.class != "noclass") {
-    //     return false;
-    // }
-
-    const update = { $set: { class: className } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
-
-    this.updateStats(id, className);
-
-    return true;
-}
-
 exports.updateStats = async function(id, className) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
@@ -195,8 +180,6 @@ exports.updateStats = async function(id, className) {
     const dexterity = classes[className].base_stats.dexterity;
     const agility = classes[className].base_stats.agility;
     const intelligence = classes[className].base_stats.intelligence;
-
-    console.log(strength);
 
     const query = { name : "stats"};
     const update = { $set: { strength: strength,

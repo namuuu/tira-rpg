@@ -43,9 +43,7 @@ module.exports = {
 
                 await interaction.message.delete();
 
-                player.create(interaction.user.id);
-
-                player.setClass(interaction.user.id, interaction.values[0]);
+                player.create(interaction.user.id, interaction.values[0]);
 
                 const displayEmbed = new EmbedBuilder()
                 .setColor(0x0099FF)
@@ -56,7 +54,7 @@ module.exports = {
                 .setThumbnail(interaction.user.displayAvatarURL());
             
                 await interaction.channel.send({embeds: [displayEmbed]});
-
+                    break;
             case 'locationChoice':
                 if(args[0] != interaction.user.id) {
                     interaction.channel.send("If you would like to move your own character, please use the t.move commande yourself ! " + "<@" + interaction.user.id + ">");
@@ -76,6 +74,7 @@ module.exports = {
                 .setThumbnail(interaction.user.displayAvatarURL());
 
                 await interaction.channel.send({embeds: [displayEmbed2]});
+                break;
             default:
                 return;
         }   
