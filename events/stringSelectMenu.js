@@ -1,5 +1,7 @@
 const player = require('../utils/playerUtils.js');
 const inv = require('../utils/inventoryUtils.js');
+const selector = require('../utils/messageTemplateUtils.js');
+const inventory = require('../utils/inventoryUtils.js');
 const { EmbedBuilder } = require('discord.js');
 const combat = require('../utils/combatUtils.js');
 const zoneData = require('../data/zones.json');
@@ -56,6 +58,7 @@ module.exports = {
                 .setThumbnail(interaction.user.displayAvatarURL());
             
                 await interaction.channel.send({embeds: [displayEmbed]});
+                break;
 
             case 'locationChoice':
                 if(args[0] != interaction.user.id) {
@@ -76,8 +79,33 @@ module.exports = {
                 .setThumbnail(interaction.user.displayAvatarURL());
 
                 await interaction.channel.send({embeds: [displayEmbed2]});
+                break;
+
+            case 'shopChoice':
+                if(args[0] != interaction.user.id) {
+                    interaction.channel.send("If you would like to shop with your own character, please use the t.shop commande yourself ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                await interaction.message.delete();
+
+                selector.generateShopItemSelector(interaction, interaction.values[0]);
+
+                break;
+            case 'shopItemChoice':
+
+                if(args[0] != interaction.user.id) {
+                    interaction.channel.send("If you would like to shop with your own character, please use the t.shop commande yourself ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                inventory.giveItem(interaction.user.id, interaction.values[0], 1);
+
+                break;
             default:
                 return;
+
+            
         }   
     }
 }
