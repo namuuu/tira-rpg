@@ -1,10 +1,14 @@
+const fs = require('fs');
 const weapons = new Map();
 const helmets = new Map();
 const chestplates = new Map();
 const boots = new Map();
 
 module.exports = {
-  map: weapons,
+  weapons: weapons,
+  helmets: helmets,
+  chestplates: chestplates,
+  boots: boots,
   setupEquipment() {
     console.log('\u001b[' + 32 + 'm' + "-- EQUIPMENT --"+ '\u001b[0m');
     console.log("Setting up Caracteristics...");
@@ -20,7 +24,9 @@ module.exports = {
 
 function set(json, map) {
     var data = JSON.parse(fs.readFileSync(`./data/equipment/${json}.json`));
-    for (var i = 0; i < data.length; i++) {
-        map.set(data[i].id, data[i]);
+    data = Object.entries(data);
+
+    for( var [key, value] of data) {
+        map.set(key, value);
     }
 }

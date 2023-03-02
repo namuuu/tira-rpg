@@ -216,25 +216,25 @@ async function typeEquipment(embed, playerId) {
     if(equipment.weapon == null) {
         embed.addFields({name: "Weapon", value: "No weapon equiped."});
     } else {
-        embed.addFields({name: "Weapon", value: equiped.weapon.name});
+        embed.addFields({name: "Weapon", value: equipment.weapon.name});
     }
 
     if(equipment.helmet == null) {
         embed.addFields({name: "Helmet", value: "No helmet equiped."});
     } else {
-        embed.addFields({name: "Helmet", value: equiped.helmet.name});
+        embed.addFields({name: "Helmet", value: equipment.helmet.name});
     }
 
     if(equipment.chestplate == null) {
         embed.addFields({name: "Chestplate", value: "No chestplate equiped."});
     } else {
-        embed.addFields({name: "Chestplate", value: equiped.chestplate.name});
+        embed.addFields({name: "Chestplate", value: equipment.chestplate.name});
     }
 
     if(equipment.boots == null) {
         embed.addFields({name: "Boots", value: "No boots equiped."});
     } else {
-        embed.addFields({name: "Boots", value: equiped.boots.name});
+        embed.addFields({name: "Boots", value: equipment.boots.name});
     }
 
     return {embed: embed};

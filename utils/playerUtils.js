@@ -32,7 +32,7 @@ exports.create = async function(id, className) {
             agility: classData.base_stats.agility,
             intelligence: classData.base_stats.intelligence,
         },
-        { name: "inventory", items: [], skills: [] , activeSkills: [], equiped: {
+        { name: "inventory", items: [], equipItems: [], skills: [] , activeSkills: [], equiped: {
             weapon: null,
             helmet: null,
             chestplate: null,

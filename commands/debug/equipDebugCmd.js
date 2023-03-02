@@ -1,5 +1,4 @@
-const player = require('../../utils/playerUtils.js');
-const skill = require('../../utils/skillUtils.js');
+const equip = require('../../utils/equipUtils.js'); 
 
 module.exports = {
   name: "debug-equip",
@@ -14,20 +13,31 @@ module.exports = {
 
     // Setting up useful data
     const authorId = message.author.id;
-    let query = 10;
-    if(args.length >= 2)
-        query = parseInt(args[1]);
 
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
             case "obtain":
+            case "obtainw":
+                equip.obtain(authorId, args[1], "weapon");
+                break;
+            case "obtainh":
+                equip.obtain(authorId, args[1], "helmet");
+                break;
+            case "obtainc":
+                equip.obtain(authorId, args[1], "chestplate");
+                break;
+            case "obtainb":
+                equip.obtain(authorId, args[1], "boots");
                 break;
             case "trash":
+                equip.trash(authorId, args[1], args[2]);
                 break;
             case "equip":
+                equip.equip(authorId, args[1], args[2]);
                 break;
             case "unequip":
+                equip.unequip(authorId, args[1]);
                 break;
             case "info":
                 break;

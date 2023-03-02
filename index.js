@@ -21,6 +21,9 @@ setupEvents(client);
 const { setupSkills } = require('./setup/skillSetup.js');
 setupSkills(client);
 
+const { setupEquipment } = require('./setup/equipSetup.js');
+setupEquipment(client);
+
 const { setupCaracteristics } = require('./setup/caracteristicsSetup.js');
 setupCaracteristics(client);
 
