@@ -85,6 +85,9 @@ exports.display = async function(player, interaction, type, ack) {
         case "stats":
             embed = (await typeStats(embed, playerId)).embed;
             break;
+        case "equipment":
+            embed = (await typeEquipment(embed, playerId)).embed;
+            break;
         default:
             embed = (await typeMain(embed, playerId)).embed;
             break;
@@ -136,10 +139,14 @@ exports.typeItems = typeItems;
 async function typeItems(embed, playerId) {
     inventory = await player.getData(playerId, "inventory");
 
+    if(Object.keys(inventory.items).length == 0) {
+        embed.setDescription("You don't have any item in your inventory.");
+        return {embed: embed};
+    }
+
     // Reading the items
     let rawdata = fs.readFileSync('./data/items.json');
     let items = JSON.parse(rawdata);
-    console.log(items);
 
     let description = "";
 
@@ -201,6 +208,38 @@ async function typeSkills(embed, playerId, playername) {
     return {embeds: embed, components: sendButtonChangeSkill(playerId, skills.length != 0, activeSkills.length != 0)};
 }
 
+exports.typeEquipment = typeEquipment;
+async function typeEquipment(embed, playerId) {
+    const playerData = await player.getData(playerId, "inventory");
+    const equipment = playerData.equiped;
+
+    if(equipment.weapon == null) {
+        embed.addFields({name: "Weapon", value: "No weapon equiped."});
+    } else {
+        embed.addFields({name: "Weapon", value: equiped.weapon.name});
+    }
+
+    if(equipment.helmet == null) {
+        embed.addFields({name: "Helmet", value: "No helmet equiped."});
+    } else {
+        embed.addFields({name: "Helmet", value: equiped.helmet.name});
+    }
+
+    if(equipment.chestplate == null) {
+        embed.addFields({name: "Chestplate", value: "No chestplate equiped."});
+    } else {
+        embed.addFields({name: "Chestplate", value: equiped.chestplate.name});
+    }
+
+    if(equipment.boots == null) {
+        embed.addFields({name: "Boots", value: "No boots equiped."});
+    } else {
+        embed.addFields({name: "Boots", value: equiped.boots.name});
+    }
+
+    return {embed: embed};
+}
+
 function sendButtonChangeSkill(userId, skillEnable, activeSkillEnable) {
     const components = [];
     components.push(
@@ -232,6 +271,7 @@ function addSlider(playerId) {
                     {label: "Items", value: "items", description: "Display every item you own!"},
                     {label: "Skills", value: "skills", description: "Manage your skills!"},
                     {label: "Stats", value: "stats", description: "Get a view of your stats!"},
+                    {label: "Equipment", value: "equipment", description: "Showcase your stuff!"},
                 ]
         )
 
