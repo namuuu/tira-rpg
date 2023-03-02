@@ -5,6 +5,7 @@ const player = require('../utils/playerUtils.js');
 const messageCreate = require('../events/messageCreate.js');
 const locationData = require('../data/location.json');
 const zonesData = require('../data/zones.json');
+const shopsData = require('../data/shops.json');
 
 // Player data management
 
@@ -115,4 +116,62 @@ exports.generateLocationSelector = async function(message) {
 		);
 
 	return message.reply({content: 'Choose the location where you want to go !', components: [row] });
+}
+
+exports.generateShopSelector = async function(message) {
+	list = [];
+	const currentLocation = await player.getData(message.author.id, "info");
+	for(var i = 0; i < Object.keys(shopsData).length; i++) {
+
+		//zone verification
+		var isOkay = false;
+		for (var j = 0; j < zonesData[currentLocation.location].shops.length; j++) {
+			if (zonesData[currentLocation.location].shops[i] == Object.keys(shopsData)[i]) {
+				isOkay = true;
+			}
+		}
+
+		if (!isOkay)
+			continue;
+
+
+		list.push({
+			label: shopsData[Object.keys(shopsData)[i]].name.toString(),
+			value: Object.keys(shopsData)[i].toString(),
+		});
+	}
+
+	const row = new ActionRowBuilder()
+		.addComponents(
+			new StringSelectMenuBuilder()
+				.setCustomId('shopChoice-' + message.author.id)
+				.setPlaceholder('Nothing selected')
+					.addOptions(
+					list
+				),
+		);
+
+	return message.reply({content: 'Choose the shop you want to visit !', components: [row] });
+}
+
+exports.generateShopItemsSelector = async function(message, shop) {
+	list = [];
+	for(var i = 0; i < shopsData[shop].items.length; i++) {
+		list.push({
+			label: shopsData[shop].items[i].name.toString() + ' - ' + shopsData[shop].items[i].cost.toString() + ' coins',
+			value: shopsData[shop].items[i].id.toString(),
+		});
+	}
+
+	const row = new ActionRowBuilder()
+		.addComponents(
+			new StringSelectMenuBuilder()
+				.setCustomId('shopItemChoice-' + message.author.id)
+				.setPlaceholder('Nothing selected')
+					.addOptions(
+					list
+				),
+		);
+
+	return message.reply({content: 'Choose the item you want to buy !', components: [row] });
 }

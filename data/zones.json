@@ -16,7 +16,8 @@
                 "m-names": ["slime", "wolf"],
                 "spawn-chance": "50"
             }
-        }
+        },
+        "shops": ["main_shop1", "main_shop2"]
     },
     "temple": {
         "name": "Forgotten Temple",
@@ -36,5 +37,6 @@
                 "spawn-chance": "50"
             }
         }
-    }
+    },
+    "shops": ["main_shop2"]
 }
