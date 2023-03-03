@@ -119,10 +119,15 @@ exports.equip = async function(playerId, equipId, type) {
 
     const equip = inv.equipItems.filter(item => item.id == equipId)[0];
 
+    
+    if(equip == null) {
+        console.log("ERROR: Tried to equip an item that the user doesn't possess.");
+        return false;
+    }
     if(type == undefined)
         type = equip.type;
-    if(equip == null || equip.type != type) {
-        console.log("ERROR: Tried to equip an item that the user doesn't possess.");
+    if(equip.type != type) {
+        console.log("ERROR: Tried to equip an item that doesn't match the type.");
         return false;
     }
 
