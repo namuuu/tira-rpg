@@ -4,12 +4,12 @@ const messageUtils = require('../utils/messageTemplateUtils.js');
 const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
-    name: "move",
+    name: "shop",
     description: "",
     requireCharacter: true,
     execute(message, args) {
 
-            messageUtils.generateLocationSelector(message);
+            messageUtils.generateShopSelector(message);
         
             return;
     }

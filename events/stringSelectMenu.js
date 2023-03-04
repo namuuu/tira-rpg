@@ -1,5 +1,6 @@
 const player = require('../utils/playerUtils.js');
 const inv = require('../utils/inventoryUtils.js');
+const selector = require('../utils/messageTemplateUtils.js');
 const { EmbedBuilder } = require('discord.js');
 const combat = require('../utils/combatUtils.js');
 const zoneData = require('../data/zones.json');
@@ -56,6 +57,7 @@ module.exports = {
                 .setThumbnail(interaction.user.displayAvatarURL());
             
                 await interaction.channel.send({embeds: [displayEmbed]});
+                break;
 
             case 'locationChoice':
                 if(args[0] != interaction.user.id) {
@@ -76,8 +78,59 @@ module.exports = {
                 .setThumbnail(interaction.user.displayAvatarURL());
 
                 await interaction.channel.send({embeds: [displayEmbed2]});
+                break;
+
+            case 'shopChoice':
+                if(args[0] != interaction.user.id) {
+                    interaction.channel.send("If you would like to shop with your own character, please use the t.shop commande yourself ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                selector.generateShopItemsSelector(interaction, interaction.values[0], "0", "0");
+
+                await interaction.message.delete();
+
+                break;
+            case 'shopItemChoice':
+                if(args[0] != interaction.user.id) {
+                    interaction.channel.send("If you would like to shop with your own character, please use the t.shop commande yourself ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                if (interaction.message.components[2] == undefined) {
+                    var quantity = interaction.message.components[1].components[0].customId.split('-')[4];
+                    var shop = interaction.message.components[1].components[0].customId.split('-')[2];
+                } else {
+                    var quantity = interaction.message.components[2].components[0].customId.split('-')[4];
+                    var shop = interaction.message.components[2].components[0].customId.split('-')[2];
+                }
+
+                await interaction.message.delete();
+
+                selector.generateShopItemsSelector(interaction, shop, interaction.values[0], quantity);
+                break;
+            case 'shopAmountChoice':
+                if(args[0] != interaction.user.id) {
+                    interaction.channel.send("If you would like to shop with your own character, please use the t.shop commande yourself ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                if (interaction.message.components[2] == undefined) {
+                    var item = interaction.message.components[1].components[0].customId.split('-')[3];
+                    var shop = interaction.message.components[1].components[0].customId.split('-')[2];
+                } else {
+                    var item = interaction.message.components[2].components[0].customId.split('-')[3];
+                    var shop = interaction.message.components[2].components[0].customId.split('-')[2];
+                }
+
+                interaction.message.delete();
+
+                selector.generateShopItemsSelector(interaction, shop, item, interaction.values[0]);
+                break;
             default:
                 return;
+
+            
         }   
     }
 }
