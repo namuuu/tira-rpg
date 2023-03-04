@@ -21,7 +21,7 @@ exports.create = async function(id) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
     const data = [
-        { name: "info", class: "noclass", level: 0, exp: 0, health: 10 },
+        { name: "info", class: "noclass", level: 0, exp: 0, health: 10, location: "temple"},
         { name: "stats", strength: 0, vitality: 10, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
         { name: "inventory", items: [], skills: [] , activeSkills: []},
         { name: "misc", lastRegen: Date.now(), party: { owner: id, members: [] }},

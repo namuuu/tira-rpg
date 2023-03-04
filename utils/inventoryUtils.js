@@ -44,7 +44,10 @@ exports.giveItem = async function(playerId, item, quantity) {
     // If the item is already in the inventory, we add the quantity to the existing one
     // Else, we create a new entry for the item
     if(inventory.items[item] != undefined) {
-        inventory.items[item].quantity += quantity;
+        var int1 = parseInt(quantity);
+        var int2 = parseInt(inventory.items[item].quantity);
+        var int3 = int1 + int2;
+        inventory.items[item].quantity = int3;
     } else {
         inventory.items = {
             ...inventory.items,

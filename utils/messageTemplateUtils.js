@@ -6,6 +6,7 @@ const messageCreate = require('../events/messageCreate.js');
 const locationData = require('../data/location.json');
 const zonesData = require('../data/zones.json');
 const shopsData = require('../data/shops.json');
+const classData = require('../data/classes.json');
 
 // Player data management
 
@@ -125,15 +126,18 @@ exports.generateShopSelector = async function(message) {
 
 		//zone verification
 		var isOkay = false;
+		
 		for (var j = 0; j < zonesData[currentLocation.location].shops.length; j++) {
-			if (zonesData[currentLocation.location].shops[i] == Object.keys(shopsData)[i]) {
+			if (zonesData[currentLocation.location].shops[j] == Object.keys(shopsData)[i]) {
 				isOkay = true;
 			}
 		}
 
-		if (!isOkay)
+		if (!isOkay) {
 			continue;
-
+		}
+			
+		console.log('ok');
 
 		list.push({
 			label: shopsData[Object.keys(shopsData)[i]].name.toString(),
@@ -154,24 +158,126 @@ exports.generateShopSelector = async function(message) {
 	return message.reply({content: 'Choose the shop you want to visit !', components: [row] });
 }
 
-exports.generateShopItemsSelector = async function(message, shop) {
+exports.generateShopItemsSelector = async function(message, shop, item, quantity) {
 	list = [];
-	for(var i = 0; i < shopsData[shop].items.length; i++) {
+	for(var i = 0; i < Object.keys(shopsData[shop].items).length; i++) {
 		list.push({
-			label: shopsData[shop].items[i].name.toString() + ' - ' + shopsData[shop].items[i].cost.toString() + ' coins',
-			value: shopsData[shop].items[i].id.toString(),
+			label: shopsData[shop].items[Object.keys(shopsData[shop].items)[i]].name.toString() + ' - ' + shopsData[shop].items[Object.keys(shopsData[shop].items)[i]].cost.toString() + ' coins',
+			value: shopsData[shop].items[Object.keys(shopsData[shop].items)[i]].id.toString(),
 		});
 	}
 
+	var ShopEmbed = new EmbedBuilder()
+                .setColor(0x1be118)
+                .setTitle(shopsData[shop].name)
+
+	if(item != "0") {
+		var currentItem = shopsData[shop].items[item].name;
+
+		var ShopEmbed = new EmbedBuilder()
+				.setColor(0x1be118)
+				.setTitle(shopsData[shop].name)
+				.setDescription('You selected ' + currentItem + ' !');
+	}
+
+	if(quantity != "0") {
+		var currentQuantity = quantity;
+
+		var ShopEmbed = new EmbedBuilder()
+				.setColor(0x1be118)
+				.setTitle(shopsData[shop].name)
+				.setDescription('You selected to buy ' + currentQuantity + ' items !');
+	}
+
+	if(item != "0" && quantity != "0") {
+		var currentItem = shopsData[shop].items[item].name;
+		var currentQuantity = quantity;
+
+		var ShopEmbed = new EmbedBuilder()
+				.setColor(0x1be118)
+				.setTitle(shopsData[shop].name)
+				.setDescription('You selected ' + currentQuantity + ' ' + currentItem + ' !');
+	}
+	
 	const row = new ActionRowBuilder()
 		.addComponents(
 			new StringSelectMenuBuilder()
-				.setCustomId('shopItemChoice-' + message.author.id)
+				.setCustomId('shopItemChoice-' + message.user.id)
 				.setPlaceholder('Nothing selected')
 					.addOptions(
 					list
 				),
 		);
 
-	return message.reply({content: 'Choose the item you want to buy !', components: [row] });
+	const row2 = new ActionRowBuilder()
+		.addComponents(
+			new StringSelectMenuBuilder()
+				.setCustomId('shopAmountChoice-' + message.user.id)
+				.setPlaceholder('Nothing selected')
+					.addOptions(
+					[
+						{
+							label: '1',
+							value: '1',
+						},
+						{
+							label: '2',
+							value: '2',
+						},
+						{
+							label: '3',
+							value: '3',
+						},
+						{
+							label: '4',
+							value: '4',
+						},
+						{
+							label: '5',
+							value: '5',
+						},
+						{
+							label: '6',
+							value: '6',
+						},
+						{
+							label: '7',
+							value: '7',
+						},
+						{
+							label: '8',
+							value: '8',
+						},
+						{
+							label: '9',
+							value: '9',
+						},
+						{
+							label: '10',
+							value: '10',
+						},
+					]
+				),
+		);
+
+		const button = new ButtonBuilder()
+		.setCustomId('buyItem-' + message.user.id + '-' + shop + '-' + item + '-' + quantity)
+		.setLabel('Buy')
+		.setStyle(ButtonStyle.Success);
+
+		const buyButton = new ActionRowBuilder()
+		.addComponents(
+			button
+		);
+
+	if(item == "0" && quantity == "0") {
+	message.reply({content: 'Choose the item you want to buy !', embeds:[ShopEmbed], components: [row, row2, buyButton] });
+	} else if(item != "0" && quantity == "0") {
+	message.reply({content: 'Choose the item you want to buy !', embeds:[ShopEmbed], components: [row2, buyButton] });
+	} else if(item == "0" && quantity != "0") {
+	message.reply({content: 'Choose the item you want to buy !', embeds:[ShopEmbed], components: [row, buyButton] });
+	} else if(item != "0" && quantity != "0") {
+	message.reply({content: 'Choose the item you want to buy !', embeds:[ShopEmbed], components: [buyButton] });
+	}
+	return; 
 }
