@@ -326,9 +326,11 @@ exports.callForVictory = async function(combat, thread, victor) {
         case "wild-encounter":
             if(victor == 1) {
                 util.updateMainMessage(combat, await thread.fetchStarterMessage(), "victory");
+                util.rewardLoot(combat, thread);
             } else {
                 util.updateMainMessage(combat, await thread.fetchStarterMessage(), "defeat");
             }
+
             break;
         case "pvp":
             util.updateMainMessage(combat, await thread.fetchStarterMessage(), "end");
@@ -336,8 +338,7 @@ exports.callForVictory = async function(combat, thread, victor) {
     }
 
 
-    thread.send("The combat is over !").then((message) => {
-        message.react("🎉");
-        setTimeout(() => thread.setLocked(true), 5000);
-    });
+
+    await thread.send("The combat is over !")
+    await thread.setLocked(true);
 }

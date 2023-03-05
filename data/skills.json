@@ -54,5 +54,14 @@
     "effects": {
       "cooldown": 10
     }
+  },
+  "slash": {
+    "name": "Slash",
+    "number":"5",
+    "description": "A simple vertical slash, classic but reliable.",
+    "effects": {
+      "cooldown": 12,
+      "damage": 8
+    }
   }
 }

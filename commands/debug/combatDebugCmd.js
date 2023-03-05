@@ -12,6 +12,8 @@ module.exports = {
         return;
     }
 
+    const combatData = await combatUtil.getCombatCollection(message.channel.id);
+
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
@@ -25,9 +27,15 @@ module.exports = {
                 combatManager.addEntityToCombat(message.channel, "dummy");
                 break;
             case "loop":
-                const combatData = combatUtil.getCombatCollection(message.channel.id);
+                
                 if(combatData != null)
                     combatManager.combatLoop(message.channel, combatData);
+                break;
+            case "reward":
+                if(combatData != null && combatData != undefined)
+                    combatUtil.rewardLoot(combatData, message.channel);
+                else
+                    message.reply("No combat data found.");
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");

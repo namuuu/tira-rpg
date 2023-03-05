@@ -106,7 +106,7 @@
     },
     "bird": {
         "name": "Bird",
-        "exp": 2,
+        "exp": 40,
         "base_stats": {
             "strength": 3,
             "vitality": 3,

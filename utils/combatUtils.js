@@ -1,5 +1,6 @@
 const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const embedUtils = require('../utils/messageTemplateUtils.js');
+const player = require('../utils/playerUtils.js');
+const inventory =  require('../utils/inventoryUtils.js');
 const manager = require('../manager/combatManager.js');
 const skillUtil = require('../utils/skillUtils.js');
 const skillList = require('../data/skills.json');
@@ -185,6 +186,7 @@ exports.sendTargetSelector = async function(combat, player, thread) {
     let i = 0;
 
     for (const enemy of enemyTeam) {
+        if(enemy.health <= 0) continue;
         stringSelectOptions.push({
             label: enemy.id,
             value: enemy.id,
@@ -323,9 +325,9 @@ exports.getSoonestTimelineEntity = function(combatInfo) {
  * @returns the fastest player. or the player who exists if one is not defined.
  */
 exports.compareTimelines = function(player1, player2) {
-    if (player1 == null || player1 == undefined)
+    if (player1 == null || player1 == undefined || player1.health <= 0)
         return player2;
-    if (player2 == null || player2 == undefined)
+    if (player2 == null || player2 == undefined || player2.health <= 0)
         return player1;
 
     if (player1.timeline < player2.timeline)
@@ -380,7 +382,7 @@ exports.createMonsterData = function(combat, monster) {
     let i = 0;
     if(this.getPlayerInCombat(monster, combat) != null) {
         i++;
-        while((player = this.getPlayerInCombat(monster + "-" + i, combat)) != null) {
+        while((this.getPlayerInCombat(monster + "-" + i, combat)) != null) {
             i++;
         }
     }
@@ -511,12 +513,56 @@ exports.checkForVictory = function(combat) {
         }
     }
 
-    if(team1Alive) {
+
+
+    if(team1Alive && !team2Alive) {
         return 1;
-    } else if(team2Alive) {
+    } else if(team2Alive && !team1Alive) {
         return 2;
     }
     return 0;
+}
+
+exports.rewardLoot = async function(combat, thread) {
+    var lootTable = [];
+    var totalExp = 0;
+
+    console.log(combat);
+
+    for(const enemy of combat.team2) {
+        if(enemy.type == "monster") {
+            const enemyType = enemy.id.split("-")[0];
+            const enemyData = mobList[enemyType];
+            lootTable.push(...enemyData.loots);
+            totalExp = totalExp + enemyData.exp;
+        console.log("enemy exp: " + enemyData.exp + " total exp: " + totalExp);
+        }   
+    }
+    totalExp = Math.floor(totalExp / combat.team1.length);
+
+    for(const victor of combat.team1) {
+        if(victor.type == "human") {
+            const embed = new EmbedBuilder()
+                .setTitle( Client.client.users.cache.get(victor.id).username + '\'s earnings!')
+            player.exp.award(victor.id, totalExp);
+            embed.setDescription("You earned a total of " + totalExp + " experience points!");
+
+            var lootDescription = "";
+
+            for(const loot of lootTable) {
+                inventory.giveItem(victor.id, loot.id, loot.pack );
+                lootDescription += loot.id + " x" + loot.pack + "\n";
+            }
+
+            if(lootDescription != "") {
+                embed.addFields({name: "Loot", value: lootDescription});
+            }
+
+            thread.send({ embeds: [embed] });
+        }
+    }
+
+    
 }
 
 exports.updateMainMessage = function(combatInfo, message, state) {

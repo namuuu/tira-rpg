@@ -126,10 +126,13 @@ async function typeMain(embed, playerId) {
 
     const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
 
+    const zones = JSON.parse(fs.readFileSync('./data/zones.json'));
+
     embed.addFields(
         { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
-        { name: 'Money', value: 'Not implemented yet', inline: true}
+        { name: 'Money', value: 'Not implemented yet'},
+        { name: 'Location', value: zones[playerInfo.location].name }
     );
 
     return {embed: embed};
@@ -142,13 +145,15 @@ async function typeItems(embed, playerId) {
     // Reading the items
     let rawdata = fs.readFileSync('./data/items.json');
     let items = JSON.parse(rawdata);
-    console.log(items);
 
     let description = "";
 
     for (const [key, value] of Object.entries(inventory.items)) {
         description += `${items[key].name} (x${value.quantity}),`;
     }
+
+    if(description == "")
+        description = "Empty,";
 
     description = description.slice(0, -1);
 
