@@ -36,8 +36,6 @@ module.exports = {
         var row = new ActionRowBuilder();
         row.addComponents(inv.addSlider(author.id));
 
-        console.log(ret);
-
         message.channel.send({ embeds: [ret.embed], components: [row] });
     }
 }

@@ -150,7 +150,7 @@ exports.exp.award = async function(id, exp, channel) {
     const result = await playerCollection.updateOne(query, update, options);
 
     for(let i=info.level+1; i<=newLevel.level; i++) {
-        exports.getNewLevelRewards(id, i, channel);
+        exports.exp.getLevelRewards(id, i, channel);
     }
 }
 
