@@ -5,7 +5,7 @@ module.exports = {
   aliases: [],
   description: "Debug command concerning skills. Usage for developer only.",
   requireCharacter: true,
-  execute(message, args) {
+  async execute(message, args) {
     if(args.length == 0) {
         message.reply("Please specify a debug command according to the document.");
         return;
@@ -38,6 +38,10 @@ module.exports = {
                 const queryResult = skill.searchSkill(skillQuery);
                 message.reply({embeds: [skill.displaySkill(queryResult)]});
                 break;
+            case "test": {
+                await skill.learnSkill(authorId, "slash");
+                await skill.selectActiveSkill(authorId, "slash");
+            }
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");
                 break;

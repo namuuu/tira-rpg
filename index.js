@@ -22,6 +22,7 @@ const { setupSkills } = require('./setup/skillSetup.js');
 setupSkills(client);
 
 // Setup mongo
+Client.client = client;
 Client.mongoDB = new MongoClient(process.env.MONGO_URI);
 
 

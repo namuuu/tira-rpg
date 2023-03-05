@@ -1,4 +1,5 @@
 const combatManager = require('../../manager/combatManager.js');
+const combatUtil = require('../../utils/combatUtils.js');
 
 module.exports = {
   name: "debug-combat",
@@ -22,6 +23,11 @@ module.exports = {
                 break;
             case "add-dummy":
                 combatManager.addEntityToCombat(message.channel, "dummy");
+                break;
+            case "loop":
+                const combatData = combatUtil.getCombatCollection(message.channel.id);
+                if(combatData != null)
+                    combatManager.combatLoop(message.channel, combatData);
                 break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");

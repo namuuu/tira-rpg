@@ -7,8 +7,6 @@ const inv = require("./inventoryUtils.js");
 
 
 exports.execute = function(exeData) {
-    //console.log(exeData);
-
     const skillEffectList = exeData.skill["effects"];
     let log = [];
 

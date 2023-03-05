@@ -1,4 +1,4 @@
-const { Client, EmbedBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const embedUtils = require('../utils/messageTemplateUtils.js');
 const manager = require('../manager/combatManager.js');
 const skillUtil = require('../utils/skillUtils.js');
@@ -259,7 +259,33 @@ exports.executeSkill = async function(combatInfo, thread, skillId, casterId, tar
         skill: skillList[skillId],
     }
 
-    //console.log(exeData);
+    let log = skillUtil.execute(exeData);
+
+    combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
+
+    const update = {
+        $set: {
+            team1: exeData.combat.team1,
+            team2: exeData.combat.team2,
+        }
+    };
+
+    await combatCollection.updateOne({}, update, { upsert: true });
+
+    manager.finishTurn(exeData, log);
+}
+
+exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, targetId) {
+    let exeData = {
+        combat: combatInfo,
+        thread: thread,
+        casterId: monsterId,
+        targetId: targetId,
+    }
+
+    let monster = exports.getPlayerInCombat(monsterId, combatInfo);
+    const random = Math.random() * (monster.skills.length - 1);
+    exeData.skill = skillList[monster.skills[random]];
 
     let log = skillUtil.execute(exeData);
 
@@ -283,11 +309,8 @@ exports.getSoonestTimelineEntity = function(combatInfo) {
 
     var fighterList = combatInfo.team1.concat(combatInfo.team2);
 
-    //console.log(combatInfo);
-
     for (const fighter of fighterList) {
-        //console.log(fighter);
-        soonestFighter = this.compareTimelines(soonestFighter, fighter);
+        soonestFighter = exports.compareTimelines(soonestFighter, fighter);
     }
 
     return soonestFighter;
@@ -355,14 +378,17 @@ exports.getPlayerEnemyTeam = function(playerId, combat) {
 exports.createMonsterData = function(combat, monster) {
 
     let i = 0;
-    while((player = this.getPlayerInCombat(monster + "-" + i, combat)) != null) {
+    if(this.getPlayerInCombat(monster, combat) != null) {
         i++;
+        while((player = this.getPlayerInCombat(monster + "-" + i, combat)) != null) {
+            i++;
+        }
     }
+    
 
     const mobData = mobList[monster];
 
     const dummy = {
-        id: monster + "-" + i,
         type: "monster",
         timeline: 0,
         stats: {
@@ -374,6 +400,12 @@ exports.createMonsterData = function(combat, monster) {
             agility: mobData.base_stats.agility + Math.floor(Math.random(mobData.mod_stats.agility)),
         },
         equipment: {}
+    }
+
+    if(i > 0) {
+        dummy.id = monster + "-" + i;
+    } else {
+        dummy.id = monster;
     }
 
     dummy.health = dummy.stats.vitality;
@@ -392,9 +424,9 @@ exports.announceNewTurn = async function(thread, player) {
 
     const embed = new EmbedBuilder();
 
-    if(player.type = "human") {
+    if(player.type == "human") {
         embed
-            .setDescription('It\'s <' + player.id + '>\'s turn!')
+            .setDescription('It\'s <@' + player.id + '>\'s turn!')
             .setColor("#ffffff");
     } else {
         embed
@@ -417,6 +449,14 @@ exports.getLogger = function(log, playerId) {
     return playerLog;
 }
 
+exports.addToValueTologger = function(log, playerId, valueName, value) {
+    let playerLog = this.getLogger(log, playerId);
+    if(playerLog[valueName] == null || playerLog[valueName] == undefined) {
+        playerLog[valueName] = 0;
+    }
+    playerLog[valueName] += value;
+}
+
 /**
  * Logs the effects an entity suffered into an embed (in argument).
  * @param {*} embed the embed to log to (it adds a field)
@@ -428,8 +468,9 @@ exports.logResults = function(embed, log, entity) {
     let title = "";
     let description = "";
 
-    if(entity.type == "player") {
-        title = "<@" + entity.id + ">";
+    if(entity.type == "human") {
+        const name = Client.client.users.cache.get(entity.id).username;
+        title = name;
     } else {
         title = entity.id;
     }
@@ -478,7 +519,7 @@ exports.checkForVictory = function(combat) {
     return 0;
 }
 
-exports.updateMainMessage = async function(combatInfo, message, state) {
+exports.updateMainMessage = function(combatInfo, message, state) {
 
     const embed = new EmbedBuilder()
 		.setTitle('The roar of battle is heard in the distance...')

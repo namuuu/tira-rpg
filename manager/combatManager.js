@@ -1,6 +1,8 @@
 const { Client, EmbedBuilder } = require('discord.js');
+const fs = require('fs');
 const util = require('../utils/combatUtils.js');
 const embed = require('../utils/messageTemplateUtils.js');
+
 
 /**
  * Instanciates a combat in the database, note that the data is currently blank.
@@ -18,6 +20,9 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         return;
     }
 
+    const searchEmbed = new EmbedBuilder()
+        .setTitle("Searching for an encounter...")
+
     const message = await channel.send("*Loading combat...*");
 
     util.createThread(message);
@@ -25,9 +30,13 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     const messageId = message.id;
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
 
+    const playerCollection = Client.mongoDB.db('player-data').collection(creator.id);
+
+    const playerInfo = await playerCollection.findOne({ name: "info" }, { _id: 0 });
+
     const combatData = [
         {
-            zone: null,
+            zone: playerInfo.location,
             type: 'wild-encounter',
             creator: creator.id,
             current_turn: 0,
@@ -141,8 +150,32 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
 
-exports.searchForMonsters = function(interaction, combat) {
-    this.addEntityToCombat(interaction.channel, "dummy");
+exports.searchForMonsters = async function(interaction, combat) {
+    //this.addEntityToCombat(interaction.channel, "dummy");
+
+    const zone = combat.zone;
+
+    var data = JSON.parse(fs.readFileSync('./data/zones.json'));
+
+    var monsters = Object.values(data[zone].monsters);
+
+    var maxRange = 0;
+    for (var i in monsters) {
+        maxRange += parseInt(monsters[i]["spawn-chance"]);
+    }
+
+    var random = Math.floor(Math.random() * maxRange) + 1;
+
+    var currentRange = 0;
+    for (var i in monsters) {
+        currentRange += parseInt(monsters[i]["spawn-chance"]);
+        if (random <= currentRange) {
+            for(var j in monsters[i]["m-names"]) {
+                await exports.addEntityToCombat(interaction.channel, monsters[i]["m-names"][j]);
+            }
+            break;
+        }
+    }
 }
 
 exports.addEntityToCombat = async function(thread, entity) {
@@ -205,7 +238,7 @@ exports.startCombat = async function(interaction) {
                 interaction.reply({ content: "You need at least one player in your team!", ephemeral: true });
                 return;
             }
-            this.searchForMonsters(interaction, combatData);
+            exports.searchForMonsters(interaction, combatData);
             break;
         case "pvp":
             if (combatData.team1.length == 0 || combatData.team2.length == 0) {
@@ -221,7 +254,7 @@ exports.startCombat = async function(interaction) {
 
     interaction.message.delete();
 
-    this.combatLoop(thread, combatData);
+    exports.combatLoop(thread, combatData);
 }
 
 exports.combatLoop = async function(thread, combatData) {
@@ -237,7 +270,8 @@ exports.combatLoop = async function(thread, combatData) {
         console.log("[DEBUG] This is the player's turn. Waiting for player input.");
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
-        util.executeSkill(combatData, thread, "default", soonestFighter.id, combatData.team1[0].id);
+        //util.executeSkill(combatData, thread, "default", soonestFighter.id, combatData.team1[0].id);
+        await util.executeMonsterAttack(combatData, thread, soonestFighter.id, combatData.team1[0].id);
     }
 
     combatData.current_turn++;
