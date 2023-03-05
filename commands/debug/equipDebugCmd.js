@@ -41,6 +41,9 @@ module.exports = {
                 break;
             case "info":
                 break;
+            case "send":
+                equip.display(authorId, message.channel);
+                break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");
                 break;

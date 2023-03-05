@@ -3,6 +3,7 @@ const { displayInventory } = require('../utils/inventoryUtils.js');
 const { startCombat, addPlayerToCombat } = require('../manager/combatManager.js');
 const { acceptInvitation } = require('../utils/partyUtils.js');
 const { sendStringAllSkills, sendModal } = require('../utils/skillUtils.js');
+const { receiveButton } = require('../utils/equipUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -44,6 +45,8 @@ module.exports = {
             case 'party_accept':
                 await acceptInvitation(userId, args[0], interaction); // Accepts a party invitation (partyUtils.js)
                 break;
+            case 'equip':	
+                receiveButton(interaction, userId, args); // Personal button handler (equipUtils.js)
             default:
                 break;
         }
