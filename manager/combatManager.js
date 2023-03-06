@@ -47,7 +47,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     const searchEmbed = new EmbedBuilder()
         .setTitle("Searching for an encounter...")
 
-    const message = await channel.send("*Loading combat...*");
+    const message = await channel.send({ embeds: [searchEmbed] });
     const messageId = message.id;
 
     util.createThread(message);
@@ -78,6 +78,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     return messageId;
 }
 
+
 exports.deleteCombat = async function(channel) {
     const combatCollection = Client.mongoDB.db('combat-data').collection(channel.id);
     const combatData = await util.getCombatCollection(channel.id);
@@ -102,6 +103,10 @@ exports.deleteCombat = async function(channel) {
     });
 }
 
+/**
+ * Deletes the combat from the databaes, but do not interfere with the thread or the origin message.
+ * @param {*} channelId the combat id to delete.
+ */
 exports.softDeleteCombat = async function(channelId) {
     const combatCollection = Client.mongoDB.db('combat-data').collection(channelId);
     const combatData = await util.getCombatCollection(channelId);

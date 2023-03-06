@@ -560,6 +560,8 @@ exports.rewardLoot = async function(combat, thread) {
                 embed.addFields({name: "Loot", value: lootDescription});
             }
 
+            player.health.set(victor.id, victor.health);
+
             thread.send({ embeds: [embed] });
         }
     }

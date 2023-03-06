@@ -1,6 +1,7 @@
 const { Client, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
-const commandSetup = require('../setup/commandSetup.js');
 const equipSetup = require('../setup/equipSetup.js');
+
+exports.stat = {};
 
 exports.display = async function(playerId, channel) {
     const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
@@ -47,9 +48,6 @@ exports.get = function(chosenEquipment, type) {
         default:
             break;
     }
-
-    console.log(map);
-    console.log(chosenEquipment);
 
     if(map.has(chosenEquipment)) {
         return map.get(chosenEquipment);
@@ -143,8 +141,7 @@ exports.equip = async function(playerId, equipId, type) {
 
     const inv = await playerCollection.findOne(query, options);
 
-    const equip = inv.equipItems.filter(item => item.id == equipId)[0];
-
+    const equip = inv.equipItems.filter(item => item.id == equipId).filter(item => item.type == type)[0];
     
     if(equip == null) {
         console.log("ERROR: Tried to equip an item that the user doesn't possess.");
@@ -374,4 +371,18 @@ exports.receiveModal = async function(interaction, playerId, equip, type, isEqui
     }
 
     interaction.message.edit({embeds: [await getDisplay(playerId, new EmbedBuilder())]});
+}
+
+exports.stat.getCombined = function(equips, stat) {
+    var total = 0;
+
+    for(var i = 0; i < Object.values(equips).length; i++) {
+        var equip = Object.values(equips)[i];
+        if(equip != null) {
+            if(equip.caracteristics[stat] != null)
+                total += equip.caracteristics[stat];
+        }
+    }
+
+    return total;
 }

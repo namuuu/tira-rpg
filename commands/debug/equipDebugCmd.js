@@ -34,7 +34,17 @@ module.exports = {
                 equip.trash(authorId, args[1], args[2]);
                 break;
             case "equip":
-                equip.equip(authorId, args[1], args[2]);
+            case "equipw":
+                equip.equip(authorId, args[1], "weapon");
+                break;
+            case "equiph":
+                equip.equip(authorId, args[1], "helmet");
+                break;
+            case "equipc":
+                equip.equip(authorId, args[1], "chestplate");
+                break;
+            case "equipb":
+                equip.equip(authorId, args[1], "boots");
                 break;
             case "unequip":
                 equip.unequip(authorId, args[1]);

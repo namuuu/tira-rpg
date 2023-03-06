@@ -67,6 +67,13 @@ exports.getData = async function(id, name) {
     return result;
 }
 
+exports.getEquiped = async function(id) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const result = await playerCollection.findOne({ name: "inventory" }, { projection: {_id: 0, items: 0, equipItems: 0, skills: 0, activeSkills: 0} });
+
+    return result.equiped;
+}   
+
 exports.updateData = async function(id, data, name) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
@@ -158,7 +165,7 @@ exports.exp.award = async function(id, exp, channel) {
     await playerCollection.updateOne({ name: "info" }, { $set: { exp: newLevel.exp, level: newLevel.level } }, { upsert: true });
 
     for(let i=info.level; i<newLevel.level; i++) {
-        exports.exp.getLevelRewards(id, i, channel);
+        exports.exp.getLevelRewards(id, i+1, channel);
     }
 }
 
@@ -167,7 +174,7 @@ exports.exp.getLevelRewards = async function(id, level, channel) {
     if(!channel)
         return;
     channel.send("Vous avez atteint le niveau " + level + " !");
-    this.updateStats(id, info.class);
+    exports.updateStats(id, info.class);
 }
 
 

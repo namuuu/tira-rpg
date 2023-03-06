@@ -2,6 +2,7 @@ const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonB
 const fs = require('fs');
 const player = require('../utils/playerUtils.js');
 const { calculateExpToNextLevel } = require('../utils/rpgInfoUtils.js');
+const equip = require('./equipUtils.js');
 const skill = require('./skillUtils.js');
 
 exports.getInventoryString = function(inventory) {
@@ -82,7 +83,7 @@ exports.display = async function(player, interaction, type, ack) {
             break;
         case "skills":
             ret = (await typeSkills(embed, playerId, player.username));
-            embed = ret.embeds;
+            embed = ret.embed;
             buttons.addComponents(ret.components);
             break;
         case "stats":
@@ -177,16 +178,15 @@ async function typeItems(embed, playerId) {
 exports.typeStats = typeStats;
 async function typeStats(embed, playerId) {
     playerStats = await player.getData(playerId, "stats");
-
-    console.log(playerStats);
+    playerEquip = await player.getEquiped(playerId);
 
     embed.addFields(
-        {name: "Vitality", value: playerStats.vitality + " ", inline: true},
-        {name: "Strength", value: playerStats.strength + " ", inline: true},
-        {name: "Resistance", value: playerStats.resistance + " ", inline: true},
-        {name: "Dexterity", value: playerStats.dexterity + " ", inline: true},
-        {name: "Agility", value: playerStats.agility + " ", inline: true},
-        {name: "Intelligence", value: playerStats.intelligence + " ", inline: true},
+        {name: "Vitality", value: playerStats.vitality + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_vit")})`, inline: true},
+        {name: "Strength", value: playerStats.strength + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_str")})`, inline: true},
+        {name: "Resistance", value: playerStats.resistance + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_res")})`, inline: true},
+        {name: "Dexterity", value: playerStats.dexterity + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
+        {name: "Agility", value: playerStats.agility + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_agi")})`, inline: true},
+        {name: "Intelligence", value: playerStats.intelligence + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_int")})`, inline: true},
     );
 
     return {embed: embed};
@@ -218,7 +218,7 @@ async function typeSkills(embed, playerId, playername) {
         embed.addFields({name: "Active Skills", value: "No active skills selected. (There may be an error!)"});
     }
 
-    return {embeds: embed, components: sendButtonChangeSkill(playerId, skills.length != 0, activeSkills.length != 0)};
+    return {embed: embed, components: sendButtonChangeSkill(playerId, skills.length != 0, activeSkills.length != 0)};
 }
 
 exports.typeEquipment = typeEquipment;
