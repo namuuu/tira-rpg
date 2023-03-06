@@ -9,10 +9,10 @@ module.exports = {
   execute(message, args) {
     console.log(args);
 
-    if (args.length < 1)
-      return;
-
-    const arg = message.mentions.members.first();
+    if (args.length >= 1)
+      var arg = message.mentions.members.first();
+    else
+      var arg = message.author;
 
     if (!arg)
       return;

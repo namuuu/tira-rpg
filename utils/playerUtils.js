@@ -17,13 +17,27 @@ exports.doesExists = async function(id) {
     return find.length > 0;
 }
 
-exports.create = async function(id) {
+exports.create = async function(id, className) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
+    const classData = classes[className];
+
     const data = [
-        { name: "info", class: "noclass", level: 0, exp: 0, health: 10, location: "temple"},
-        { name: "stats", strength: 0, vitality: 10, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
-        { name: "inventory", items: [], skills: [] , activeSkills: []},
+        { name: "info", class: className, level: 0, exp: 0, health: classData.base_stats.vitality, location: "tutorial" },
+        { name: "stats", 
+            strength: classData.base_stats.strength,
+            vitality: classData.base_stats.vitality, 
+            resistance: classData.base_stats.resistance, 
+            dexterity: classData.base_stats.dexterity,
+            agility: classData.base_stats.agility,
+            intelligence: classData.base_stats.intelligence,
+        },
+        { name: "inventory", items: [], equipItems: [], skills: [] , activeSkills: [], equiped: {
+            weapon: null,
+            helmet: null,
+            chestplate: null,
+            boots: null,
+        } },
         { name: "misc", lastRegen: Date.now(), party: { owner: id, members: [] }},
     ]
 

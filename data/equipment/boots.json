@@ -1,0 +1,10 @@
+{
+    "dev_staff": {
+        "id": "dev_staff",
+        "name": "Dev Staff",
+        "description": "The Dev Staff is a developer-only weapon.",
+        "caracteristics": {
+            "raw_damage": 5
+        }
+    }
+}

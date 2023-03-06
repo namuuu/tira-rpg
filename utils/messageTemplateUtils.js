@@ -1,8 +1,6 @@
 const { Client } = require('discord.js');
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, MessageActionRow, MessageSelectMenu, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
-const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 const player = require('../utils/playerUtils.js');
-const messageCreate = require('../events/messageCreate.js');
 const locationData = require('../data/location.json');
 const zonesData = require('../data/zones.json');
 const shopsData = require('../data/shops.json');
