@@ -2,6 +2,7 @@ const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonB
 const fs = require('fs');
 const player = require('../utils/playerUtils.js');
 const { calculateExpToNextLevel } = require('../utils/rpgInfoUtils.js');
+const equip = require('./equipUtils.js');
 const skill = require('./skillUtils.js');
 
 exports.getInventoryString = function(inventory) {
@@ -82,11 +83,14 @@ exports.display = async function(player, interaction, type, ack) {
             break;
         case "skills":
             ret = (await typeSkills(embed, playerId, player.username));
-            embed = ret.embeds;
+            embed = ret.embed;
             buttons.addComponents(ret.components);
             break;
         case "stats":
             embed = (await typeStats(embed, playerId)).embed;
+            break;
+        case "equipment":
+            embed = (await typeEquipment(embed, playerId)).embed;
             break;
         default:
             embed = (await typeMain(embed, playerId)).embed;
@@ -126,13 +130,17 @@ async function typeMain(embed, playerId) {
 
     const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
 
-    const zones = JSON.parse(fs.readFileSync('./data/zones.json'));
+    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerInfo.location];
+    if(zone == undefined)
+        var zoneName = playerInfo.location;
+    else
+        var zoneName = zone.name;
 
     embed.addFields(
         { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
-        { name: 'Money', value: 'Not implemented yet'},
-        { name: 'Location', value: zones[playerInfo.location].name }
+        { name: 'Money', value: '$' + playerInfo.money, inline: true},
+        { name: 'Location', value: zoneName }
     );
 
     return {embed: embed};
@@ -141,6 +149,11 @@ async function typeMain(embed, playerId) {
 exports.typeItems = typeItems;
 async function typeItems(embed, playerId) {
     inventory = await player.getData(playerId, "inventory");
+
+    if(Object.keys(inventory.items).length == 0) {
+        embed.setDescription("You don't have any item in your inventory.");
+        return {embed: embed};
+    }
 
     // Reading the items
     let rawdata = fs.readFileSync('./data/items.json');
@@ -165,16 +178,15 @@ async function typeItems(embed, playerId) {
 exports.typeStats = typeStats;
 async function typeStats(embed, playerId) {
     playerStats = await player.getData(playerId, "stats");
-
-    console.log(playerStats);
+    playerEquip = await player.getEquiped(playerId);
 
     embed.addFields(
-        {name: "Vitality", value: playerStats.vitality + " ", inline: true},
-        {name: "Strength", value: playerStats.strength + " ", inline: true},
-        {name: "Resistance", value: playerStats.resistance + " ", inline: true},
-        {name: "Dexterity", value: playerStats.dexterity + " ", inline: true},
-        {name: "Agility", value: playerStats.agility + " ", inline: true},
-        {name: "Intelligence", value: playerStats.intelligence + " ", inline: true},
+        {name: "Vitality", value: playerStats.vitality + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_vit")})`, inline: true},
+        {name: "Strength", value: playerStats.strength + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_str")})`, inline: true},
+        {name: "Resistance", value: playerStats.resistance + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_res")})`, inline: true},
+        {name: "Dexterity", value: playerStats.dexterity + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
+        {name: "Agility", value: playerStats.agility + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_agi")})`, inline: true},
+        {name: "Intelligence", value: playerStats.intelligence + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_int")})`, inline: true},
     );
 
     return {embed: embed};
@@ -206,7 +218,39 @@ async function typeSkills(embed, playerId, playername) {
         embed.addFields({name: "Active Skills", value: "No active skills selected. (There may be an error!)"});
     }
 
-    return {embeds: embed, components: sendButtonChangeSkill(playerId, skills.length != 0, activeSkills.length != 0)};
+    return {embed: embed, components: sendButtonChangeSkill(playerId, skills.length != 0, activeSkills.length != 0)};
+}
+
+exports.typeEquipment = typeEquipment;
+async function typeEquipment(embed, playerId) {
+    const playerData = await player.getData(playerId, "inventory");
+    const equipment = playerData.equiped;
+
+    if(equipment.weapon == null) {
+        embed.addFields({name: "Weapon", value: "No weapon equiped."});
+    } else {
+        embed.addFields({name: "Weapon", value: equipment.weapon.name});
+    }
+
+    if(equipment.helmet == null) {
+        embed.addFields({name: "Helmet", value: "No helmet equiped."});
+    } else {
+        embed.addFields({name: "Helmet", value: equipment.helmet.name});
+    }
+
+    if(equipment.chestplate == null) {
+        embed.addFields({name: "Chestplate", value: "No chestplate equiped."});
+    } else {
+        embed.addFields({name: "Chestplate", value: equipment.chestplate.name});
+    }
+
+    if(equipment.boots == null) {
+        embed.addFields({name: "Boots", value: "No boots equiped."});
+    } else {
+        embed.addFields({name: "Boots", value: equipment.boots.name});
+    }
+
+    return {embed: embed};
 }
 
 function sendButtonChangeSkill(userId, skillEnable, activeSkillEnable) {
@@ -240,6 +284,7 @@ function addSlider(playerId) {
                     {label: "Items", value: "items", description: "Display every item you own!"},
                     {label: "Skills", value: "skills", description: "Manage your skills!"},
                     {label: "Stats", value: "stats", description: "Get a view of your stats!"},
+                    {label: "Equipment", value: "equipment", description: "Showcase your stuff!"},
                 ]
         )
 

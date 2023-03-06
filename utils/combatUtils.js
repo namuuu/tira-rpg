@@ -286,7 +286,8 @@ exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, tar
     }
 
     let monster = exports.getPlayerInCombat(monsterId, combatInfo);
-    const random = Math.random() * (monster.skills.length - 1);
+    const random = Math.floor(Math.random() * (monster.skills.length));
+    console.log(random);
     exeData.skill = skillList[monster.skills[random]];
 
     let log = skillUtil.execute(exeData);
@@ -526,8 +527,7 @@ exports.checkForVictory = function(combat) {
 exports.rewardLoot = async function(combat, thread) {
     var lootTable = [];
     var totalExp = 0;
-
-    console.log(combat);
+    var totalMoney = 0;
 
     for(const enemy of combat.team2) {
         if(enemy.type == "monster") {
@@ -535,17 +535,20 @@ exports.rewardLoot = async function(combat, thread) {
             const enemyData = mobList[enemyType];
             lootTable.push(...enemyData.loots);
             totalExp = totalExp + enemyData.exp;
-        console.log("enemy exp: " + enemyData.exp + " total exp: " + totalExp);
+            totalMoney = totalMoney + enemyData.money;
         }   
     }
     totalExp = Math.floor(totalExp / combat.team1.length);
+    totalMoney = Math.floor(totalMoney / combat.team1.length);
 
     for(const victor of combat.team1) {
         if(victor.type == "human") {
             const embed = new EmbedBuilder()
                 .setTitle( Client.client.users.cache.get(victor.id).username + '\'s earnings!')
             player.exp.award(victor.id, totalExp);
-            embed.setDescription("You earned a total of " + totalExp + " experience points!");
+            player.giveMoney(victor.id, totalMoney);
+            embed.setDescription("You earned a total of " + totalExp + " experience points and " + totalMoney + " $ !");
+            
 
             var lootDescription = "";
 
@@ -557,6 +560,8 @@ exports.rewardLoot = async function(combat, thread) {
             if(lootDescription != "") {
                 embed.addFields({name: "Loot", value: lootDescription});
             }
+
+            player.health.set(victor.id, victor.health);
 
             thread.send({ embeds: [embed] });
         }

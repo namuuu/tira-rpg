@@ -1,0 +1,18 @@
+{
+    "leather": {
+        "id": "leather",
+        "name": "Leather",
+        "description": "Basic boots made of leather.",
+        "caracteristics": {
+            "raw_buff_res": 1
+        }
+    },
+    "iron": {
+        "id": "iron",
+        "name": "Iron",
+        "description": "Basic boots made of iron.",
+        "caracteristics": {
+            "raw_buff_res": 2
+        }
+    }
+}

@@ -6,6 +6,7 @@ const { displayInventory } = require('../utils/inventoryUtils.js');
 const { startCombat, addPlayerToCombat } = require('../manager/combatManager.js');
 const { acceptInvitation } = require('../utils/partyUtils.js');
 const { sendStringAllSkills, sendModal } = require('../utils/skillUtils.js');
+const { receiveButton } = require('../utils/equipUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -47,6 +48,8 @@ module.exports = {
             case 'party_accept':
                 await acceptInvitation(userId, args[0], interaction); // Accepts a party invitation (partyUtils.js)
                 break;
+            case 'equip':	
+                receiveButton(interaction, userId, args); // Personal button handler (equipUtils.js)
             case 'buyItem':
 
                 if(args[0] != interaction.user.id) {
@@ -62,6 +65,14 @@ module.exports = {
                 var currentQuantity = interaction.message.components[0].components[0].customId.split('-')[4];
                 var currentItem = interaction.message.components[0].components[0].customId.split('-')[3];
                 var shop = interaction.message.components[0].components[0].customId.split('-')[2];
+
+                var buy = await player.takeMoney(interaction.user.id, shopsData[shop].items[currentItem].cost * currentQuantity, interaction.message);
+
+                if(!buy) {
+                    await interaction.message.delete(); 
+                    selector.generateShopItemsSelector(interaction, shop, "0", "0");
+                    break;
+                }
 
                 await inventory.giveItem(interaction.user.id, currentItem, currentQuantity);
 

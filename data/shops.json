@@ -1,25 +1,19 @@
 {
-"main_shop1": {
-    "id": "main_shop1",
-    "name": "Main Shop 1",
+"item_shop1": {
+    "id": "item_shop1",
+    "name": "Item Shop 1",
     "rarity": 1,
     "items": {
-        "item1": {
-            "id": "item1",
-            "name": "Item 1",
-            "cost": 100,
-            "type": "weapon"
-        },
-        "item2": {
-            "id": "item2",
-            "name": "Item 2",
-            "cost": 200,
+        "apple": {
+            "id": "apple",
+            "name": "Apple",
+            "cost": 2,
             "type": "consumable"
         },
         "item3": {
-            "id": "item3",
-            "name": "Item 3",
-            "cost": 10,
+            "id": "warhandbook",
+            "name": "Old War Handbook",
+            "cost": 160,
             "type": "key-item"
         }
     }

@@ -1,23 +1,35 @@
 {
     "slime_lake": {
         "name": "Slime Lake",
-        "description": "Yipee",
+        "description": "A quiet place with only slimes roaming around. It's a good place to train your skills.",
         "required": {
             "level": "",
             "quests": "",
-            "items": ""
+            "items": ""  
         },
         "monsters": {
             "group1": {
-                "m-names": ["slime", "slime", "wolf"],
-                "spawn-chance": "50"
+                "m-names": ["slime", "slime", "slime"],
+                "spawn-chance": "30"
             },
             "group2": {
-                "m-names": ["slime", "wolf"],
-                "spawn-chance": "50"
+                "m-names": ["slime", "red_slime"],
+                "spawn-chance": "25"
+            },
+            "group3": {
+                "m-names": ["slime", "blue_slime", "slime"],
+                "spawn-chance": "25"
+            },
+            "group4": {
+                "m-names": ["red_slime", "blue_slime"],
+                "spawn-chance": "15"
+            },
+            "group5": {
+                "m-names": ["king_slime"],
+                "spawn-chance": "5"
             }
         },
-        "shops": ["main_shop1", "main_shop2"]
+        "shops": [""]
     },
     "temple": {
         "name": "Forgotten Temple",
@@ -37,6 +49,18 @@
                 "spawn-chance": "1000000000000"
             }
         },
-        "shops": ["main_shop2"]
+        "shops": [""]
+    },
+    "capital": {
+        "name": "La Capitale",
+        "description": "Tutorial/20",
+        "required": {
+            "level": "",
+            "quests": "",
+            "items": ""  
+        },
+        "monsters": {
+        },
+        "shops": ["item_shop1", "equipment_shop1"]
     }
 }

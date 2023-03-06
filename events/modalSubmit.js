@@ -1,5 +1,6 @@
 const player = require('../utils/playerUtils.js');
-const { receiveModal } = require('../utils/skillUtils.js');
+const skill = require('../utils/skillUtils.js');
+const equip = require('../utils/equipUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -17,10 +18,16 @@ module.exports = {
 
         switch(command) {
             case 'select_skill':
-                receiveModal(interaction, true);
+                skill.receiveModal(interaction, true);
                 break;
             case 'unselect_skill':
-                receiveModal(interaction, false);
+                skill.receiveModal(interaction, false);
+                break;
+            case 'equip':
+                equip.receiveModal(interaction, userId, interaction.fields.getTextInputValue('text-input'), args[0], true);
+                break;
+            case 'unequip':
+                equip.receiveModal(interaction, userId, interaction.fields.getTextInputValue('text-input'), args[0], false);
                 break;
             default:
                 break;

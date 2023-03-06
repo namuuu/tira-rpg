@@ -1,14 +1,21 @@
 const { Client } = require('discord.js');
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, MessageActionRow, MessageSelectMenu, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
-const rpgInfoUtils = require('../utils/rpgInfoUtils.js');
 const player = require('../utils/playerUtils.js');
-const messageCreate = require('../events/messageCreate.js');
 const locationData = require('../data/location.json');
 const zonesData = require('../data/zones.json');
 const shopsData = require('../data/shops.json');
 const classData = require('../data/classes.json');
 
 // Player data management
+
+exports.sendErrorEmbed = async function(message, error) {
+	const errorEmbed = new EmbedBuilder()
+		.setColor('F08080')
+		.setAuthor({name: 'An error occured'})
+		.addFields( { name: 'An error occured while executing your command.', value: error } );
+	
+	return message.channel.send({embeds: [errorEmbed]});
+}
 
 exports.generateSelector = async function(message) {
 	list = [];
@@ -50,7 +57,7 @@ exports.sendEncounterMessage = async function(message, type) {
 			mainEmbed.addFields({name: 'Players', value: 'Waiting for players...'});
 			break;
 		default:
-			mainEmbed.addFields({name: 'Wrong type', value: 'Something seems to be wrong with our sysem.', inline: true});
+			mainEmbed.addFields({name: 'Wrong type', value: 'Something seems to be wrong with our system.', inline: true});
 			break;
 	}
 
@@ -72,7 +79,6 @@ exports.generateLocationSelector = async function(message) {
 
 	for(var i = 0; i < Object.keys(locationData).length; i++) {
 		for (var j = 0; j < locationData[Object.keys(locationData)[i]].zones.length; j++) {
-
 			const currentLocation = await player.getData(message.author.id, "info");
 			if (currentLocation.location == locationData[Object.keys(locationData)[i]].zones[j]) {	
 				continue;

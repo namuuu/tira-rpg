@@ -2,6 +2,7 @@ const { Client, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const util = require('../utils/combatUtils.js');
 const embed = require('../utils/messageTemplateUtils.js');
+const playerUtils = require('../utils/playerUtils.js');
 
 
 /**
@@ -12,6 +13,7 @@ const embed = require('../utils/messageTemplateUtils.js');
 exports.instanciateCombat = async function(orderMessage, creator) {
     const channel = orderMessage.channel;
 
+    // Check if the channel is a thread
     if(channel.isThread()) {
         console.log("[ERROR] Tried to instanciate a combat in a thread channel.");
         orderMessage.reply("You can't instanciate a combat in a thread channel.").then(msg => {
@@ -20,20 +22,38 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         return;
     }
 
+    const playerCollection = Client.mongoDB.db('player-data').collection(creator.id);
+    const playerInfo = await playerCollection.findOne({ name: "info" }, { _id: 0 });
+
+    if(playerInfo == null) {
+        console.log("[ERROR] Tried to instanciate a combat with a non-existent player.");
+        return;
+    }
+    
+    const location = JSON.parse(fs.readFileSync('./data/zones.json', 'utf8'))[playerInfo.location];
+
+    if(location == null) {
+        console.log("[ERROR] Tried to instanciate a combat in a non-existent location.");
+        return;
+    }
+    if(location.monsters == null || location.monsters.length == 0) {
+        console.log("[ERROR] Tried to instanciate a combat in a location with no monsters.");
+        orderMessage.reply("There are no monsters in this location.").then(msg => {
+            setTimeout(() => msg.delete(), 5000);
+        });
+        return;
+    }
+
     const searchEmbed = new EmbedBuilder()
         .setTitle("Searching for an encounter...")
 
-    const message = await channel.send("*Loading combat...*");
+    const message = await channel.send({ embeds: [searchEmbed] });
+    const messageId = message.id;
 
     util.createThread(message);
 
-    const messageId = message.id;
+    
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
-
-    const playerCollection = Client.mongoDB.db('player-data').collection(creator.id);
-
-    const playerInfo = await playerCollection.findOne({ name: "info" }, { _id: 0 });
-
     const combatData = [
         {
             zone: playerInfo.location,
@@ -58,6 +78,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     return messageId;
 }
 
+
 exports.deleteCombat = async function(channel) {
     const combatCollection = Client.mongoDB.db('combat-data').collection(channel.id);
     const combatData = await util.getCombatCollection(channel.id);
@@ -67,8 +88,13 @@ exports.deleteCombat = async function(channel) {
         return;
     }
 
-    util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
+    for(player of combatData.team1.concat(combatData.team2)) {
+        if(player.type == "human") {
+            playerUtils.setState(null, player.id, {name: "idle"});
+        }
+    }
 
+    util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
     util.deleteThread(channel);
 
     await combatCollection.drop(function(err, res) {
@@ -76,6 +102,32 @@ exports.deleteCombat = async function(channel) {
         if (res) console.log("[DEBUG] Combat " + channel.id + " deleted.");
     });
 }
+
+/**
+ * Deletes the combat from the databaes, but do not interfere with the thread or the origin message.
+ * @param {*} channelId the combat id to delete.
+ */
+exports.softDeleteCombat = async function(channelId) {
+    const combatCollection = Client.mongoDB.db('combat-data').collection(channelId);
+    const combatData = await util.getCombatCollection(channelId);
+
+    if(combatData == null) {
+        console.log("[DEBUG] Attempted to delete a non-existent combat. (NON_EXISTENT_COMBAT_DELETE_ATTEMPT)");
+        return;
+    }
+
+    for(player of combatData.team1.concat(combatData.team2)) {
+        if(player.type == "human") {
+            playerUtils.setState(null, player.id, {name: "idle"});
+        }
+    }
+
+    await combatCollection.drop(function(err, res) {
+        if (err) throw err;
+        if (res) console.log("[DEBUG] Combat " + channelId + " deleted.");
+    });
+}
+
 
 exports.addPlayerToCombat = async function(playerId, combatId, team, interaction) {
     let message = interaction.message;
@@ -99,6 +151,13 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
 
     playerCollection = Client.mongoDB.db('player-data').collection(playerId);
     const playerInfo = await playerCollection.findOne({ name: "info" }, { _id: 0 });
+
+    if(playerInfo.state.name != "idle") {
+        console.log("[DEBUG] Attempted to join a combat with a non-idle player. (NON_IDLE_PLAYER_JOIN_ATTEMPT)");
+        interaction.reply({ content:"Your character is not able to go in combat!", ephemeral: true});
+        return;
+    }
+
     const playerStats = await playerCollection.findOne({ name: "stats" }, { _id: 0 });
     const playerInv = await playerCollection.findOne({ name: "inventory" }, { _id: 0 });
     const playerMisc = await playerCollection.findOne({ name: "misc" }, { _id: 0 });
@@ -146,18 +205,26 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
+    await playerCollection.updateOne({ name: "info" }, { $set: { state: {name: "in-combat", combatid: combatId} } }, { upsert: true });
+
     interaction.reply({ content: 'You have joined the combat!', ephemeral: true });
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
 
 exports.searchForMonsters = async function(interaction, combat) {
-    //this.addEntityToCombat(interaction.channel, "dummy");
+    var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone];
 
-    const zone = combat.zone;
+    if(zone == null) {
+        console.log("[DEBUG] Attempted to spawn monsters in a non-existent zone. (NON_EXISTENT_ZONE_SPAWN_ATTEMPT)");
+        return false;
+    }
 
-    var data = JSON.parse(fs.readFileSync('./data/zones.json'));
+    var monsters = Object.values(zone.monsters);
 
-    var monsters = Object.values(data[zone].monsters);
+    if(monsters == null || monsters == undefined || monsters.length == 0) {
+        console.log("[DEBUG] Attempted to spawn monsters in a zone with no monsters. (ZONE_WITH_NO_MONSTERS_SPAWN_ATTEMPT)");
+        return false;
+    }
 
     var maxRange = 0;
     for (var i in monsters) {
@@ -176,6 +243,8 @@ exports.searchForMonsters = async function(interaction, combat) {
             break;
         }
     }
+
+    return true;
 }
 
 exports.addEntityToCombat = async function(thread, entity) {
@@ -208,7 +277,7 @@ exports.addEntityToCombat = async function(thread, entity) {
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
-    console.log("[DEBUG] Dummy joined combat " + combatId); 
+    console.log("[DEBUG] " + entity + " joined combat " + combatId); 
 }
 
 exports.startCombat = async function(interaction) {
@@ -238,7 +307,10 @@ exports.startCombat = async function(interaction) {
                 interaction.reply({ content: "You need at least one player in your team!", ephemeral: true });
                 return;
             }
-            exports.searchForMonsters(interaction, combatData);
+            const ret = exports.searchForMonsters(interaction, combatData);
+            if(!ret) {
+                return;
+            }
             break;
         case "pvp":
             if (combatData.team1.length == 0 || combatData.team2.length == 0) {
@@ -337,8 +409,22 @@ exports.callForVictory = async function(combat, thread, victor) {
             break;
     }
 
+    for(player of combat.team1.concat(combat.team2)) {
+        if(player.type == "human") {
+            playerUtils.setState(null, player.id, {name: "idle"});
+        }
+    }
 
+    const combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
+    combatCollection.drop(function(err, res) {
+        if (err) throw err;
+        if (res) console.log("[DEBUG] Combat " + thread.id + " deleted.");
+    });
 
-    await thread.send("The combat is over !")
-    await thread.setLocked(true);
+    thread.send("The combat is over !");
+    const threadRet = await thread.setLocked(true);
+
+    console.log(threadRet);
+
+    
 }

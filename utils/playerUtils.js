@@ -17,13 +17,27 @@ exports.doesExists = async function(id) {
     return find.length > 0;
 }
 
-exports.create = async function(id) {
+exports.create = async function(id, className) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
+    const classData = classes[className];
+
     const data = [
-        { name: "info", class: "noclass", level: 0, exp: 0, health: 10, location: "temple"},
-        { name: "stats", strength: 0, vitality: 10, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
-        { name: "inventory", items: [], skills: [] , activeSkills: []},
+        { name: "info", class: className, money: 100, level: 0, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, location: "capital" },
+        { name: "stats", 
+            strength: classData.base_stats.strength,
+            vitality: classData.base_stats.vitality, 
+            resistance: classData.base_stats.resistance, 
+            dexterity: classData.base_stats.dexterity,
+            agility: classData.base_stats.agility,
+            intelligence: classData.base_stats.intelligence,
+        },
+        { name: "inventory", items: [], equipItems: [], skills: [] , activeSkills: [], equiped: {
+            weapon: null,
+            helmet: null,
+            chestplate: null,
+            boots: null,
+        } },
         { name: "misc", lastRegen: Date.now(), party: { owner: id, members: [] }},
     ]
 
@@ -52,6 +66,13 @@ exports.getData = async function(id, name) {
     
     return result;
 }
+
+exports.getEquiped = async function(id) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const result = await playerCollection.findOne({ name: "inventory" }, { projection: {_id: 0, items: 0, equipItems: 0, skills: 0, activeSkills: 0} });
+
+    return result.equiped;
+}   
 
 exports.updateData = async function(id, data, name) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
@@ -136,48 +157,58 @@ exports.health.passiveRegen = async function(userID) {
 exports.exp.award = async function(id, exp, channel) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
-    const query = { name: "info" };
-    let options = { 
-        projection: {_id: 0},
-    };
+    const info = await playerCollection.findOne({ name: "info" }, { projection: {_id: 0}});
 
-    const info = await playerCollection.findOne(query, options);
     const newExp = info.exp + exp;
     const newLevel = rpgInfoUtils.calculateNewLevelExp(info.level, newExp);
     
-    const update = { $set: { exp: newLevel.exp, level: newLevel.level } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne({ name: "info" }, { $set: { exp: newLevel.exp, level: newLevel.level } }, { upsert: true });
 
-    for(let i=info.level+1; i<=newLevel.level; i++) {
-        exports.exp.getLevelRewards(id, i, channel);
+    for(let i=info.level; i<newLevel.level; i++) {
+        exports.exp.getLevelRewards(id, i+1, channel);
     }
 }
 
+exports.levelUpStats = async function(id, level) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+
+    var query = { name: "info" };
+    const info = await playerCollection.findOne(query);
+    const userClass = info.class;
+
+    console.log("hello ?");
+
+    const strength = classes[userClass].base_stats.strength*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.strength)*0.5);
+    const vitality = classes[userClass].base_stats.vitality*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.vitality)*0.5);
+    const resistance = classes[userClass].base_stats.resistance*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.resistance)*0.5);
+    const dexterity = classes[userClass].base_stats.dexterity*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.dexterity)*0.5);
+    const agility = classes[userClass].base_stats.agility*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.agility)*0.5);
+    const intelligence = classes[userClass].base_stats.intelligence*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.intelligence)*0.5);
+
+    query = { name: "stats" };
+    const update = { $set: { strength: strength,
+                             vitality: vitality,
+                             resistance: resistance,
+                             dexterity: dexterity,
+                             agility: agility,
+                             intelligence: intelligence, }};
+    const result = await playerCollection.updateOne(query, update, {upsert: false});
+
+    
+}
+
 exports.exp.getLevelRewards = async function(id, level, channel) {
+    const info = await exports.getData(id, "info");
     if(!channel)
         return;
     channel.send("Vous avez atteint le niveau " + level + " !");
+    exports.levelUpStats(id, level);
 }
 
 
 exports.setClass = async function(id, className) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
-
-    const query = { name: "info" };
-    let options = { 
-        projection: {_id: 0},
-    };
-
-    const info = await playerCollection.findOne(query, options);
-
-    // if(info.class != "noclass") {
-    //     return false;
-    // }
-
-    const update = { $set: { class: className } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne({ name: "info" }, { $set: { class: className } }, { upsert: true });
 
     this.updateStats(id, className);
 
@@ -196,8 +227,6 @@ exports.updateStats = async function(id, className) {
     const agility = classes[className].base_stats.agility;
     const intelligence = classes[className].base_stats.intelligence;
 
-    console.log(strength);
-
     const query = { name : "stats"};
     const update = { $set: { strength: strength,
                              vitality: vitality,
@@ -206,8 +235,6 @@ exports.updateStats = async function(id, className) {
                              agility: agility,
                              intelligence: intelligence, }};
     const result = await playerCollection.updateOne(query, update, {upsert: false});
-
-    console.log(result);
 
     return true;
     
@@ -219,6 +246,60 @@ exports.setLocation = async function(id, location) {
     const query = { name: "info" };
     
     const update = { $set: { location: location } };
+    const options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+
+    return true;
+}
+
+exports.setState = async function (playerCollection, id, state) {
+    if(playerCollection == null || playerCollection == undefined)
+        playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const query = { name: "info" };
+
+    const update = { $set: { state: state } };
+
+    playerCollection.updateOne(query, update, {upsert: true});
+}
+
+exports.getState = async function (id) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+
+    const query = { name: "info" };
+    let options = { 
+        projection: {_id: 0, class: 0, level: 0, exp: 0},
+    };
+
+    const info = await playerCollection.findOne(query, options);
+    return info.state;
+}
+
+exports.giveMoney = async function(id, amount) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const info = await this.getData(id, "info");
+    const newMoney = info.money + amount;
+
+    const query = { name: "info" };
+
+    const update = { $set: { money: newMoney } };
+    const options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+
+    return true;
+}
+
+exports.takeMoney = async function(id, amount, message) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const info = await this.getData(id, "info");
+    const newMoney = info.money - amount;
+
+    if (newMoney < 0) {
+        message.channel.send("You don't have enough money to do that.");
+        return false;
+    }
+
+    const query = { name: "info" };
+    const update = { $set: { money: newMoney } };
     const options = { upsert: true };
     const result = await playerCollection.updateOne(query, update, options);
 

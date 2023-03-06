@@ -1,11 +1,7 @@
 {
   "apple": {
-    "name": "Pomme",
-    "description": "Une pomme. Donne 5 points de vie."
-  },
-  "baguette": {
-    "name": "Baguette",
-    "description": "Une baguette. Donne 10 points de vie."
+    "name": "Apple",
+    "description": "A fresh apple."
   },
   "slime_juice": {
     "name": "Slime Juice",
@@ -18,5 +14,9 @@
   "feather": {
     "name": "Feather",
     "description": "A light feather."
+  },
+  "warhandbook": {
+    "name": "War Handbook",
+    "description": "A book about an old war between humans and monsters. It's very heavy."
   }
 }

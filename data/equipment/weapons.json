@@ -1,0 +1,55 @@
+{
+    "dev_staff": {
+        "id": "dev_staff",
+        "name": "Dev Staff",
+        "description": "The Dev Staff is a developer-only weapon.",
+        "caracteristics": {
+            "raw_buff_int": 1000000
+        }
+    },
+    "capital_sword": {
+        "id": "capital_sword",
+        "name": "Sword of the Capital",
+        "description": "The Capital Sword is a basic weapon given to all beginner warriors in La Capitale.",
+        "caracteristics": {
+            "raw_buff_vit": 1,
+            "raw_buff_str": 2
+        }
+    },
+    "iron_fang": {
+        "id": "iron_fang",
+        "name": "Iron Fang",
+        "description": "The Iron Fang is a basic weapon given to all beginner assassins in La Capitale.",
+        "caracteristics": {
+            "raw_buff_agi": 1,
+            "raw_buff_dex": 2
+        }
+    },
+    "apprentice_book": {
+        "id": "apprentice_book",
+        "name": "Apprentice Book",
+        "description": "The Apprentice Book is a basic weapon given to all beginner mages in La Capitale.",
+        "caracteristics": {
+            "raw_buff_int": 2,  
+            "raw_buff_res": 1
+        }
+    },
+    "wooden_staff": {
+        "id": "church_staff",
+        "name": "Staff of the Church",
+        "description": "The Church Staff is a basic weapon given to all beginner clerics in La Capitale.",
+        "caracteristics": {
+            "raw_buff_int": 1,
+            "raw_buff_res": 2
+        }
+    },
+    "hunter_bow": {
+        "id": "hunter_bow",
+        "name": "Hunter's Bow",
+        "description": "The Hunter's Bow is a basic weapon given to all beginner archers in La Capitale.",
+        "caracteristics": {
+            "raw_buff_agi": 2,
+            "raw_buff_dex": 1
+        }
+    }
+}
