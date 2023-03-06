@@ -2,6 +2,11 @@
     "slime_lake": {
         "name": "Slime Lake",
         "description": "A quiet place with only slimes roaming around. It's a good place to train your skills.",
+        "required": {
+            "level": "",
+            "quests": "",
+            "items": ""  
+        },
         "monsters": {
             "group1": {
                 "m-names": ["slime", "slime", "slime"],
