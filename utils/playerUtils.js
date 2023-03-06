@@ -169,12 +169,40 @@ exports.exp.award = async function(id, exp, channel) {
     }
 }
 
+exports.levelUpStats = async function(id, level) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+
+    var query = { name: "info" };
+    const info = await playerCollection.findOne(query);
+    const userClass = info.class;
+
+    console.log("hello ?");
+
+    const strength = classes[userClass].base_stats.strength*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.strength)*0.5);
+    const vitality = classes[userClass].base_stats.vitality*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.vitality)*0.5);
+    const resistance = classes[userClass].base_stats.resistance*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.resistance)*0.5);
+    const dexterity = classes[userClass].base_stats.dexterity*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.dexterity)*0.5);
+    const agility = classes[userClass].base_stats.agility*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.agility)*0.5);
+    const intelligence = classes[userClass].base_stats.intelligence*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.intelligence)*0.5);
+
+    query = { name: "stats" };
+    const update = { $set: { strength: strength,
+                             vitality: vitality,
+                             resistance: resistance,
+                             dexterity: dexterity,
+                             agility: agility,
+                             intelligence: intelligence, }};
+    const result = await playerCollection.updateOne(query, update, {upsert: false});
+
+    
+}
+
 exports.exp.getLevelRewards = async function(id, level, channel) {
     const info = await exports.getData(id, "info");
     if(!channel)
         return;
     channel.send("Vous avez atteint le niveau " + level + " !");
-    exports.updateStats(id, info.class);
+    exports.levelUpStats(id, level);
 }
 
 

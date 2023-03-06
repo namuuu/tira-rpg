@@ -286,7 +286,8 @@ exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, tar
     }
 
     let monster = exports.getPlayerInCombat(monsterId, combatInfo);
-    const random = Math.random() * (monster.skills.length - 1);
+    const random = Math.floor(Math.random() * (monster.skills.length));
+    console.log(random);
     exeData.skill = skillList[monster.skills[random]];
 
     let log = skillUtil.execute(exeData);

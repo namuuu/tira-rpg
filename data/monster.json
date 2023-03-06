@@ -35,8 +35,80 @@
             "weight": 1
         }]
     },
+    "wolf": {
+        "name": "Wolf",
+        "exp": 5,
+        "money": 3,
+        "base_stats": {
+            "strength": 9,
+            "vitality": 5,
+            "resistance": 4,
+            "dexterity": 7,
+            "agility": 10,
+            "intelligence": 2
+        },
+        "mod_stats": {
+            "strength": 0,
+            "vitality": 0,
+            "resistance": 0,
+            "dexterity": 3,
+            "agility": 2,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "boots": null
+        },
+        "skills": [{
+            "id": "bite",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "basic_fang",
+            "pack": 1,
+            "weight": 1
+        }]
+    },
+    "bird": {
+        "name": "Bird",
+        "exp": 40,
+        "money": 8,
+        "base_stats": {
+            "strength": 5,
+            "vitality": 3,
+            "resistance": 2,
+            "dexterity": 3,
+            "agility": 10,
+            "intelligence": 4
+        },
+        "mod_stats": {
+            "strength": 0,
+            "vitality": 0,
+            "resistance": 0,
+            "dexterity": 0,
+            "agility": 4,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "boots": null
+        },
+        "skills": [{
+            "id": "peck",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "feather",
+            "pack": 1,
+            "weight": 1
+        }]
+    },
     "slime": {
-        "name": "Blue Slime",
+        "name": "Basic Slime",
         "exp": 4,
         "money": 9,
         "base_stats": {
@@ -71,23 +143,23 @@
             "weight": 1
         }]
     },
-    "wolf": {
-        "name": "Wolf",
-        "exp": 9,
-        "money": 10,
+    "blue_slime": {
+        "name": "Blue Slime",
+        "exp": 6,
+        "money": 12,
         "base_stats": {
-            "strength": 7,
-            "vitality": 6,
-            "resistance": 5,
-            "dexterity": 8,
-            "agility": 12,
-            "intelligence": 3
+            "strength": 5,
+            "vitality": 8,
+            "resistance": 4,
+            "dexterity": 18,
+            "agility": 8,
+            "intelligence": 2
         },
         "mod_stats": {
-            "strength": 0,
-            "vitality": 0,
+            "strength": 1,
+            "vitality": 4,
             "resistance": 0,
-            "dexterity": 2,
+            "dexterity": 3,
             "agility": 2,
             "intelligence": 0
         },
@@ -98,33 +170,37 @@
             "boots": null
         },
         "skills": [{
-            "id": "bite",
+            "id": "front_attack",
+            "weight": 3
+        },
+        {
+            "id": "acid_spin",
             "weight": 1
         }],
         "loots": [{
-            "id": "basic_fang",
+            "id": "slime_juice",
             "pack": 1,
             "weight": 1
         }]
     },
-    "bird": {
-        "name": "Bird",
-        "exp": 40,
-        "money": 8,
+    "red_slime": {
+        "name": "Red Slime",
+        "exp": 8,
+        "money": 15,
         "base_stats": {
-            "strength": 3,
-            "vitality": 3,
-            "resistance": 2,
-            "dexterity": 3,
-            "agility": 15,
-            "intelligence": 4
+            "strength": 12,
+            "vitality": 6,
+            "resistance": 4,
+            "dexterity": 12,
+            "agility": 12,
+            "intelligence": 2
         },
         "mod_stats": {
-            "strength": 0,
-            "vitality": 0,
+            "strength": 5,
+            "vitality": 2,
             "resistance": 0,
-            "dexterity": 0,
-            "agility": 4,
+            "dexterity": 3,
+            "agility": 2,
             "intelligence": 0
         },
         "equipment": {
@@ -134,14 +210,66 @@
             "boots": null
         },
         "skills": [{
-            "id": "peck",
+            "id": "front_attack",
+            "weight": 4
+        },
+        {
+            "id": "acid_flame",
             "weight": 1
         }],
         "loots": [{
-            "id": "feather",
+            "id": "slime_juice",
             "pack": 1,
             "weight": 1
         }]
+    },
+    "king_slime": {
+        "name": "King Slime",
+        "exp": 15,
+        "money": 20,
+        "base_stats": {
+            "strength": 15,
+            "vitality": 20,
+            "resistance": 5,
+            "dexterity": 15,
+            "agility": 15,
+            "intelligence": 3
+        },
+        "mod_stats": {
+            "strength": 5,
+            "vitality": 5,
+            "resistance": 0,
+            "dexterity": 3,
+            "agility": 2,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "boots": null
+        },
+        "skills": [{
+            "id": "front_attack",
+            "weight": 3
+        },
+        {
+            "id": "acid_flame",
+            "weight": 1
+        },
+        {
+            "id": "acid_spin",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "slime_juice",
+            "pack": 1,
+            "weight": 2
+        },
+        {
+            "id": "slimy_crown",
+            "pack": 1,
+            "weight": 0.1
+        }]
     }
-    
 }

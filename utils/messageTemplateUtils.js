@@ -71,7 +71,6 @@ exports.generateLocationSelector = async function(message) {
 
 	for(var i = 0; i < Object.keys(locationData).length; i++) {
 		for (var j = 0; j < locationData[Object.keys(locationData)[i]].zones.length; j++) {
-
 			const currentLocation = await player.getData(message.author.id, "info");
 			if (currentLocation.location == locationData[Object.keys(locationData)[i]].zones[j]) {	
 				continue;
