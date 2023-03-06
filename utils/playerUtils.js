@@ -157,9 +157,7 @@ exports.exp.award = async function(id, exp, channel) {
     
     await playerCollection.updateOne({ name: "info" }, { $set: { exp: newLevel.exp, level: newLevel.level } }, { upsert: true });
 
-    console.log(info.level + " -> " + newLevel.level);
     for(let i=info.level; i<newLevel.level; i++) {
-        console.log("Level up !");
         exports.exp.getLevelRewards(id, i, channel);
     }
 }

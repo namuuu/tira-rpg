@@ -1,6 +1,7 @@
 const { prefix } = require('./../config.json');
 const { EmbedBuilder } = require('discord.js');
 const player = require('../utils/playerUtils.js');
+const template = require('../utils/messageTemplateUtils.js');
 const permsUtils = require('../utils/permsUtils.js');
 
 module.exports = {
@@ -27,9 +28,11 @@ module.exports = {
             message.channel.send({embeds: [unknownEmbed]});
             return;
         };
+
+        const executeCmd = client.commands.get(command);
         
         // Check if the command requires a character to exist in the database
-        if(client.commands.get(command).requireCharacter && await player.doesExists(message.author.id) == false) {
+        if(executeCmd.requireCharacter && await !player.doesExists(message.author.id)) {
             // If it doesn't exist, send a message to the user
             const noCharacterEmbed = new EmbedBuilder()
                 .setColor('F08080')
@@ -37,6 +40,11 @@ module.exports = {
                 .addFields({ name: 'You need to create a character before you can use this command.', value: 'Use the `start` command to create a character.' })
             
             message.channel.send({embeds: [noCharacterEmbed]});
+            return;
+        }
+
+        if(executeCmd.requireState != null && !executeCmd.requireState.contains(player.getState(message.author.id))) {
+            template.sendErrorEmbed(message, 'You cannot use this command in your current state.');
             return;
         }
 

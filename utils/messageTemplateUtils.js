@@ -8,6 +8,15 @@ const classData = require('../data/classes.json');
 
 // Player data management
 
+exports.sendErrorEmbed = async function(message, error) {
+	const errorEmbed = new EmbedBuilder()
+		.setColor('F08080')
+		.setAuthor({name: 'An error occured'})
+		.addFields( { name: 'An error occured while executing your command.', value: error } );
+	
+	return message.channel.send({embeds: [errorEmbed]});
+}
+
 exports.generateSelector = async function(message) {
 	list = [];
 	for(var i = 0; i < Object.keys(classData).length; i++) {
