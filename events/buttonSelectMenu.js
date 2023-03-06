@@ -66,7 +66,7 @@ module.exports = {
                 var currentItem = interaction.message.components[0].components[0].customId.split('-')[3];
                 var shop = interaction.message.components[0].components[0].customId.split('-')[2];
 
-                var buy = player.takeMoney(interaction.user.id, shopsData[shop].items[currentItem].cost * currentQuantity, interaction.message);
+                var buy = await player.takeMoney(interaction.user.id, shopsData[shop].items[currentItem].cost * currentQuantity, interaction.message);
 
                 if(!buy) {
                     await interaction.message.delete(); 

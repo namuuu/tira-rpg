@@ -23,7 +23,7 @@ exports.create = async function(id, className) {
     const classData = classes[className];
 
     const data = [
-        { name: "info", class: className, money: 100, level: 0, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, location: "temple" },
+        { name: "info", class: className, money: 100, level: 0, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, location: "capital" },
         { name: "stats", 
             strength: classData.base_stats.strength,
             vitality: classData.base_stats.vitality, 
