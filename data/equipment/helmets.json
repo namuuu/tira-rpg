@@ -1,10 +1,18 @@
 {
-    "dev_staff": {
-        "id": "dev_staff",
-        "name": "Dev Staff",
-        "description": "The Dev Staff is a developer-only weapon.",
+    "leather": {
+        "id": "leather",
+        "name": "Leather",
+        "description": "A basic helmet made of leather.",
         "caracteristics": {
-            "raw_damage": 5
+            "raw_buff_vit": 1
+        }
+    },
+    "iron": {
+        "id": "iron",
+        "name": "Iron",
+        "description": "A basic helmet made of iron.",
+        "caracteristics": {
+            "raw_buff_vit": 2
         }
     }
 }
