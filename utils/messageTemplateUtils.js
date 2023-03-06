@@ -42,7 +42,7 @@ exports.sendEncounterMessage = async function(message, type) {
 			mainEmbed.addFields({name: 'Players', value: 'Waiting for players...'});
 			break;
 		default:
-			mainEmbed.addFields({name: 'Wrong type', value: 'Something seems to be wrong with our sysem.', inline: true});
+			mainEmbed.addFields({name: 'Wrong type', value: 'Something seems to be wrong with our system.', inline: true});
 			break;
 	}
 

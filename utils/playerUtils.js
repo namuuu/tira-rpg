@@ -21,7 +21,7 @@ exports.create = async function(id) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
     const data = [
-        { name: "info", class: "noclass", level: 0, exp: 0, health: 10, location: "temple"},
+        { name: "info", class: "noclass", money: 100, level: 0, exp: 0, health: 10, location: "temple"},
         { name: "stats", strength: 0, vitality: 10, resistance: 0, dexterity: 0, agility: 0, intelligence: 0 },
         { name: "inventory", items: [], skills: [] , activeSkills: []},
         { name: "misc", lastRegen: Date.now(), party: { owner: id, members: [] }},
@@ -155,9 +155,11 @@ exports.exp.award = async function(id, exp, channel) {
 }
 
 exports.exp.getLevelRewards = async function(id, level, channel) {
+    const info = await exports.getData(id, "info");
     if(!channel)
         return;
     channel.send("Vous avez atteint le niveau " + level + " !");
+    this.updateStats(id, info.class);
 }
 
 
@@ -219,6 +221,38 @@ exports.setLocation = async function(id, location) {
     const query = { name: "info" };
     
     const update = { $set: { location: location } };
+    const options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+
+    return true;
+}
+
+exports.giveMoney = async function(id, amount) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const info = await this.getData(id, "info");
+    const newMoney = info.money + amount;
+
+    const query = { name: "info" };
+
+    const update = { $set: { money: newMoney } };
+    const options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+
+    return true;
+}
+
+exports.takeMoney = async function(id, amount, message) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const info = await this.getData(id, "info");
+    const newMoney = info.money - amount;
+
+    if (newMoney < 0) {
+        message.channel.send("You don't have enough money to do that.");
+        return false;
+    }
+
+    const query = { name: "info" };
+    const update = { $set: { money: newMoney } };
     const options = { upsert: true };
     const result = await playerCollection.updateOne(query, update, options);
 

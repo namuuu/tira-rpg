@@ -131,7 +131,7 @@ async function typeMain(embed, playerId) {
     embed.addFields(
         { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
-        { name: 'Money', value: 'Not implemented yet'},
+        { name: 'Money', value: '$' + playerInfo.money, inline: true },
         { name: 'Location', value: zones[playerInfo.location].name }
     );
 
