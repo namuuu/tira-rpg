@@ -23,7 +23,7 @@ exports.create = async function(id, className) {
     const classData = classes[className];
 
     const data = [
-        { name: "info", class: className, level: 0, exp: 0, health: classData.base_stats.vitality, location: "tutorial" },
+        { name: "info", class: className, level: 0, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, location: "tutorial" },
         { name: "stats", 
             strength: classData.base_stats.strength,
             vitality: classData.base_stats.vitality, 
@@ -150,20 +150,16 @@ exports.health.passiveRegen = async function(userID) {
 exports.exp.award = async function(id, exp, channel) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
-    const query = { name: "info" };
-    let options = { 
-        projection: {_id: 0},
-    };
+    const info = await playerCollection.findOne({ name: "info" }, { projection: {_id: 0}});
 
-    const info = await playerCollection.findOne(query, options);
     const newExp = info.exp + exp;
     const newLevel = rpgInfoUtils.calculateNewLevelExp(info.level, newExp);
     
-    const update = { $set: { exp: newLevel.exp, level: newLevel.level } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne({ name: "info" }, { $set: { exp: newLevel.exp, level: newLevel.level } }, { upsert: true });
 
-    for(let i=info.level+1; i<=newLevel.level; i++) {
+    console.log(info.level + " -> " + newLevel.level);
+    for(let i=info.level; i<newLevel.level; i++) {
+        console.log("Level up !");
         exports.exp.getLevelRewards(id, i, channel);
     }
 }
@@ -220,3 +216,26 @@ exports.setLocation = async function(id, location) {
 
     return true;
 }
+
+exports.setState = async function (playerCollection, id, state) {
+    if(playerCollection == null || playerCollection == undefined)
+        playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const query = { name: "info" };
+
+    const update = { $set: { state: state } };
+
+    playerCollection.updateOne(query, update, {upsert: true});
+}
+
+exports.getState = async function (id) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+
+    const query = { name: "info" };
+    let options = { 
+        projection: {_id: 0, class: 0, level: 0, exp: 0},
+    };
+
+    const info = await playerCollection.findOne(query, options);
+    return info.state;
+}
+

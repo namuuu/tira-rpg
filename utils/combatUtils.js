@@ -544,7 +544,7 @@ exports.rewardLoot = async function(combat, thread) {
         if(victor.type == "human") {
             const embed = new EmbedBuilder()
                 .setTitle( Client.client.users.cache.get(victor.id).username + '\'s earnings!')
-            player.exp.award(victor.id, totalExp);
+            player.exp.award(victor.id, totalExp, thread);
             embed.setDescription("You earned a total of " + totalExp + " experience points!");
 
             var lootDescription = "";

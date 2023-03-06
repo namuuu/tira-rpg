@@ -129,13 +129,17 @@ async function typeMain(embed, playerId) {
 
     const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
 
-    const zones = JSON.parse(fs.readFileSync('./data/zones.json'));
+    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerInfo.location];
+    if(zone == undefined)
+        var zoneName = playerInfo.location;
+    else
+        var zoneName = zone.name;
 
     embed.addFields(
         { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
         { name: 'Money', value: 'Not implemented yet'},
-        { name: 'Location', value: zones[playerInfo.location].name }
+        { name: 'Location', value: zoneName }
     );
 
     return {embed: embed};

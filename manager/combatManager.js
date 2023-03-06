@@ -2,6 +2,7 @@ const { Client, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const util = require('../utils/combatUtils.js');
 const embed = require('../utils/messageTemplateUtils.js');
+const playerUtils = require('../utils/playerUtils.js');
 
 
 /**
@@ -67,6 +68,12 @@ exports.deleteCombat = async function(channel) {
         return;
     }
 
+    for(player of combatData.team1.concat(combatData.team2)) {
+        if(player.type == "human") {
+            playerUtils.setState(null, player.id, {name: "idle"});
+        }
+    }
+
     util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
 
     util.deleteThread(channel);
@@ -99,6 +106,13 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
 
     playerCollection = Client.mongoDB.db('player-data').collection(playerId);
     const playerInfo = await playerCollection.findOne({ name: "info" }, { _id: 0 });
+
+    if(playerInfo.state.name != "idle") {
+        console.log("[DEBUG] Attempted to join a combat with a non-idle player. (NON_IDLE_PLAYER_JOIN_ATTEMPT)");
+        interaction.reply({ content:"Your character is not able to go in combat!", ephemeral: true});
+        return;
+    }
+
     const playerStats = await playerCollection.findOne({ name: "stats" }, { _id: 0 });
     const playerInv = await playerCollection.findOne({ name: "inventory" }, { _id: 0 });
     const playerMisc = await playerCollection.findOne({ name: "misc" }, { _id: 0 });
@@ -145,6 +159,8 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
     util.updateMainMessage(info, message, "prebattle");
 
     await combatCollection.updateOne({}, update, { upsert: true });
+
+    await playerCollection.updateOne({ name: "info" }, { $set: { state: {name: "in-combat", combatid: combatId} } }, { upsert: true });
 
     interaction.reply({ content: 'You have joined the combat!', ephemeral: true });
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
@@ -337,7 +353,11 @@ exports.callForVictory = async function(combat, thread, victor) {
             break;
     }
 
-
+    for(player of combat.team1.concat(combat.team2)) {
+        if(player.type == "human") {
+            playerUtils.setState(null, player.id, {name: "idle"});
+        }
+    }
 
     await thread.send("The combat is over !")
     await thread.setLocked(true);
