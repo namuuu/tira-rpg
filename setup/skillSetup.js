@@ -1,4 +1,5 @@
 const skillMap = new Map();
+const { ConnectionService } = require('discord.js');
 const combatUtils = require('../utils/combatUtils.js');
 
 module.exports = {
@@ -18,16 +19,18 @@ module.exports = {
 function heal(exeData, quantity, log) {
 }
 
-function damage(exeData, quantity, log) {
-  const { combat, targetId, thread } = exeData;
+function damage(exeData, power, log) {
+  const { combat, targetId, casterId } = exeData;
 
+  console.log(casterId);
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
   const target = combatUtils.getPlayerInCombat(targetId, combat);
-  target.health -= quantity;
+  
+  const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
 
-  if(combatUtils.getLogger(log, targetId).damage == undefined)
-    combatUtils.getLogger(log, targetId).damage = quantity;
-  else
-    combatUtils.getLogger(log, targetId).damage += quantity;
+  target.health -= damage;
+
+  combatUtils.addToValueTologger(log, targetId, "damage", damage);
 }
 
 function cooldown(exeData, quantity, log) {

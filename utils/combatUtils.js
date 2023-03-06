@@ -1,5 +1,6 @@
-const { Client, EmbedBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const embedUtils = require('../utils/messageTemplateUtils.js');
+const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const player = require('../utils/playerUtils.js');
+const inventory =  require('../utils/inventoryUtils.js');
 const manager = require('../manager/combatManager.js');
 const skillUtil = require('../utils/skillUtils.js');
 const skillList = require('../data/skills.json');
@@ -185,6 +186,7 @@ exports.sendTargetSelector = async function(combat, player, thread) {
     let i = 0;
 
     for (const enemy of enemyTeam) {
+        if(enemy.health <= 0) continue;
         stringSelectOptions.push({
             label: enemy.id,
             value: enemy.id,
@@ -259,7 +261,33 @@ exports.executeSkill = async function(combatInfo, thread, skillId, casterId, tar
         skill: skillList[skillId],
     }
 
-    //console.log(exeData);
+    let log = skillUtil.execute(exeData);
+
+    combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
+
+    const update = {
+        $set: {
+            team1: exeData.combat.team1,
+            team2: exeData.combat.team2,
+        }
+    };
+
+    await combatCollection.updateOne({}, update, { upsert: true });
+
+    manager.finishTurn(exeData, log);
+}
+
+exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, targetId) {
+    let exeData = {
+        combat: combatInfo,
+        thread: thread,
+        casterId: monsterId,
+        targetId: targetId,
+    }
+
+    let monster = exports.getPlayerInCombat(monsterId, combatInfo);
+    const random = Math.random() * (monster.skills.length - 1);
+    exeData.skill = skillList[monster.skills[random]];
 
     let log = skillUtil.execute(exeData);
 
@@ -283,11 +311,8 @@ exports.getSoonestTimelineEntity = function(combatInfo) {
 
     var fighterList = combatInfo.team1.concat(combatInfo.team2);
 
-    //console.log(combatInfo);
-
     for (const fighter of fighterList) {
-        //console.log(fighter);
-        soonestFighter = this.compareTimelines(soonestFighter, fighter);
+        soonestFighter = exports.compareTimelines(soonestFighter, fighter);
     }
 
     return soonestFighter;
@@ -300,9 +325,9 @@ exports.getSoonestTimelineEntity = function(combatInfo) {
  * @returns the fastest player. or the player who exists if one is not defined.
  */
 exports.compareTimelines = function(player1, player2) {
-    if (player1 == null || player1 == undefined)
+    if (player1 == null || player1 == undefined || player1.health <= 0)
         return player2;
-    if (player2 == null || player2 == undefined)
+    if (player2 == null || player2 == undefined || player2.health <= 0)
         return player1;
 
     if (player1.timeline < player2.timeline)
@@ -355,14 +380,17 @@ exports.getPlayerEnemyTeam = function(playerId, combat) {
 exports.createMonsterData = function(combat, monster) {
 
     let i = 0;
-    while((player = this.getPlayerInCombat(monster + "-" + i, combat)) != null) {
+    if(this.getPlayerInCombat(monster, combat) != null) {
         i++;
+        while((this.getPlayerInCombat(monster + "-" + i, combat)) != null) {
+            i++;
+        }
     }
+    
 
     const mobData = mobList[monster];
 
     const dummy = {
-        id: monster + "-" + i,
         type: "monster",
         timeline: 0,
         stats: {
@@ -374,6 +402,12 @@ exports.createMonsterData = function(combat, monster) {
             agility: mobData.base_stats.agility + Math.floor(Math.random(mobData.mod_stats.agility)),
         },
         equipment: {}
+    }
+
+    if(i > 0) {
+        dummy.id = monster + "-" + i;
+    } else {
+        dummy.id = monster;
     }
 
     dummy.health = dummy.stats.vitality;
@@ -392,9 +426,9 @@ exports.announceNewTurn = async function(thread, player) {
 
     const embed = new EmbedBuilder();
 
-    if(player.type = "human") {
+    if(player.type == "human") {
         embed
-            .setDescription('It\'s <' + player.id + '>\'s turn!')
+            .setDescription('It\'s <@' + player.id + '>\'s turn!')
             .setColor("#ffffff");
     } else {
         embed
@@ -417,6 +451,14 @@ exports.getLogger = function(log, playerId) {
     return playerLog;
 }
 
+exports.addToValueTologger = function(log, playerId, valueName, value) {
+    let playerLog = this.getLogger(log, playerId);
+    if(playerLog[valueName] == null || playerLog[valueName] == undefined) {
+        playerLog[valueName] = 0;
+    }
+    playerLog[valueName] += value;
+}
+
 /**
  * Logs the effects an entity suffered into an embed (in argument).
  * @param {*} embed the embed to log to (it adds a field)
@@ -428,8 +470,9 @@ exports.logResults = function(embed, log, entity) {
     let title = "";
     let description = "";
 
-    if(entity.type == "player") {
-        title = "<@" + entity.id + ">";
+    if(entity.type == "human") {
+        const name = Client.client.users.cache.get(entity.id).username;
+        title = name;
     } else {
         title = entity.id;
     }
@@ -470,15 +513,59 @@ exports.checkForVictory = function(combat) {
         }
     }
 
-    if(team1Alive) {
+
+
+    if(team1Alive && !team2Alive) {
         return 1;
-    } else if(team2Alive) {
+    } else if(team2Alive && !team1Alive) {
         return 2;
     }
     return 0;
 }
 
-exports.updateMainMessage = async function(combatInfo, message, state) {
+exports.rewardLoot = async function(combat, thread) {
+    var lootTable = [];
+    var totalExp = 0;
+
+    console.log(combat);
+
+    for(const enemy of combat.team2) {
+        if(enemy.type == "monster") {
+            const enemyType = enemy.id.split("-")[0];
+            const enemyData = mobList[enemyType];
+            lootTable.push(...enemyData.loots);
+            totalExp = totalExp + enemyData.exp;
+        console.log("enemy exp: " + enemyData.exp + " total exp: " + totalExp);
+        }   
+    }
+    totalExp = Math.floor(totalExp / combat.team1.length);
+
+    for(const victor of combat.team1) {
+        if(victor.type == "human") {
+            const embed = new EmbedBuilder()
+                .setTitle( Client.client.users.cache.get(victor.id).username + '\'s earnings!')
+            player.exp.award(victor.id, totalExp);
+            embed.setDescription("You earned a total of " + totalExp + " experience points!");
+
+            var lootDescription = "";
+
+            for(const loot of lootTable) {
+                inventory.giveItem(victor.id, loot.id, loot.pack );
+                lootDescription += loot.id + " x" + loot.pack + "\n";
+            }
+
+            if(lootDescription != "") {
+                embed.addFields({name: "Loot", value: lootDescription});
+            }
+
+            thread.send({ embeds: [embed] });
+        }
+    }
+
+    
+}
+
+exports.updateMainMessage = function(combatInfo, message, state) {
 
     const embed = new EmbedBuilder()
 		.setTitle('The roar of battle is heard in the distance...')

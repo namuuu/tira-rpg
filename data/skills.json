@@ -20,12 +20,48 @@
       "damage": 40
     }
   },
+  "front_attack": {
+    "name": "Front Attack",
+    "number":"2",
+    "description": "A basic attack where the caster charges forward.",
+    "effects": {
+      "cooldown": 12,
+      "damage": 2
+    }
+  },
+  "bite": {
+    "name": "Bite",
+    "number":"3",
+    "description": "A strong bite.",
+    "effects": {
+      "cooldown": 16,
+      "damage": 4
+    }
+  },
+  "peck": {
+    "name": "Peck",
+    "number":"4",
+    "description": "A small peck.",
+    "effects": {
+      "cooldown": 16,
+      "damage": 2
+    }
+  },
   "default": {
     "name": "Struggle",
     "number":"1",
     "description": "Is just struggling",
     "effects": {
       "cooldown": 10
+    }
+  },
+  "slash": {
+    "name": "Slash",
+    "number":"5",
+    "description": "A simple vertical slash, classic but reliable.",
+    "effects": {
+      "cooldown": 12,
+      "damage": 8
     }
   }
 }

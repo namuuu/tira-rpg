@@ -44,7 +44,10 @@ exports.giveItem = async function(playerId, item, quantity) {
     // If the item is already in the inventory, we add the quantity to the existing one
     // Else, we create a new entry for the item
     if(inventory.items[item] != undefined) {
-        inventory.items[item].quantity += quantity;
+        var int1 = parseInt(quantity);
+        var int2 = parseInt(inventory.items[item].quantity);
+        var int3 = int1 + int2;
+        inventory.items[item].quantity = int3;
     } else {
         inventory.items = {
             ...inventory.items,
@@ -126,10 +129,13 @@ async function typeMain(embed, playerId) {
 
     const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
 
+    const zones = JSON.parse(fs.readFileSync('./data/zones.json'));
+
     embed.addFields(
         { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
-        { name: 'Money', value: 'Not implemented yet', inline: true}
+        { name: 'Money', value: 'Not implemented yet'},
+        { name: 'Location', value: zones[playerInfo.location].name }
     );
 
     return {embed: embed};
@@ -153,6 +159,9 @@ async function typeItems(embed, playerId) {
     for (const [key, value] of Object.entries(inventory.items)) {
         description += `${items[key].name} (x${value.quantity}),`;
     }
+
+    if(description == "")
+        description = "Empty,";
 
     description = description.slice(0, -1);
 

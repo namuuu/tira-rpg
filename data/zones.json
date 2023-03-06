@@ -16,7 +16,8 @@
                 "m-names": ["slime", "wolf"],
                 "spawn-chance": "50"
             }
-        }
+        },
+        "shops": ["main_shop1", "main_shop2"]
     },
     "temple": {
         "name": "Forgotten Temple",
@@ -24,7 +25,7 @@
         "required": {
             "level": "",
             "quests": "",
-            "items": ["key"]    
+            "items": ""  
         },
         "monsters": {
             "group1": {
@@ -32,9 +33,10 @@
                 "spawn-chance": "50"
             },
             "group2": {
-                "m-names": ["delmotte"],
-                "spawn-chance": "50"
+                "m-names": ["bird"],
+                "spawn-chance": "1000000000000"
             }
-        }
+        },
+        "shops": ["main_shop2"]
     }
 }

@@ -1,4 +1,7 @@
 const player = require('../utils/playerUtils.js');
+const inventory = require('../utils/inventoryUtils.js');
+const selector = require('../utils/messageTemplateUtils.js');
+const shopsData = require('../data/shops.json');
 const { displayInventory } = require('../utils/inventoryUtils.js');
 const { startCombat, addPlayerToCombat } = require('../manager/combatManager.js');
 const { acceptInvitation } = require('../utils/partyUtils.js');
@@ -47,6 +50,30 @@ module.exports = {
                 break;
             case 'equip':	
                 receiveButton(interaction, userId, args); // Personal button handler (equipUtils.js)
+            case 'buyItem':
+
+                if(args[0] != interaction.user.id) {
+                    interaction.channel.send("If you would like to shop with your own character, please use the t.shop commande yourself ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                if (interaction.message.components[1] != undefined) {
+                    interaction.channel.send("Please select an item and a quantity to buy ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                var currentQuantity = interaction.message.components[0].components[0].customId.split('-')[4];
+                var currentItem = interaction.message.components[0].components[0].customId.split('-')[3];
+                var shop = interaction.message.components[0].components[0].customId.split('-')[2];
+
+                await inventory.giveItem(interaction.user.id, currentItem, currentQuantity);
+
+                interaction.channel.send("You bought " + currentQuantity + " " + shopsData[shop].items[currentItem].name + " ! " + "<@" + interaction.user.id + ">");
+
+                await interaction.message.delete(); 
+
+                selector.generateShopItemsSelector(interaction, shop, "0", "0");
+            break;
             default:
                 break;
         }

@@ -28,6 +28,7 @@ const { setupCaracteristics } = require('./setup/caracteristicsSetup.js');
 setupCaracteristics(client);
 
 // Setup mongo
+Client.client = client;
 Client.mongoDB = new MongoClient(process.env.MONGO_URI);
 
 

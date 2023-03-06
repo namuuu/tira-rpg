@@ -7,8 +7,16 @@
     "name": "Baguette",
     "description": "Une baguette. Donne 10 points de vie."
   },
-  "frites_ru": {
-    "name": "Frites du Restaurant Universitaire",
-    "description": "Donne 5 points de vie, mais poison pendant 27 ans. Se stack"
+  "slime_juice": {
+    "name": "Slime Juice",
+    "description": "A weird slimy liquid, with a pale blue color. It could be useful for sticking things together."
+  },
+  "basic_fang": {
+    "name": "Basic Fang",
+    "description": "A basic fang. It's not very sharp."
+  },
+  "feather": {
+    "name": "Feather",
+    "description": "A light feather."
   }
 }
