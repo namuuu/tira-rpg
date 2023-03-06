@@ -29,6 +29,24 @@
       "damage": 2
     }
   },
+  "acid_spin": {
+    "name": "Acid Spin",
+    "number":"6",
+    "description": "A spin attack that spits acid.",
+    "effects": {
+      "cooldown": 20,
+      "damage": 9
+    }
+  },
+  "acid_flame": {
+    "name": "Acid Flame",
+    "number":"7",
+    "description": "An acid flame attack.",
+    "effects": {
+      "cooldown": 30,
+      "damage": 12
+    }
+  },
   "bite": {
     "name": "Bite",
     "number":"3",
