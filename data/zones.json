@@ -17,7 +17,7 @@
                 "spawn-chance": "50"
             }
         },
-        "shops": ["main_shop1", "main_shop2"]
+        "shops": [""]
     },
     "temple": {
         "name": "Forgotten Temple",
@@ -37,6 +37,18 @@
                 "spawn-chance": "1000000000000"
             }
         },
-        "shops": ["main_shop2"]
+        "shops": [""]
+    },
+    "capital": {
+        "name": "La Capitale",
+        "description": "Tutorial/20",
+        "required": {
+            "level": "",
+            "quests": "",
+            "items": ""  
+        },
+        "monsters": {
+        },
+        "shops": ["item_shop1", "equipment_shop1"]
     }
 }

@@ -4,7 +4,26 @@
         "name": "The Holy Dragon's plate.",
         "description": "This plate is given to all beta-testers.",
         "caracteristics": {
-            "raw_damage": 5
+            "raw_buff_res": 3,
+            "raw_buff_vit": 3
+        }
+    },
+    "leather": {
+        "id": "leather",
+        "name": "Leather",
+        "description": "A basic armor made of leather.",
+        "caracteristics": {
+            "raw_buff_res": 1,
+            "raw_buff_vit": 2
+        }
+    },
+    "iron": {
+        "id": "iron",
+        "name": "Iron",
+        "description": "A basic armor made of iron.",
+        "caracteristics": {
+            "raw_buff_res": 1,
+            "raw_buff_vit": 3
         }
     }
 }
