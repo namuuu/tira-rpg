@@ -22,7 +22,6 @@ function heal(exeData, quantity, log) {
 function damage(exeData, power, log) {
   const { combat, targetId, casterId } = exeData;
 
-  console.log(casterId);
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
   const target = combatUtils.getPlayerInCombat(targetId, combat);
   

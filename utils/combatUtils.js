@@ -528,8 +528,6 @@ exports.rewardLoot = async function(combat, thread) {
     var totalExp = 0;
     var totalMoney = 0;
 
-    console.log(combat);
-
     for(const enemy of combat.team2) {
         if(enemy.type == "monster") {
             const enemyType = enemy.id.split("-")[0];
@@ -537,7 +535,6 @@ exports.rewardLoot = async function(combat, thread) {
             lootTable.push(...enemyData.loots);
             totalExp = totalExp + enemyData.exp;
             totalMoney = totalMoney + enemyData.money;
-        console.log("enemy exp: " + enemyData.exp + " total exp: " + totalExp);
         }   
     }
     totalExp = Math.floor(totalExp / combat.team1.length);

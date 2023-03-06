@@ -21,7 +21,11 @@ module.exports = {
                 combatManager.instanciateCombat(message, message.author);
                 break;
             case "delete":
-                combatManager.deleteCombat(message.channel);
+                if(args.length == 1) {
+                    combatManager.deleteCombat(message.channel);
+                } else {
+                    combatManager.softDeleteCombat(args[1]);
+                }
                 break;
             case "add-dummy":
                 combatManager.addEntityToCombat(message.channel, "dummy");
