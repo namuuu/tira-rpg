@@ -23,7 +23,7 @@ exports.create = async function(id, className) {
     const classData = classes[className];
 
     const data = [
-        { name: "info", class: className, level: 0, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, location: "tutorial" },
+        { name: "info", class: className, money: 100, level: 0, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, location: "temple" },
         { name: "stats", 
             strength: classData.base_stats.strength,
             vitality: classData.base_stats.vitality, 
@@ -165,9 +165,11 @@ exports.exp.award = async function(id, exp, channel) {
 }
 
 exports.exp.getLevelRewards = async function(id, level, channel) {
+    const info = await exports.getData(id, "info");
     if(!channel)
         return;
     channel.send("Vous avez atteint le niveau " + level + " !");
+    this.updateStats(id, info.class);
 }
 
 
@@ -239,3 +241,34 @@ exports.getState = async function (id) {
     return info.state;
 }
 
+exports.giveMoney = async function(id, amount) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const info = await this.getData(id, "info");
+    const newMoney = info.money + amount;
+
+    const query = { name: "info" };
+
+    const update = { $set: { money: newMoney } };
+    const options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+
+    return true;
+}
+
+exports.takeMoney = async function(id, amount, message) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(id);
+    const info = await this.getData(id, "info");
+    const newMoney = info.money - amount;
+
+    if (newMoney < 0) {
+        message.channel.send("You don't have enough money to do that.");
+        return false;
+    }
+
+    const query = { name: "info" };
+    const update = { $set: { money: newMoney } };
+    const options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+
+    return true;
+}

@@ -526,6 +526,7 @@ exports.checkForVictory = function(combat) {
 exports.rewardLoot = async function(combat, thread) {
     var lootTable = [];
     var totalExp = 0;
+    var totalMoney = 0;
 
     console.log(combat);
 
@@ -535,17 +536,21 @@ exports.rewardLoot = async function(combat, thread) {
             const enemyData = mobList[enemyType];
             lootTable.push(...enemyData.loots);
             totalExp = totalExp + enemyData.exp;
+            totalMoney = totalMoney + enemyData.money;
         console.log("enemy exp: " + enemyData.exp + " total exp: " + totalExp);
         }   
     }
     totalExp = Math.floor(totalExp / combat.team1.length);
+    totalMoney = Math.floor(totalMoney / combat.team1.length);
 
     for(const victor of combat.team1) {
         if(victor.type == "human") {
             const embed = new EmbedBuilder()
                 .setTitle( Client.client.users.cache.get(victor.id).username + '\'s earnings!')
-            player.exp.award(victor.id, totalExp, thread);
-            embed.setDescription("You earned a total of " + totalExp + " experience points!");
+            player.exp.award(victor.id, totalExp);
+            player.giveMoney(victor.id, totalMoney);
+            embed.setDescription("You earned a total of " + totalExp + " experience points and " + totalMoney + " $ !");
+            
 
             var lootDescription = "";
 

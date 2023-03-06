@@ -66,6 +66,14 @@ module.exports = {
                 var currentItem = interaction.message.components[0].components[0].customId.split('-')[3];
                 var shop = interaction.message.components[0].components[0].customId.split('-')[2];
 
+                var buy = player.takeMoney(interaction.user.id, shopsData[shop].items[currentItem].cost * currentQuantity, interaction.message);
+
+                if(!buy) {
+                    await interaction.message.delete(); 
+                    selector.generateShopItemsSelector(interaction, shop, "0", "0");
+                    break;
+                }
+
                 await inventory.giveItem(interaction.user.id, currentItem, currentQuantity);
 
                 interaction.channel.send("You bought " + currentQuantity + " " + shopsData[shop].items[currentItem].name + " ! " + "<@" + interaction.user.id + ">");
