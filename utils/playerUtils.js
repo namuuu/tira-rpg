@@ -163,21 +163,7 @@ exports.exp.getLevelRewards = async function(id, level, channel) {
 
 exports.setClass = async function(id, className) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
-
-    const query = { name: "info" };
-    let options = { 
-        projection: {_id: 0},
-    };
-
-    const info = await playerCollection.findOne(query, options);
-
-    // if(info.class != "noclass") {
-    //     return false;
-    // }
-
-    const update = { $set: { class: className } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne({ name: "info" }, { $set: { class: className } }, { upsert: true });
 
     this.updateStats(id, className);
 
@@ -196,8 +182,6 @@ exports.updateStats = async function(id, className) {
     const agility = classes[className].base_stats.agility;
     const intelligence = classes[className].base_stats.intelligence;
 
-    console.log(strength);
-
     const query = { name : "stats"};
     const update = { $set: { strength: strength,
                              vitality: vitality,
@@ -206,8 +190,6 @@ exports.updateStats = async function(id, className) {
                              agility: agility,
                              intelligence: intelligence, }};
     const result = await playerCollection.updateOne(query, update, {upsert: false});
-
-    console.log(result);
 
     return true;
     
