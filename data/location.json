@@ -2,11 +2,6 @@
     "serene": {
         "name": "Serene",
         "description": "A serene place to relax and enjoy the view.",
-        "zones": ["capital, temple, slime_lake"]
-    },
-    "moondust": {
-        "name": "Moondust Mountain",
-        "description": "Celeste gaming",
-        "zones": [""]
+        "zones": ["capital", "temple", "slime_lake"]
     }
 }

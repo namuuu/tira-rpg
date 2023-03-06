@@ -1,7 +1,7 @@
 {
 "item_shop1": {
-    "id": "main_shop1",
-    "name": "Main Shop 1",
+    "id": "item_shop1",
+    "name": "Item Shop 1",
     "rarity": 1,
     "items": {
         "apple": {

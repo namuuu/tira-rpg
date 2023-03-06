@@ -167,7 +167,7 @@ exports.exp.getLevelRewards = async function(id, level, channel) {
     if(!channel)
         return;
     channel.send("Vous avez atteint le niveau " + level + " !");
-    this.updateStats(id, info.class);
+    exports.updateStats(id, info.class);
 }
 
 
