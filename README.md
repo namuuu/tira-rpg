@@ -87,3 +87,4 @@ Your discord.js version is outdated (Needed version is at least discordjs v14). 
 | Canfrixe | Developer |
 | Az' | Game Designer |
 | Viixyy | Game Designer |
+| Nekotaku | Game Designer |
