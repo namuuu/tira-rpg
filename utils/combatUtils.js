@@ -168,15 +168,7 @@ exports.receiveSkillSelector = async function(interaction) {
 
     interaction.message.delete();
 
-    var isSingle = false;
-
-    for(var i = 0 ; i < skillList[skillId].type.length ; i++) {
-        if(skillList[skillId].type[i].split('-')[1] == "single") {
-            var isSingle = true;
-        }
-    }
-
-    if(combatInfo.current_action.aim_at == null || combatInfo.current_action.aim_at == undefined && isSingle) {
+    if(combatInfo.current_action.aim_at == null || combatInfo.current_action.aim_at == undefined) {
         this.sendTargetSelector(combatInfo, interaction.user, interaction.channel);
     } else {
         // EXECUTE SKILL
@@ -286,6 +278,7 @@ exports.receiveTargetSelector = async function(interaction) {
 }
 
 exports.executeSkill = async function(combatInfo, thread, skillId, casterId, targetId) {
+
     let exeData = {
         combat: combatInfo,
         thread: thread,
