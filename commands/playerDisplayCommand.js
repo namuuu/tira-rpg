@@ -17,7 +17,7 @@ module.exports = {
         const buttons = new ActionRowBuilder();
 
         if(args.length == 0) {
-            ret = await inv.typeMain(embed, author.id);
+            ret = (await inv.typeMain(embed, author.id)).embed;
         } else {
             switch(args[0]) {
                 case "items":
@@ -45,6 +45,6 @@ module.exports = {
         componentList.push(row);
 
 
-        message.channel.send({ embeds: [ret], components: [row] });
+        message.channel.send({ embeds: [ret], components: componentList });
     }
 }

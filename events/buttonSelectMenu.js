@@ -3,7 +3,7 @@ const inventory = require('../utils/inventoryUtils.js');
 const selector = require('../utils/messageTemplateUtils.js');
 const shopsData = require('../data/shops.json');
 const { displayInventory } = require('../utils/inventoryUtils.js');
-const { startCombat, addPlayerToCombat } = require('../manager/combatManager.js');
+const { startCombat, addPlayerToCombat, removePlayerFromCombat } = require('../manager/combatManager.js');
 const { acceptInvitation } = require('../utils/partyUtils.js');
 const { sendStringAllSkills, sendModal } = require('../utils/skillUtils.js');
 const { receiveButton } = require('../utils/equipUtils.js');
@@ -41,6 +41,9 @@ module.exports = {
                 break;
             case 'joinFight':
                 await addPlayerToCombat(userId, args[0], args[1], interaction); // Adds a player to a combat (combatManager.js)
+                break;
+            case 'leaveFight':
+                await removePlayerFromCombat(userId, args[0], interaction); // Removes a player from a combat (combatManager.js)
                 break;
             case 'combat_start':
                 await startCombat(interaction); // Starts a combat (combatManager.js)

@@ -3,6 +3,7 @@ const fs = require('fs');
 const util = require('../utils/combatUtils.js');
 const embed = require('../utils/messageTemplateUtils.js');
 const playerUtils = require('../utils/playerUtils.js');
+const equip = require('../utils/equipUtils.js');
 
 
 /**
@@ -50,7 +51,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     const message = await channel.send({ embeds: [searchEmbed] });
     const messageId = message.id;
 
-    util.createThread(message);
+    await util.createThread(message);
 
     
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
@@ -161,6 +162,7 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
     const playerStats = await playerCollection.findOne({ name: "stats" }, { _id: 0 });
     const playerInv = await playerCollection.findOne({ name: "inventory" }, { _id: 0 });
     const playerMisc = await playerCollection.findOne({ name: "misc" }, { _id: 0 });
+    const playerEquip = playerInv.equiped;
 
     if(playerMisc.party.owner != info.creator) {
         console.log("[DEBUG] Attempted to join a combat with a non-party member. (NON_PARTY_MEMBER_JOIN_ATTEMPT)");
@@ -172,15 +174,15 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
         id: playerId,
         type: "human",
         class: playerInfo.class,
-        health: playerInfo.health,
+        health: playerInfo.health + equip.stat.getCombined(playerEquip, "raw_buff_vit"),
         timeline: 0,
         stats: {
-            vitality: playerStats.vitality,
-            strength: playerStats.strength,
-            dexterity: playerStats.dexterity,
-            resistance: playerStats.resistance,
-            intelligence: playerStats.intelligence,
-            agility: playerStats.agility,
+            vitality: playerStats.vitality + equip.stat.getCombined(playerEquip, "raw_buff_vit"),
+            strength: playerStats.strength + equip.stat.getCombined(playerEquip, "raw_buff_str"),
+            dexterity: playerStats.dexterity + equip.stat.getCombined(playerEquip, "raw_buff_dex"),
+            resistance: playerStats.resistance + equip.stat.getCombined(playerEquip, "raw_buff_res"),
+            intelligence: playerStats.intelligence + equip.stat.getCombined(playerEquip, "raw_buff_int"),
+            agility: playerStats.agility + equip.stat.getCombined(playerEquip, "raw_buff_agi"),
         },
         equipment: {},
         skills: playerInv.activeSkills,
@@ -207,8 +209,64 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
 
     await playerCollection.updateOne({ name: "info" }, { $set: { state: {name: "in-combat", combatid: combatId} } }, { upsert: true });
 
-    interaction.reply({ content: 'You have joined the combat!', ephemeral: true });
+    interaction.deferUpdate();
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
+}
+
+exports.removePlayerFromCombat = async function(playerId, combatId, interaction) {
+    let message = interaction.message;
+    const combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
+    let info = await util.getCombatCollection(combatId);
+
+    if (info == null) {
+        console.log("[DEBUG] Attempted to leave a non-existent combat. (NON_EXISTENT_COMBAT_LEAVE_ATTEMPT)");
+        return;
+    }
+
+    if(util.getPlayerInCombat(playerId, info) == null) {
+        console.log("[DEBUG] Attempted to leave a combat with a non-existing player. (NON_EXISTING_PLAYER_LEAVE_ATTEMPT)");
+        interaction.reply({ content:"You're not in this combat!", ephemeral: true});
+        return;
+    }
+
+    if(info.current_action.current_player_id != null) {
+        console.log("[DEBUG] Attempted to leave a combat with a player in the middle of an action. (PLAYER_IN_ACTION_LEAVE_ATTEMPT)");
+        interaction.reply({ content:"The combat has already started!", ephemeral: true});
+    }
+
+    playerCollection = Client.mongoDB.db('player-data').collection(playerId);
+    const playerInfo = await playerCollection.findOne({ name: "info" }, { _id: 0 });
+
+    if(playerInfo.state.name != "in-combat") {
+        console.log("[DEBUG] Attempted to leave a combat with a non-in-combat player. (NON_IN_COMBAT_PLAYER_LEAVE_ATTEMPT)");
+        interaction.reply({ content:"Your character is not in combat!", ephemeral: true});
+        return;
+    }
+
+    if(playerInfo.state.combatid != combatId) {
+        console.log("[DEBUG] Attempted to leave a combat with a player in another combat. (PLAYER_IN_OTHER_COMBAT_LEAVE_ATTEMPT)");
+        interaction.reply({ content:"Your character is not in this combat!", ephemeral: true});
+        return;
+    }
+
+    info.team1 = info.team1.filter(player => player.id != playerId);
+    info.team2 = info.team2.filter(player => player.id != playerId);
+
+    const update = {
+        $set: {
+            current_turn: 1,
+            team1: info.team1,
+            team2: info.team2,
+        }
+    };
+
+    util.updateMainMessage(info, message, "prebattle");
+
+    await combatCollection.updateOne({}, update, { upsert: true });
+
+    await playerCollection.updateOne({ name: "info" }, { $set: { state: {name: "idle"} } }, { upsert: true });
+
+    interaction.deferUpdate();
 }
 
 exports.searchForMonsters = async function(interaction, combat) {
@@ -283,21 +341,23 @@ exports.addEntityToCombat = async function(thread, entity) {
 exports.startCombat = async function(interaction) {
     let thread = interaction.channel;
     let combatId = thread.id;
-    let combatCollection = await util.getCombatCollection(combatId);
+    let combatData = await util.getCombatCollection(combatId);
 
     if(!thread.isThread()) {
         console.log("[DEBUG] Attempted to start a non-thread channel. (NON_THREAD_CHANNEL_START_ATTEMPT)");
         return;
     }
 
-    if (combatCollection == null) {
+    if (combatData == null) {
         console.log("[DEBUG] Attempted to start a non-existent combat. (NON_EXISTENT_COMBAT_START_ATTEMPT)");
         return;
     }
 
-    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
-
-    const combatData = await combatCollection.findOne({}, { _id: 0 });
+    if(combatData.creator != interaction.user.id) {
+        console.log("[DEBUG] Non-created attempted to start a combat. (NON_CREATOR_COMBAT_START_ATTEMPT)");
+        interaction.reply({ content: "You're not the initiator of the combat, hence you cannot start it!", ephemeral: true });
+        return;
+    }
 
     // Checks if the combat has enough players. For PVE, it will add monsters.
     switch(combatData.type) {
