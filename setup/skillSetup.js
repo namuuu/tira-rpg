@@ -18,6 +18,13 @@ module.exports = {
 }
 
 function heal(exeData, quantity, log) {
+  const { combat, targetId, casterId } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+  const target = combatUtils.getPlayerInCombat(targetId, combat);
+  target.health = (target.health + quantity > target.stats.vitality) ? target.stats.vitality : target.health + quantity;
+
+  combatUtils.addToValueTologger(log, casterId, "heal", quantity);
 }
 
 function damage(exeData, power, log) {

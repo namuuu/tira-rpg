@@ -1,6 +1,7 @@
 const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const fs = require('fs');
 const player = require('../utils/playerUtils.js');
+const classData = require('../data/classes.json');
 const { calculateExpToNextLevel } = require('../utils/rpgInfoUtils.js');
 const equip = require('./equipUtils.js');
 const skill = require('./skillUtils.js');
@@ -144,6 +145,7 @@ async function typeMain(embed, playerId) {
 
     embed.addFields(
         { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
+        { name: 'Class', value: classData[playerInfo.class].name, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
         { name: 'Money', value: '$' + playerInfo.money, inline: true},
         { name: 'Location', value: zoneName }
