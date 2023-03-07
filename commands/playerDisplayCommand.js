@@ -1,7 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} = require('discord.js');
 const inv = require('../utils/inventoryUtils.js');
 
-
 module.exports = {
     name: "display",
     aliases: [],
@@ -21,15 +20,30 @@ module.exports = {
         } else {
             switch(args[0]) {
                 case "items":
+                case "item":
+                case "it":
+                case "inv":
+                case "inventory":
                     ret = (await inv.typeItems(embed, author.id)).embed;
-                    break
+                    break;
                 case "skills":
+                case "skill":
+                case "sk":
                     ret = (await inv.typeSkills(embed, author.id));
                     buttons.addComponents(ret.components);
                     ret = ret.embed;
                     break;
                 case "stats":
+                case "stat":
+                case "st":
                     ret = (await inv.typeStats(embed, author.id)).embed;
+                    break;
+                case "equip":
+                case "equipment":
+                case "e":
+                    ret = (await inv.typeEquipment(embed, author.id));
+                    buttons.addComponents(ret.components);
+                    ret = ret.embed;
                     break;
                 default:
                     ret = (await inv.typeMain(embed, author.id)).embed;

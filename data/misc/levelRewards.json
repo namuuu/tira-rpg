@@ -1,0 +1,50 @@
+{
+    "warrior":{
+        "0": [
+            {
+                "id": "slash",
+                "name": "Slash",
+                "type": "skill"
+            }
+        ],
+        "4": [
+            {
+                "id": "bite",
+                "name": "Bite",
+                "type": "skill"
+            }
+        ]
+    },
+    "assassin":{
+        "0": [
+            {
+                "id": "slash",
+                "type": "skill"
+            }
+        ]
+    },
+    "mage":{
+        "0": [
+            {
+                "id": "slash",
+                "type": "skill"
+            }
+        ]
+    },
+    "ranger":{
+        "0": [
+            {
+                "id": "slash",
+                "type": "skill"
+            }
+        ]
+    },
+    "healer":{
+        "0": [
+            {
+                "id": "slash",
+                "type": "skill"
+            }
+        ]
+    }
+}

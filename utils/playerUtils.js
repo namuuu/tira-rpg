@@ -1,4 +1,5 @@
-const { Client } = require('discord.js');
+const { Client, EmbedBuilder } = require('discord.js');
+const fs = require('fs');
 const rpgInfoUtils = require('./rpgInfoUtils.js');
 const classes = require('../data/classes.json');
 
@@ -22,6 +23,7 @@ exports.create = async function(id, className) {
 
     const classData = classes[className];
 
+    const skill = JSON.parse(fs.readFileSync(`./data/misc/levelRewards.json`))[className]["0"][0];
     const data = [
         { name: "info", class: className, money: 100, level: 0, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, location: "capital" },
         { name: "stats", 
@@ -32,7 +34,7 @@ exports.create = async function(id, className) {
             agility: classData.base_stats.agility,
             intelligence: classData.base_stats.intelligence,
         },
-        { name: "inventory", items: [], equipItems: [], skills: [] , activeSkills: [], equiped: {
+        { name: "inventory", items: [], equipItems: [], skills: [skill.id] , activeSkills: [skill.id], equiped: {
             weapon: null,
             helmet: null,
             chestplate: null,
@@ -165,7 +167,7 @@ exports.exp.award = async function(id, exp, channel) {
     await playerCollection.updateOne({ name: "info" }, { $set: { exp: newLevel.exp, level: newLevel.level } }, { upsert: true });
 
     for(let i=info.level; i<newLevel.level; i++) {
-        exports.exp.getLevelRewards(id, i+1, channel);
+        exports.exp.getLevelRewards(id, i+1, channel, info.class);
     }
 }
 
@@ -175,8 +177,6 @@ exports.levelUpStats = async function(id, level) {
     var query = { name: "info" };
     const info = await playerCollection.findOne(query);
     const userClass = info.class;
-
-    console.log("hello ?");
 
     const strength = classes[userClass].base_stats.strength*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.strength)*0.5);
     const vitality = classes[userClass].base_stats.vitality*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.vitality)*0.5);
@@ -197,11 +197,37 @@ exports.levelUpStats = async function(id, level) {
     
 }
 
-exports.exp.getLevelRewards = async function(id, level, channel) {
+exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
     const info = await exports.getData(id, "info");
     if(!channel)
         return;
-    channel.send("Vous avez atteint le niveau " + level + " !");
+
+    const embed = new EmbedBuilder();
+    embed.setColor(0x00FF00);
+    embed.setTitle(`Level Up!`);
+    embed.setDescription(`<@${id}> has reached level ${level}!`);
+
+    var field = "";
+
+    const levelRewards = JSON.parse(fs.readFileSync("./data/misc/levelRewards.json", "utf8"))[userClass];
+    if(levelRewards != undefined && levelRewards[level] != undefined) {
+        for(let i=0; i<levelRewards[level].length; i++) {
+            const reward = levelRewards[level][i];
+
+            switch(reward.type) {
+                case "skill":
+                    const { learnSkill } = require("./skillUtils.js");
+                    learnSkill(id, reward.id);
+                    field += `Skill: ${reward.name}\n`;
+            }
+        }
+    }
+
+    if(field != "")
+        embed.addFields({ name: "Rewards", value: field });
+
+    channel.send({ embeds: [embed] });
+
     exports.levelUpStats(id, level);
 }
 

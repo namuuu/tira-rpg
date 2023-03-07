@@ -10,7 +10,7 @@ module.exports = {
   chestplates: chestplates,
   boots: boots,
   setupEquipment() {
-    console.log('\u001b[' + 32 + 'm' + "-- EQUIPMENT --"+ '\u001b[0m');
+    console.groupCollapsed("-- Equipment --");
     console.log("Setting up Caracteristics...");
     set("weapons", weapons);
     set("helmets", helmets);
@@ -18,6 +18,7 @@ module.exports = {
     set("boots", boots);
 
     console.log("Equipments are all setup !");
+    console.groupEnd();
   },
   
 }

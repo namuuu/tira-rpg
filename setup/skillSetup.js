@@ -5,13 +5,14 @@ const combatUtils = require('../utils/combatUtils.js');
 module.exports = {
   map: skillMap,
   setupSkills() {
-    console.log("-- SKILLS --");
+    console.groupCollapsed("-- Skills --");
     console.log("Setting up Skills...");
     skillMap.set("heal", heal);
     skillMap.set("damage", damage);
     skillMap.set("cooldown", cooldown);
 
     console.log("Skills are all setup !");
+    console.groupEnd();
   },
   
 }

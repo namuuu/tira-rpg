@@ -2,7 +2,7 @@ const fs = require("fs");
 
 module.exports = {
     setupEvents(client) {
-      console.log("-- EVENTS --");
+      console.groupCollapsed("-- Events --");
         const eventFiles = fs.readdirSync("./events").filter(file => file.endsWith('.js'));
 
         for (const file of eventFiles) {
@@ -14,5 +14,6 @@ module.exports = {
                 client.on(event.name, (...args) => event.trigger(...args, client));
             }
         }
+        console.groupEnd();
     }
 }

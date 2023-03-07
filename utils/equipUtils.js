@@ -16,7 +16,7 @@ exports.display = async function(playerId, channel) {
 
     let embed = new EmbedBuilder();
 
-    embed = await getDisplay(playerId, embed, inv.equiped);
+    embed = await exports.getDisplay(playerId, embed, inv.equiped);
 
     const row = new ActionRowBuilder()
         .addComponents(
@@ -173,7 +173,6 @@ exports.unequip = async function(playerId, type) {
     };
 
     const inv = await playerCollection.findOne(query, options);
-
     if(inv.equiped[type] == null) {
         console.log("ERROR: Tried to unequip an item that the user hasn't equipped.");
         return "notequip";
@@ -197,7 +196,7 @@ exports.receiveButton = async function(interaction, playerId, args) {
     switch (args[0]) {
         case "backmain":
             embed = new EmbedBuilder();
-            embed = await getDisplay(playerId, embed);
+            embed = await exports.getDisplay(playerId, embed);
             row.addComponents(
                 makeButton("Equip", "equip-equip"),
                 makeButton("Unequip", "equip-unequip"),
@@ -236,17 +235,60 @@ exports.receiveButton = async function(interaction, playerId, args) {
             sendModal(interaction, playerId, "boots", true);
             return;
         case "unequipweapon":
-            sendModal(interaction, playerId, "weapon", false);
-            return;
+            exports.unequip(playerId, "weapon").then(async result => {
+                if(result == true) {
+                    embed = new EmbedBuilder();
+                    embed = await exports.getDisplay(playerId, embed);
+                    row.addComponents(
+                        makeButton("Equip", "equip-equip"),
+                        makeButton("Unequip", "equip-unequip"),
+                        makeButton("List"  , "equip-list"));
+                } else {
+                    interaction.reply({content: "You don't have a weapon equipped.", ephemeral: true});
+                }});
+                break;
         case "unequiphelmet":
-            sendModal(interaction, playerId, "helmet", false);
-            return;
+            const result = await exports.unequip(playerId, "helmet")
+            if(result == true) {
+                embed = new EmbedBuilder();
+                embed = await exports.getDisplay(playerId, embed);
+                row.addComponents(
+                    makeButton("Equip", "equip-equip"),
+                    makeButton("Unequip", "equip-unequip"),
+                    makeButton("List"  , "equip-list"));
+            } else {
+                console.log("DEBUG: " + result);
+                interaction.reply({content: "You don't have a helmet equipped.", ephemeral: true});
+                return;
+            };
+            break;
         case "unequipchestplate":
-            sendModal(interaction, playerId, "chestplate", false);
-            return;
+            exports.unequip(playerId, "chestplate").then(async result => {
+                if(result == true) {
+                    embed = new EmbedBuilder();
+                    embed = await exports.getDisplay(playerId, embed);
+                    row.addComponents(
+                        makeButton("Equip", "equip-equip"),
+                        makeButton("Unequip", "equip-unequip"),
+                        makeButton("List"  , "equip-list"));
+                } else {
+                    interaction.reply({content: "You don't have a chestplate equipped.", ephemeral: true});
+                    return;
+                }});
+                break;
         case "unequipboots":
-            sendModal(interaction, playerId, "boots", false);
-            return;
+            exports.unequip(playerId, "boots").then(async result => {
+                if(result == true) {
+                    embed = new EmbedBuilder();
+                    embed = await exports.getDisplay(playerId, embed);
+                    row.addComponents(
+                        makeButton("Equip", "equip-equip"),
+                        makeButton("Unequip", "equip-unequip"),
+                        makeButton("List"  , "equip-list"));
+                } else {
+                    interaction.reply({content: "You don't have boots equipped.", ephemeral: true});
+                }});
+                break;
         default:
             row.addComponents(
                 makeButton("←", "equip-backmain"),
@@ -262,7 +304,7 @@ exports.receiveButton = async function(interaction, playerId, args) {
 
 }
 
- async function getDisplay(playerId, embed, equipment) {
+exports.getDisplay = async function (playerId, embed, equipment) {
     if(equipment == null) {
         const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
 
@@ -342,19 +384,12 @@ function sendModal(interaction, playerid, type, isEquip) {
     interaction.showModal(modal);
 }
 
-exports.receiveModal = async function(interaction, playerId, equip, type, isEquip) {
-
-    if(isEquip) {
-        var result = await this.equip(playerId, equip, type);
-    } else {
-        var result = await this.unequip(playerId, equip, type);
-    }
-
-    console.log(result);
+exports.receiveModal = async function(interaction, playerId, equip, type,) {
+    var result = await this.equip(playerId, equip, type);
 
     switch (result) {
-        case "notequip":
-            interaction.reply({content: "You don't have that item equipped!", ephemeral: true});
+        case true:
+            interaction.deferUpdate();
             break;
         case "invalidtype":
             interaction.reply({content: "Invalid type!", ephemeral: true});
@@ -362,15 +397,13 @@ exports.receiveModal = async function(interaction, playerId, equip, type, isEqui
         case "nopossess":
             interaction.reply({content: "You don't possess this item!", ephemeral: true});
             break;
-        case true:
-            interaction.reply({content: "Done!", ephemeral: true});
-            break;
         default:
             interaction.reply({content: "Something went wrong!", ephemeral: true});
             break;
     }
 
-    interaction.message.edit({embeds: [await getDisplay(playerId, new EmbedBuilder())]});
+    interaction.message.edit({embeds: [await exports.getDisplay(playerId, new EmbedBuilder())]});
+
 }
 
 exports.stat.getCombined = function(equips, stat) {

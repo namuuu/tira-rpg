@@ -53,6 +53,7 @@ module.exports = {
                 break;
             case 'equip':	
                 receiveButton(interaction, userId, args); // Personal button handler (equipUtils.js)
+                break;
             case 'buyItem':
 
                 if(args[0] != interaction.user.id) {

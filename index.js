@@ -33,7 +33,7 @@ Client.mongoDB = new MongoClient(process.env.MONGO_URI);
 
 
 client.once('ready', () => {
-  console.log('\u001b[1;32m Tira\'s RPG Bot is ready to execute.' + ' \u001b[0m');
+  console.log('\u001b[1;32mTira\'s RPG Bot is ready to execute.' + ' \u001b[0m');
 
     client.user.setPresence({ activities: [{name: 'Battling'}], status: 'online'});
 });

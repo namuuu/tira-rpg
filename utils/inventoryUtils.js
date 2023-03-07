@@ -1,4 +1,4 @@
-const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const fs = require('fs');
 const player = require('../utils/playerUtils.js');
 const { calculateExpToNextLevel } = require('../utils/rpgInfoUtils.js');
@@ -90,12 +90,18 @@ exports.display = async function(player, interaction, type, ack) {
             embed = (await typeStats(embed, playerId)).embed;
             break;
         case "equipment":
-            embed = (await typeEquipment(embed, playerId)).embed;
+            ret = (await typeEquipment(embed, playerId, player.username));
+            embed = ret.embed;
+            buttons.addComponents(ret.components);
             break;
         default:
             embed = (await typeMain(embed, playerId)).embed;
             break;
     }
+
+    console.log(embed);
+    // interaction.deferUpdate();
+    // return;
 
     try {
         if(buttons.components.length > 0)
@@ -226,31 +232,15 @@ async function typeEquipment(embed, playerId) {
     const playerData = await player.getData(playerId, "inventory");
     const equipment = playerData.equiped;
 
-    if(equipment.weapon == null) {
-        embed.addFields({name: "Weapon", value: "No weapon equiped."});
-    } else {
-        embed.addFields({name: "Weapon", value: equipment.weapon.name});
-    }
+    embed = await equip.getDisplay(playerId, embed, equipment );
 
-    if(equipment.helmet == null) {
-        embed.addFields({name: "Helmet", value: "No helmet equiped."});
-    } else {
-        embed.addFields({name: "Helmet", value: equipment.helmet.name});
-    }
+    const components = [];
+    components.push(
+            makeButton("Equip", "equip-equip"),
+            makeButton("Unequip", "equip-unequip"),
+            makeButton("List"  , "equip-list"));
 
-    if(equipment.chestplate == null) {
-        embed.addFields({name: "Chestplate", value: "No chestplate equiped."});
-    } else {
-        embed.addFields({name: "Chestplate", value: equipment.chestplate.name});
-    }
-
-    if(equipment.boots == null) {
-        embed.addFields({name: "Boots", value: "No boots equiped."});
-    } else {
-        embed.addFields({name: "Boots", value: equipment.boots.name});
-    }
-
-    return {embed: embed};
+    return {embed: embed, components: components};
 }
 
 function sendButtonChangeSkill(userId, skillEnable, activeSkillEnable) {
@@ -289,4 +279,11 @@ function addSlider(playerId) {
         )
 
     return invSelector;
+}
+
+function makeButton(name, id) {
+    return new ButtonBuilder()
+        .setCustomId(id)
+        .setLabel(name)
+        .setStyle(ButtonStyle.Secondary);
 }
