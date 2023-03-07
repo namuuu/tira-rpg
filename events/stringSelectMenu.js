@@ -4,6 +4,7 @@ const selector = require('../utils/messageTemplateUtils.js');
 const { EmbedBuilder } = require('discord.js');
 const combat = require('../utils/combatUtils.js');
 const zoneData = require('../data/zones.json');
+const fs = require('fs');
 
 module.exports = {
     name: 'interactionCreate',
@@ -46,11 +47,13 @@ module.exports = {
 
                 player.create(interaction.user.id, interaction.values[0]);
 
+                var playerClass = JSON.parse(fs.readFileSync('./data/classes.json'))
+                
                 const displayEmbed = new EmbedBuilder()
                 .setColor(0x0099FF)
-                .setTitle(':crossed_swords: Ton voyage commence ! :crossed_swords:')
+                .setTitle(`:crossed_swords:  ${interaction.user.username}, you are a ${playerClass[interaction.values[0]].name} now !  :crossed_swords:`)
                 .addFields( 
-                    { name: 'Est ce que ton épopée sera écrite dans l\'\histoire ?', value: "Ton personnage a été créé, " + interaction.user.username }
+                    { name: 'There it is... The beginning', value: "Are you ready for a whole new adventure ?" }
                 )
                 .setThumbnail(interaction.user.displayAvatarURL());
             
