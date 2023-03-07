@@ -218,7 +218,7 @@ exports.receiveTargetSelector = async function(interaction) {
     }
 
     if(interaction.user.id != combatInfo.current_action.current_player_id) {
-        interaction.reply("I'm afraid it's not your turn yet...");
+        interaction.reply({ content: "I'm afraid it's not your turn yet...", ephemeral: true});
         return;
     }
 

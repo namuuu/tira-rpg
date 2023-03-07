@@ -209,7 +209,7 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
 
     await playerCollection.updateOne({ name: "info" }, { $set: { state: {name: "in-combat", combatid: combatId} } }, { upsert: true });
 
-    interaction.reply({ content: 'You have joined the combat!', ephemeral: true });
+    interaction.deferUpdate();
     console.log("[DEBUG] " + playerId + " joined combat " + combatId);
 }
 
@@ -341,21 +341,23 @@ exports.addEntityToCombat = async function(thread, entity) {
 exports.startCombat = async function(interaction) {
     let thread = interaction.channel;
     let combatId = thread.id;
-    let combatCollection = await util.getCombatCollection(combatId);
+    let combatData = await util.getCombatCollection(combatId);
 
     if(!thread.isThread()) {
         console.log("[DEBUG] Attempted to start a non-thread channel. (NON_THREAD_CHANNEL_START_ATTEMPT)");
         return;
     }
 
-    if (combatCollection == null) {
+    if (combatData == null) {
         console.log("[DEBUG] Attempted to start a non-existent combat. (NON_EXISTENT_COMBAT_START_ATTEMPT)");
         return;
     }
 
-    combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
-
-    const combatData = await combatCollection.findOne({}, { _id: 0 });
+    if(combatData.creator != interaction.user.id) {
+        console.log("[DEBUG] Non-created attempted to start a combat. (NON_CREATOR_COMBAT_START_ATTEMPT)");
+        interaction.reply({ content: "You're not the initiator of the combat, hence you cannot start it!", ephemeral: true });
+        return;
+    }
 
     // Checks if the combat has enough players. For PVE, it will add monsters.
     switch(combatData.type) {
