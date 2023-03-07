@@ -31,9 +31,7 @@ exports.createThread = async function(message) {
 
     await thread.send({ embeds: [embed], components: [row] });
 
-    return new Promise(async resolve => {
-        resolve(thread);
-    });
+    return thread;
 }
 
 /**
@@ -581,15 +579,22 @@ exports.updateMainMessage = function(combatInfo, message, state) {
     switch(state) {
         case "prebattle":
             embed.setDescription("A battle is about to begin! All party members can join the fight.");
-            components.push(
-                new ActionRowBuilder()
+            const row = new ActionRowBuilder()
 		            .addComponents(
                         new ButtonBuilder()
                             .setCustomId('joinFight-' + message.id + '-1')
-                            .setLabel('Join in !')
+                            .setLabel('Join in!')
                             .setStyle(ButtonStyle.Secondary)
-                    )
-				);
+                    );
+            if(combatInfo.team1.length > 0 || combatInfo.team2.length > 0) {
+                row.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('leaveFight-' + message.id + '-1')
+                        .setLabel('Leave!')
+                        .setStyle(ButtonStyle.Secondary)
+                );
+            }
+            components.push(row);
             break;
         case "battle":
             embed.setDescription("Current turn: " + combatInfo.current_turn);
