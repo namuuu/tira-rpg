@@ -5,8 +5,8 @@ const combatUtils = require('../utils/combatUtils.js');
 module.exports = {
   map: skillMap,
   setupSkills() {
-    console.log("-- SKILLS --");
-    console.log("Setting up Skills...");
+    console.log("-- SKILLS EFFECTS--");
+    console.log("Setting up Skills Effects...");
     skillMap.set("heal", heal);
     skillMap.set("damage", damage);
     skillMap.set("cooldown", cooldown);
@@ -17,6 +17,13 @@ module.exports = {
 }
 
 function heal(exeData, quantity, log) {
+  const { combat, targetId, casterId } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+  const target = combatUtils.getPlayerInCombat(targetId, combat);
+  target.health = (target.health + quantity > target.stats.vitality) ? target.stats.vitality : target.health + quantity;
+
+  combatUtils.addToValueTologger(log, casterId, "heal", quantity);
 }
 
 function damage(exeData, power, log) {

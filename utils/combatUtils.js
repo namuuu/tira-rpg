@@ -170,7 +170,15 @@ exports.receiveSkillSelector = async function(interaction) {
 
     interaction.message.delete();
 
-    if(combatInfo.current_action.aim_at == null || combatInfo.current_action.aim_at == undefined) {
+    var isSingle = false;
+
+    for(var i = 0 ; i < skillList[skillId].type.length ; i++) {
+        if(skillList[skillId].type[i].split('-')[1] == "single") {
+            var isSingle = true;
+        }
+    }
+
+    if(combatInfo.current_action.aim_at == null || combatInfo.current_action.aim_at == undefined && isSingle) {
         this.sendTargetSelector(combatInfo, interaction.user, interaction.channel);
     } else {
         // EXECUTE SKILL
@@ -180,31 +188,58 @@ exports.receiveSkillSelector = async function(interaction) {
 
 exports.sendTargetSelector = async function(combat, player, thread) {
     const enemyTeam = this.getPlayerEnemyTeam(player.id, combat);
+    const allyTeam = this.getPlayerAlliedTeam(player.id, combat);
+    let combatInfo = await this.getCombatCollection(thread.id);
 
+    var skillId = combatInfo.current_action.skill;
 
     const stringSelectOptions = [];
     let i = 0;
 
-    for (const enemy of enemyTeam) {
-        if(enemy.health <= 0) continue;
-        stringSelectOptions.push({
-            label: enemy.id,
-            value: enemy.id,
-            description: "HP: " + enemy.health + " / " + enemy.stats.vitality,
-        });
-        i = i + 1;
+    console.log(skillList[skillId].type[0].split('-')[0]);
+
+    if(skillList[skillId].type[0].split('-')[0] == "damage" || skillList[skillId].type[0].split('-')[0] == "debuff") {
+        for (const enemy of enemyTeam) {
+            if(enemy.health <= 0) continue;
+            stringSelectOptions.push({
+                label: enemy.id,
+                value: enemy.id,
+                description: "HP: " + enemy.health + " / " + enemy.stats.vitality,
+            });
+            i = i + 1;
+        }
+
+        var row = new ActionRowBuilder()
+            .addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId('combat_target_selector')
+                    .setPlaceholder('Choose a target !')
+                    .addOptions(stringSelectOptions)
+            );
     }
 
-    const row = new ActionRowBuilder()
-        .addComponents(
-            new StringSelectMenuBuilder()
-                .setCustomId('combat_target_selector')
-                .setPlaceholder('Choose a target !')
-                .addOptions(stringSelectOptions)
-        );
+    if(skillList[skillId].type[0].split('-')[0] == "heal" || skillList[skillId].type[0].split('-')[0] == "buff") {
+        for (const ally of allyTeam) {
+            if(ally.health <= 0) continue;
+            stringSelectOptions.push({
+                label: Client.client.users.cache.get(ally.id).username,
+                value: ally.id,
+                description: "HP: " + ally.health + " / " + ally.stats.vitality,
+            });
+            i = i + 1;
+        }
+
+        var row = new ActionRowBuilder()
+            .addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId('combat_target_selector')
+                    .setPlaceholder('Choose a target !')
+                    .addOptions(stringSelectOptions)
+            );
+    }
 
     const embed = new EmbedBuilder()
-        .setDescription("Who do you want to attack, <@" + player.id + "> ?")
+            .setDescription("Who do you want to target, <@" + player.id + "> ?")
 
     await thread.send({ embeds: [embed], components: [row] });
 }
@@ -484,6 +519,9 @@ exports.logResults = function(embed, log, entity) {
         switch(effect) {
             case "damage":
                 description += "Lost " + value + " HP (" + entity.health + " left) \n";
+                break;
+            case "heal":
+                description += "Gained " + value + " HP (" + entity.health + " left) \n";
                 break;
         }
     }
