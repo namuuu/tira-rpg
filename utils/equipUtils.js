@@ -259,7 +259,6 @@ exports.receiveButton = async function(interaction, playerId, args) {
             } else {
                 console.log("DEBUG: " + result);
                 interaction.reply({content: "You don't have a helmet equipped.", ephemeral: true});
-                return;
             };
             break;
         case "unequipchestplate":
@@ -273,7 +272,6 @@ exports.receiveButton = async function(interaction, playerId, args) {
                         makeButton("List"  , "equip-list"));
                 } else {
                     interaction.reply({content: "You don't have a chestplate equipped.", ephemeral: true});
-                    return;
                 }});
                 break;
         case "unequipboots":
@@ -384,7 +382,7 @@ function sendModal(interaction, playerid, type, isEquip) {
     interaction.showModal(modal);
 }
 
-exports.receiveModal = async function(interaction, playerId, equip, type,) {
+exports.receiveModal = async function(interaction, playerId, equip, type) {
     var result = await this.equip(playerId, equip, type);
 
     switch (result) {

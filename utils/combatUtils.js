@@ -12,10 +12,17 @@ const mobList = require('../data/monster.json');
  * @returns the created thread
  */
 exports.createThread = async function(message) {
-    const thread = await message.startThread({
-        name: 'Combat Thread',
-        autoArchiveDuration: 60,
-    });
+    try {
+        var thread = await message.startThread({
+            name: 'Combat Thread',
+            autoArchiveDuration: 60,
+        });
+    } catch (error) {
+        message.reply('There was an error trying to create a thread. Maybe there\s too many threads already ?');
+        console.error(error);
+        return;
+    }
+    
 
     const embed = new EmbedBuilder()
         .setTitle("The tension is palpable...")
@@ -166,67 +173,102 @@ exports.receiveSkillSelector = async function(interaction) {
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
-    interaction.message.delete();
+    let exeData = {
+        combat: combatInfo,
+        thread: interaction.channel,
+        casterPlayer: interaction.user,
+        casterId: interaction.user.id,
+        skill: skillList[skillId],
+        allyTeam: exports.getPlayerAlliedTeam(interaction.user.id, combatInfo),
+        enemyTeam: exports.getPlayerEnemyTeam(interaction.user.id, combatInfo),
+    }
 
-    if(combatInfo.current_action.aim_at == null || combatInfo.current_action.aim_at == undefined) {
-        this.sendTargetSelector(combatInfo, interaction.user, interaction.channel);
-    } else {
-        // EXECUTE SKILL
-        this.executeSkill(combatInfo, interaction.channel, combatInfo.current_action.skill, interaction.user.id, combatInfo.current_action.aim_at);
+    interaction.message.delete();
+    switch(skillList[skillId].aim.split('-')[0]) {
+        case "self": // Aiming at self
+            exeData.targets = [exports.getPlayerInCombat(interaction.user.id, combatInfo)];
+            exports.executeSkill(exeData)
+        break;
+        case "ally":
+            const remainingAllies = exeData.enemyTeam.filter(player => player.health > 0 && player.id != interaction.user.id);
+            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+                exeData.targets = remainingAllies;
+                exports.executeSkill(exeData);
+            } else {
+                if(remainingAllies.length == 1) {
+                    exeData.targets = [exeData.allyTeam[0]];
+                    break;
+                } 
+                exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, exeData.allyTeam.filter(player => player.health > 0 && player.id != interaction.user.id));
+            }
+        break;
+        case "ally+self":
+            const remainingAlliesAndSelf = exeData.allyTeam.filter(player => player.health > 0);
+            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+                exeData.targets = remainingAlliesAndSelf;
+                exports.executeSkill(exeData);
+            } else {
+                if(remainingAlliesAndSelf.length == 1) {
+                    exeData.targets = [remainingAlliesAndSelf[0]];
+                    exports.executeSkill(exeData);
+                    break;
+                }
+                exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, remainingAlliesAndSelf);
+            }
+        break;
+        case "enemy":
+            const remainingEnemies = exeData.enemyTeam.filter(player => player.health > 0);
+            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+                exeData.targets = remainingEnemies;
+                exports.executeSkill(exeData);
+            } else {
+                if(remainingEnemies.length == 1) {
+                    exeData.targets = [remainingEnemies[0]];
+                    exports.executeSkill(exeData);
+                    break;
+                }
+                exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, remainingEnemies);
+            }
+        break;
+        case "all":
+            const remainingPlayers = exeData.allyTeam.concat(exeData.enemyTeam).filter(player => player.health > 0);
+            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+                exeData.targets = remainingPlayers;
+                exports.executeSkill(exeData);
+            } else {
+                if(remainingPlayers.length == 1) {
+                    exeData.targets = [remainingPlayers[0]];
+                    exports.executeSkill(exeData);
+                    break;
+                }
+                exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, remainingPlayers);
+            }
+        break;
+        default:
+
+        break;
     }
 }
 
-exports.sendTargetSelector = async function(combat, player, thread) {
-    const enemyTeam = this.getPlayerEnemyTeam(player.id, combat);
-    const allyTeam = this.getPlayerAlliedTeam(player.id, combat);
-    let combatInfo = await this.getCombatCollection(thread.id);
+exports.sendTargetSelector = async function(combat, player, thread, targets) {
 
-    var skillId = combatInfo.current_action.skill;
+    const options = [];
 
-    const stringSelectOptions = [];
-    let i = 0;
+    for(const target of targets) {
+        options.push({
+            label: target.name,
+            value: target.id,
+            description: target.id,
+        });
+    }
 
-    console.log(skillList[skillId].type[0].split('-')[0]);
-
-    if(skillList[skillId].type[0].split('-')[0] == "damage" || skillList[skillId].type[0].split('-')[0] == "debuff") {
-        for (const enemy of enemyTeam) {
-            if(enemy.health <= 0) continue;
-            stringSelectOptions.push({
-                label: enemy.id,
-                value: enemy.id,
-                description: "HP: " + enemy.health + " / " + enemy.stats.vitality,
-            });
-            i = i + 1;
-        }
-
-        var row = new ActionRowBuilder()
+    var row = new ActionRowBuilder()
             .addComponents(
                 new StringSelectMenuBuilder()
                     .setCustomId('combat_target_selector')
                     .setPlaceholder('Choose a target !')
-                    .addOptions(stringSelectOptions)
+                    .addOptions(options)
             );
-    }
-
-    if(skillList[skillId].type[0].split('-')[0] == "heal" || skillList[skillId].type[0].split('-')[0] == "buff") {
-        for (const ally of allyTeam) {
-            if(ally.health <= 0) continue;
-            stringSelectOptions.push({
-                label: Client.client.users.cache.get(ally.id).username,
-                value: ally.id,
-                description: "HP: " + ally.health + " / " + ally.stats.vitality,
-            });
-            i = i + 1;
-        }
-
-        var row = new ActionRowBuilder()
-            .addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId('combat_target_selector')
-                    .setPlaceholder('Choose a target !')
-                    .addOptions(stringSelectOptions)
-            );
-    }
 
     const embed = new EmbedBuilder()
             .setDescription("Who do you want to target, <@" + player.id + "> ?")
@@ -249,44 +291,26 @@ exports.receiveTargetSelector = async function(interaction) {
         return;
     }
 
-    const targetId = interaction.values[0];
+    const exeData = {
+        combat: combatInfo,
+        thread: interaction.channel,
+        casterPlayer: interaction.user,
+        casterId: interaction.user.id,
+        skill: skillList[combatInfo.current_action.skill],
+        allyTeam: exports.getPlayerAlliedTeam(interaction.user.id, combatInfo),
+        enemyTeam: exports.getPlayerEnemyTeam(interaction.user.id, combatInfo),
+        targets: [exports.getPlayerInCombat(interaction.values[0], combatInfo)]
+    }
 
-    combatInfo.current_action.aim_at = targetId;
-
-    const update = {
-        $set: {
-            current_action: combatInfo.current_action,
-        }
-    };
-
-    await combatCollection.updateOne({}, update, { upsert: true });
+    await combatCollection.updateOne({}, {$set: { current_action: combatInfo.current_action }}, { upsert: true });
 
     interaction.message.delete();
 
-    if(combatInfo.current_action.skill == null || combatInfo.current_action.skill == undefined) {
-        const playerTeam = (combatInfo.current_action.current_player_team == 1) ? combatInfo.team2 : combatInfo.team1;
-        for (const player of playerTeam) {
-            //console.log(player);
-            if(player.id == interaction.user.id) {
-                this.sendSkillSelector(player, interaction.channel);
-            }
-        }
-    } else {
-        // EXECUTE SKILL
-        this.executeSkill(combatInfo, interaction.channel, combatInfo.current_action.skill, interaction.user.id, combatInfo.current_action.aim_at);
-    }
+    exports.executeSkill(exeData);
 }
 
-exports.executeSkill = async function(combatInfo, thread, skillId, casterId, targetId) {
-
-    let exeData = {
-        combat: combatInfo,
-        thread: thread,
-        casterId: casterId,
-        targetId: targetId,
-        skill: skillList[skillId],
-    }
-
+exports.executeSkill = async function(exeData) {
+    const { thread } = exeData;
     let log = skillUtil.execute(exeData);
 
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
@@ -308,12 +332,11 @@ exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, tar
         combat: combatInfo,
         thread: thread,
         casterId: monsterId,
-        targetId: targetId,
+        targets: [exports.getPlayerInCombat(targetId, combatInfo)],
     }
 
     let monster = exports.getPlayerInCombat(monsterId, combatInfo);
     const random = Math.floor(Math.random() * (monster.skills.length));
-    console.log(random);
     exeData.skill = skillList[monster.skills[random]];
 
     let log = skillUtil.execute(exeData);
@@ -433,8 +456,10 @@ exports.createMonsterData = function(combat, monster) {
 
     if(i > 0) {
         dummy.id = monster + "-" + i;
+        dummy.name = mobData.name + " (" + i + ")";
     } else {
         dummy.id = monster;
+        dummy.name = mobData.name;
     }
 
     dummy.health = dummy.stats.vitality;
@@ -494,17 +519,7 @@ exports.addToValueTologger = function(log, playerId, valueName, value) {
  * @returns true if the entity died, false otherwise
  */
 exports.logResults = function(embed, log, entity) {
-    let title = "";
     let description = "";
-
-    if(entity.type == "human") {
-        const name = Client.client.users.cache.get(entity.id).username;
-        title = name;
-    } else {
-        title = entity.id;
-    }
-
-    //console.log(entity);
 
     for (const [effect, value] of Object.entries(log.find(player => player.id == entity.id))) {
         switch(effect) {
@@ -519,11 +534,11 @@ exports.logResults = function(embed, log, entity) {
 
     if(entity.health <= 0) {
         description += "Died\n";
-        embed.addFields({name: title, value: description});
+        embed.addFields({name: entity.name, value: description});
         return true;
     }
 
-    embed.addFields({name: title, value: description});
+    embed.addFields({name: entity.name, value: description});
     return false;
 }
 
@@ -589,8 +604,10 @@ exports.rewardLoot = async function(combat, thread) {
             if(lootDescription != "") {
                 embed.addFields({name: "Loot", value: lootDescription});
             }
-
-            player.health.set(victor.id, victor.health);
+            if(victor.health > 0)
+                player.health.set(victor.id, (victor.health > victor.vitality ? victor.vitality : victor.health));
+            else
+                player.health.set(victor.id, 0);
 
             thread.send({ embeds: [embed] });
         }
@@ -656,7 +673,7 @@ exports.updateMainMessage = function(combatInfo, message, state) {
                 break;
             case "monster":
             case "dummy":
-                team1 += player.id + " ";
+                team1 += player.name + " ";
                 break;
         }
 
@@ -674,7 +691,7 @@ exports.updateMainMessage = function(combatInfo, message, state) {
                 break;
             case "monster":
             case "dummy":
-                team2 += player.id + " ";
+                team2 += player.name + " ";
                 break;
         }
 

@@ -40,7 +40,7 @@ module.exports = {
                 sendModal(interaction, false, args[0]);
                 break;
             case 'joinFight':
-                await addPlayerToCombat(userId, args[0], args[1], interaction); // Adds a player to a combat (combatManager.js)
+                await addPlayerToCombat(user, args[0], args[1], interaction); // Adds a player to a combat (combatManager.js)
                 break;
             case 'leaveFight':
                 await removePlayerFromCombat(userId, args[0], interaction); // Removes a player from a combat (combatManager.js)

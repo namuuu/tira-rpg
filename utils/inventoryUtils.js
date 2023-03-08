@@ -62,7 +62,11 @@ exports.giveItem = async function(playerId, item, quantity) {
     // Updating the inventory in the database
     const result = await playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
 
-    console.group("[DEBUG] Item " + item + " given to player " + playerId);
+    console.groupCollapsed("Item Given");
+    console.log(`Given to: ${playerId}`);
+    console.log(`Item: ${item}`);
+    console.log(`Quantity: ${quantity}`);
+    console.groupEnd();
 }
 
 exports.display = async function(player, interaction, type, ack) {
@@ -99,10 +103,6 @@ exports.display = async function(player, interaction, type, ack) {
             embed = (await typeMain(embed, playerId)).embed;
             break;
     }
-
-    console.log(embed);
-    // interaction.deferUpdate();
-    // return;
 
     try {
         if(buttons.components.length > 0)
@@ -202,15 +202,13 @@ async function typeStats(embed, playerId) {
 
 exports.typeSkills = typeSkills;
 async function typeSkills(embed, playerId, playername) {
-    const playerData = await player.getData(playerId, "inventory");
-    const skills = playerData.skills;
-    const activeSkills = playerData.activeSkills;
-
     var data = JSON.parse(fs.readFileSync('./data/skills.json'));
+    const playerData = await player.getData(playerId, "inventory");
+    const skills = playerData.skills.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
+    const activeSkills = playerData.activeSkills.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
 
-    embed
-        .setTitle(`${playername}'s Skills`)
-        .setFooter({text: 'Need to get more info about a specific skill ? Type t.skill <number>'})
+    embed.setTitle(`${playername}'s Skills`)
+         .setFooter({text: 'Need to get more info about a specific skill ? Type t.skill <number>'})
 
     try {
         embed.setDescription(skills.length != 0 ? skills.map(skill => `# ${data[skill].number} - ${data[skill].name}`).join(", ") : "No skills learned.");
