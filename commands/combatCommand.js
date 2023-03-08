@@ -18,6 +18,8 @@ module.exports = {
         case "help":
             sendHelp(message);
         break;
+        case "display":
+            
         case "encounter":
             combat.instanciateCombat(message, message.author);
             break;
