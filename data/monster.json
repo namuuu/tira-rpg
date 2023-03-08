@@ -185,7 +185,7 @@
     },
     "red_slime": {
         "name": "Red Slime",
-        "exp": 8,
+        "exp": 7,
         "money": 15,
         "base_stats": {
             "strength": 12,
@@ -226,7 +226,7 @@
     "king_slime": {
         "name": "King Slime",
         "exp": 15,
-        "money": 20,
+        "money": 50,
         "base_stats": {
             "strength": 15,
             "vitality": 20,
@@ -268,6 +268,109 @@
         },
         {
             "id": "slimy_crown",
+            "pack": 1,
+            "weight": 0.5
+        }]
+    },
+    "rat_shadow": {
+        "name": "Rat Shadow",
+        "exp": 9,
+        "money": 8,
+        "base_stats": {
+            "strength": 13,
+            "vitality": 8,
+            "resistance": 5,
+            "dexterity": 10,
+            "agility": 15,
+            "intelligence": 8
+        },
+        "mod_stats": {
+            "strength": 2,
+            "vitality": 0,
+            "resistance": 0,
+            "dexterity": 1,
+            "agility": 3,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "boots": null
+        },
+        "skills": [{
+            "id": "bite",
+            "weight": 2
+        },
+        {
+            "id": "toxic_spite",
+            "weight": 1
+        },
+        {
+            "id": "gust",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "rat_tail",
+            "pack": 1,
+            "weight": 2
+        }]
+    },
+    "fallen_knight": {
+        "name": "Fallen Knight",
+        "exp": 12,
+        "money": 15,
+        "base_stats": {
+            "strength": 15,
+            "vitality": 15,
+            "resistance": 10,
+            "dexterity": 5,
+            "agility": 7,
+            "intelligence": 2
+        },
+        "mod_stats": {
+            "strength": 3,
+            "vitality": 3,
+            "resistance": 2,
+            "dexterity": 1,
+            "agility": 1,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "boots": null
+        },
+        "skills": [{
+            "id": "slash",
+            "weight": 2
+        },
+        {
+            "id": "shadow_slash",
+            "weight": 1
+        },
+        {
+            "id": "gust",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "broken_sword",
+            "pack": 1,
+            "weight": 0.2
+        },
+        {
+            "id": "old_helmet",
+            "pack": 1,
+            "weight": 0.1
+        },
+        {
+            "id": "old_chestplate",
+            "pack": 1,
+            "weight": 0.1
+        },
+        {
+            "id": "old_boots",
             "pack": 1,
             "weight": 0.1
         }]

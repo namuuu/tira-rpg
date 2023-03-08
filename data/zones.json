@@ -62,5 +62,25 @@
         "monsters": {
         },
         "shops": ["item_shop1", "equipment_shop1"]
+    },
+    "forgotten_outpost": {
+        "name": "Forgotten Outpost",
+        "description": "A small outpost that was abandoned a long time ago.",
+        "required": {
+            "level": "10",
+            "quests": "",
+            "items": ["warhandbook"]  
+        },
+        "monsters": {
+            "group1": {
+                "m-names": ["bird", "slime", "bird"],
+                "spawn-chance": "50"
+            },
+            "group2": {
+                "m-names": ["bird"],
+                "spawn-chance": "1000000000000"
+            }
+        },
+        "shops": [""]
     }
 }

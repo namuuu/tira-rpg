@@ -51,5 +51,14 @@
             "raw_buff_agi": 2,
             "raw_buff_dex": 1
         }
+    },
+    "broken_sword": {
+        "id": "broken_sword",
+        "name": "Broken Sword",
+        "description": "An old sword found in an old battlefield. It's not very useful, but it's better than nothing.",
+        "caracteristics": {
+            "raw_buff_vit": 2,
+            "raw_buff_str": 1
+        }
     }
 }
