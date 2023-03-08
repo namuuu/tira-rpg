@@ -1,7 +1,12 @@
 const player = require('../utils/playerUtils.js');
 const inventory = require('../utils/inventoryUtils.js');
-const combat = require('../manager/combatManager.js');
-const party = require('../utils/partyUtils.js');
+const selector = require('../utils/messageTemplateUtils.js');
+const shopsData = require('../data/shops.json');
+const { displayInventory } = require('../utils/inventoryUtils.js');
+const { startCombat, addPlayerToCombat, removePlayerFromCombat } = require('../manager/combatManager.js');
+const { acceptInvitation } = require('../utils/partyUtils.js');
+const { sendStringAllSkills, sendModal } = require('../utils/skillUtils.js');
+const { receiveButton } = require('../utils/equipUtils.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -22,16 +27,65 @@ module.exports = {
 
         switch(command) {
             case 'displayInventory':
-                inventory.displayInventory(userId, interaction);
+                displayInventory(userId, interaction); // Displays the inventory of a player (inventoryUtils.js)
+                break;
+            case 'displaySkills':
+                const ret = await sendStringAllSkills(user.username, userId); // Displays all the skills of a player (skillUtils.js)
+                interaction.reply(ret);
+                break;
+            case 'select_skill':
+                sendModal(interaction, true, args[0]);
+                break;
+            case 'unselect_skill':
+                sendModal(interaction, false, args[0]);
                 break;
             case 'joinFight':
-                await combat.addPlayerToCombat(userId, args[0], args[1], interaction);
+                await addPlayerToCombat(user, args[0], args[1], interaction); // Adds a player to a combat (combatManager.js)
+                break;
+            case 'leaveFight':
+                await removePlayerFromCombat(userId, args[0], interaction); // Removes a player from a combat (combatManager.js)
                 break;
             case 'combat_start':
-                await combat.startCombat(interaction);
+                await startCombat(interaction); // Starts a combat (combatManager.js)
                 break;
             case 'party_accept':
-                await party.acceptInvitation(userId, args[0], interaction);
+                await acceptInvitation(userId, args[0], interaction); // Accepts a party invitation (partyUtils.js)
+                break;
+            case 'equip':	
+                receiveButton(interaction, userId, args); // Personal button handler (equipUtils.js)
+                break;
+            case 'buyItem':
+
+                if(args[0] != interaction.user.id) {
+                    interaction.channel.send("If you would like to shop with your own character, please use the t.shop commande yourself ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                if (interaction.message.components[1] != undefined) {
+                    interaction.channel.send("Please select an item and a quantity to buy ! " + "<@" + interaction.user.id + ">");
+                    return;
+                }
+
+                var currentQuantity = interaction.message.components[0].components[0].customId.split('-')[4];
+                var currentItem = interaction.message.components[0].components[0].customId.split('-')[3];
+                var shop = interaction.message.components[0].components[0].customId.split('-')[2];
+
+                var buy = await player.takeMoney(interaction.user.id, shopsData[shop].items[currentItem].cost * currentQuantity, interaction.message);
+
+                if(!buy) {
+                    await interaction.message.delete(); 
+                    selector.generateShopItemsSelector(interaction, shop, "0", "0");
+                    break;
+                }
+
+                await inventory.giveItem(interaction.user.id, currentItem, currentQuantity);
+
+                interaction.channel.send("You bought " + currentQuantity + " " + shopsData[shop].items[currentItem].name + " ! " + "<@" + interaction.user.id + ">");
+
+                await interaction.message.delete(); 
+
+                selector.generateShopItemsSelector(interaction, shop, "0", "0");
+            break;
             default:
                 break;
         }

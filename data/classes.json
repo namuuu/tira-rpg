@@ -1,17 +1,14 @@
 {
-    "noclass": {
-        "name": "No Class"
-    },
     "warrior": {
-        "name": "Guerrier",
+        "name": "Solar Warrior",
         "description": "Les guerriers sont des unités équilibrées, possédant des options viables dans la plupart des situations.",
         "base_stats": {
-            "strength": 10,
-            "vitality": 10,
-            "resistance": 10,
-            "dexterity": 10,
-            "agility": 10,
-            "intelligence": 10
+            "strength": 15,
+            "vitality": 12,
+            "resistance": 14,
+            "dexterity": 8,
+            "agility": 6,
+            "intelligence": 5
         },
         "mult_stats": {
             "strength": 2,
@@ -23,83 +20,83 @@
         }
     },
     "assassin": {
-        "name": "Rôdeur",
+        "name": "Lurker of the Abyss",
         "description": "Les rôdeurs sont des unités rapides, mais plus fragiles. Elles peuvent créer des situations très avantageuses si elles parviennent à exécuter leur plan.",
         "base_stats": {
-            "strength": 10,
-            "vitality": 10,
-            "resistance": 10,
-            "dexterity": 10,
-            "agility": 10,
-            "intelligence": 10
+            "strength": 12,
+            "vitality": 6,
+            "resistance": 6,
+            "dexterity": 14,
+            "agility": 14,
+            "intelligence": 8
         },
         "mult_stats": {
-            "strength": 2,
-            "vitality": 1.5,
-            "resistance": 1.7,
-            "dexterity": 0.5,
-            "agility": 0.5,
-            "intelligence": 0.2
+            "strength": 1.2,
+            "vitality": 0.5,
+            "resistance": 0.8,
+            "dexterity": 2,
+            "agility": 1.8,
+            "intelligence": 0.6
         }
     },
     "magician": {
-        "name": "Magicien",
+        "name": "Paint Mage",
         "description": "Les magiciens se servent d'attaques élémentaires pour se battre, cela leur permettant  d'accroître le potentiel offensif de ses alliés, ou gêner ses adversaires.",
         "base_stats": {
-            "strength": 10,
-            "vitality": 10,
-            "resistance": 10,
+            "strength": 4,
+            "vitality": 8,
+            "resistance": 12,
             "dexterity": 10,
-            "agility": 10,
-            "intelligence": 10
+            "agility": 8,
+            "intelligence": 18
         },
         "mult_stats": {
-            "strength": 2,
-            "vitality": 1.5,
-            "resistance": 1.7,
-            "dexterity": 0.5,
-            "agility": 0.5,
-            "intelligence": 0.2
+            "strength": 0.3,
+            "vitality": 1.0,
+            "resistance": 1.4,
+            "dexterity": 1.2,
+            "agility": 1.0,
+            "intelligence": 2.5
         }
     },
     "ranger": {
-        "name": "Tireur",
+        "name": "Lunar Ranger",
         "description": "Les tireurs ont besoin d'utiliser des munitions afin de réaliser des dégâts, et bien que puissants la gestoin de leur stock est un élément primordial pour tout bon tireur.",
         "base_stats": {
-            "strength": 10,
-            "vitality": 10,
-            "resistance": 10,
-            "dexterity": 10,
-            "agility": 10,
-            "intelligence": 10
+            "strength": 6,
+            "vitality": 5,
+            "resistance": 8,
+            "dexterity": 15,
+            "agility": 14,
+            "intelligence": 12
         },
         "mult_stats": {
-            "strength": 2,
-            "vitality": 1.5,
-            "resistance": 1.7,
-            "dexterity": 0.5,
-            "agility": 0.5,
-            "intelligence": 0.2
+            "strength": 0.7,
+            "vitality": 0.5,
+            "resistance": 1.0,
+            "dexterity": 2,
+            "agility": 1.2,
+            "intelligence": 1.6
         }
     },
     "healer": {
-        "name": "Soigneur",
+        "name": "Divine Light",
         "description": "Les soigneurs possédent des sorts au même titre que les magiciens, mais ceux-ci ont des capacitées plus démarquées, au prix de dégâts plus faibles.",
         "base_stats": {
-            "strength": 10,
-            "vitality": 10,
-            "resistance": 10,
-            "dexterity": 10,
-            "agility": 10,
-            "intelligence": 10
+            "strength": 6,
+            "vitality": 12,
+            "resistance": 14,
+            "dexterity": 8,
+            "agility": 8,
+            "intelligence": 12
         },
         "mult_stats": {
-            "strength": 2,
+            "strength": 0.6,
             "vitality": 1.5,
             "resistance": 1.7,
-            "dexterity": 0.5,
-            "agility": 0.5,
-            "intelligence": 0.2
+            "dexterity": 0.8,
+            "agility": 0.8,
+            "intelligence": 1.6
         }
     }
 }

@@ -1,0 +1,38 @@
+{
+    "holy_dragon_chestplate": {
+        "id": "holy_dragon_chestplate",
+        "name": "The Holy Dragon's plate.",
+        "description": "This plate is given to all beta-testers.",
+        "caracteristics": {
+            "raw_buff_res": 3,
+            "raw_buff_vit": 3
+        }
+    },
+    "leather_chestplate": {
+        "id": "leather_chestplate",
+        "name": "Leather Chestplate",
+        "description": "A basic armor made of leather.",
+        "caracteristics": {
+            "raw_buff_res": 1,
+            "raw_buff_vit": 2
+        }
+    },
+    "iron_chestplate": {
+        "id": "iron_chestplate",
+        "name": "Iron Chestplate",
+        "description": "A basic armor made of iron.",
+        "caracteristics": {
+            "raw_buff_res": 1,
+            "raw_buff_vit": 3
+        }
+    },
+    "old_chestplate": {
+        "id": "old_chestplate",
+        "name": "Old Chestplate",
+        "description": "A basic armor used in a war long ago.",
+        "caracteristics": {
+            "raw_buff_res": 1,
+            "raw_buff_vit": 3
+        }
+    }
+}

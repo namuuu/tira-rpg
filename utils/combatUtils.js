@@ -1,5 +1,6 @@
-const { Client, EmbedBuilder, StringSelectMenuOptionBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const embedUtils = require('../utils/messageTemplateUtils.js');
+const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const player = require('../utils/playerUtils.js');
+const inventory =  require('../utils/inventoryUtils.js');
 const manager = require('../manager/combatManager.js');
 const skillUtil = require('../utils/skillUtils.js');
 const skillList = require('../data/skills.json');
@@ -11,10 +12,17 @@ const mobList = require('../data/monster.json');
  * @returns the created thread
  */
 exports.createThread = async function(message) {
-    const thread = await message.startThread({
-        name: 'Combat Thread',
-        autoArchiveDuration: 60,
-    });
+    try {
+        var thread = await message.startThread({
+            name: 'Combat Thread',
+            autoArchiveDuration: 60,
+        });
+    } catch (error) {
+        message.reply('There was an error trying to create a thread. Maybe there\s too many threads already ?');
+        console.error(error);
+        return;
+    }
+    
 
     const embed = new EmbedBuilder()
         .setTitle("The tension is palpable...")
@@ -30,9 +38,7 @@ exports.createThread = async function(message) {
 
     await thread.send({ embeds: [embed], components: [row] });
 
-    return new Promise(async resolve => {
-        resolve(thread);
-    });
+    return thread;
 }
 
 /**
@@ -167,42 +173,105 @@ exports.receiveSkillSelector = async function(interaction) {
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
-    interaction.message.delete();
+    let exeData = {
+        combat: combatInfo,
+        thread: interaction.channel,
+        casterPlayer: interaction.user,
+        casterId: interaction.user.id,
+        skill: skillList[skillId],
+        allyTeam: exports.getPlayerAlliedTeam(interaction.user.id, combatInfo),
+        enemyTeam: exports.getPlayerEnemyTeam(interaction.user.id, combatInfo),
+    }
 
-    if(combatInfo.current_action.aim_at == null || combatInfo.current_action.aim_at == undefined) {
-        this.sendTargetSelector(combatInfo, interaction.user, interaction.channel);
-    } else {
-        // EXECUTE SKILL
-        this.executeSkill(combatInfo, interaction.channel, combatInfo.current_action.skill, interaction.user.id, combatInfo.current_action.aim_at);
+    interaction.message.delete();
+    switch(skillList[skillId].aim.split('-')[0]) {
+        case "self": // Aiming at self
+            exeData.targets = [exports.getPlayerInCombat(interaction.user.id, combatInfo)];
+            exports.executeSkill(exeData)
+        break;
+        case "ally":
+            const remainingAllies = exeData.enemyTeam.filter(player => player.health > 0 && player.id != interaction.user.id);
+            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+                exeData.targets = remainingAllies;
+                exports.executeSkill(exeData);
+            } else {
+                if(remainingAllies.length == 1) {
+                    exeData.targets = [exeData.allyTeam[0]];
+                    break;
+                } 
+                exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, exeData.allyTeam.filter(player => player.health > 0 && player.id != interaction.user.id));
+            }
+        break;
+        case "ally+self":
+            const remainingAlliesAndSelf = exeData.allyTeam.filter(player => player.health > 0);
+            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+                exeData.targets = remainingAlliesAndSelf;
+                exports.executeSkill(exeData);
+            } else {
+                if(remainingAlliesAndSelf.length == 1) {
+                    exeData.targets = [remainingAlliesAndSelf[0]];
+                    exports.executeSkill(exeData);
+                    break;
+                }
+                exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, remainingAlliesAndSelf);
+            }
+        break;
+        case "enemy":
+            const remainingEnemies = exeData.enemyTeam.filter(player => player.health > 0);
+            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+                exeData.targets = remainingEnemies;
+                exports.executeSkill(exeData);
+            } else {
+                if(remainingEnemies.length == 1) {
+                    exeData.targets = [remainingEnemies[0]];
+                    exports.executeSkill(exeData);
+                    break;
+                }
+                exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, remainingEnemies);
+            }
+        break;
+        case "all":
+            const remainingPlayers = exeData.allyTeam.concat(exeData.enemyTeam).filter(player => player.health > 0);
+            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+                exeData.targets = remainingPlayers;
+                exports.executeSkill(exeData);
+            } else {
+                if(remainingPlayers.length == 1) {
+                    exeData.targets = [remainingPlayers[0]];
+                    exports.executeSkill(exeData);
+                    break;
+                }
+                exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, remainingPlayers);
+            }
+        break;
+        default:
+
+        break;
     }
 }
 
-exports.sendTargetSelector = async function(combat, player, thread) {
-    const enemyTeam = this.getPlayerEnemyTeam(player.id, combat);
+exports.sendTargetSelector = async function(combat, player, thread, targets) {
 
+    const options = [];
 
-    const stringSelectOptions = [];
-    let i = 0;
-
-    for (const enemy of enemyTeam) {
-        stringSelectOptions.push({
-            label: enemy.id,
-            value: enemy.id,
-            description: "HP: " + enemy.health + " / " + enemy.stats.vitality,
+    for(const target of targets) {
+        options.push({
+            label: target.name,
+            value: target.id,
+            description: target.id,
         });
-        i = i + 1;
     }
 
-    const row = new ActionRowBuilder()
-        .addComponents(
-            new StringSelectMenuBuilder()
-                .setCustomId('combat_target_selector')
-                .setPlaceholder('Choose a target !')
-                .addOptions(stringSelectOptions)
-        );
+    var row = new ActionRowBuilder()
+            .addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId('combat_target_selector')
+                    .setPlaceholder('Choose a target !')
+                    .addOptions(options)
+            );
 
     const embed = new EmbedBuilder()
-        .setDescription("Who do you want to attack, <@" + player.id + "> ?")
+            .setDescription("Who do you want to target, <@" + player.id + "> ?")
 
     await thread.send({ embeds: [embed], components: [row] });
 }
@@ -218,48 +287,57 @@ exports.receiveTargetSelector = async function(interaction) {
     }
 
     if(interaction.user.id != combatInfo.current_action.current_player_id) {
-        interaction.reply("I'm afraid it's not your turn yet...");
+        interaction.reply({ content: "I'm afraid it's not your turn yet...", ephemeral: true});
         return;
     }
 
-    const targetId = interaction.values[0];
+    const exeData = {
+        combat: combatInfo,
+        thread: interaction.channel,
+        casterPlayer: interaction.user,
+        casterId: interaction.user.id,
+        skill: skillList[combatInfo.current_action.skill],
+        allyTeam: exports.getPlayerAlliedTeam(interaction.user.id, combatInfo),
+        enemyTeam: exports.getPlayerEnemyTeam(interaction.user.id, combatInfo),
+        targets: [exports.getPlayerInCombat(interaction.values[0], combatInfo)]
+    }
 
-    combatInfo.current_action.aim_at = targetId;
+    await combatCollection.updateOne({}, {$set: { current_action: combatInfo.current_action }}, { upsert: true });
+
+    interaction.message.delete();
+
+    exports.executeSkill(exeData);
+}
+
+exports.executeSkill = async function(exeData) {
+    const { thread } = exeData;
+    let log = skillUtil.execute(exeData);
+
+    combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
     const update = {
         $set: {
-            current_action: combatInfo.current_action,
+            team1: exeData.combat.team1,
+            team2: exeData.combat.team2,
         }
     };
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
-    interaction.message.delete();
-
-    if(combatInfo.current_action.skill == null || combatInfo.current_action.skill == undefined) {
-        const playerTeam = (combatInfo.current_action.current_player_team == 1) ? combatInfo.team2 : combatInfo.team1;
-        for (const player of playerTeam) {
-            //console.log(player);
-            if(player.id == interaction.user.id) {
-                this.sendSkillSelector(player, interaction.channel);
-            }
-        }
-    } else {
-        // EXECUTE SKILL
-        this.executeSkill(combatInfo, interaction.channel, combatInfo.current_action.skill, interaction.user.id, combatInfo.current_action.aim_at);
-    }
+    manager.finishTurn(exeData, log);
 }
 
-exports.executeSkill = async function(combatInfo, thread, skillId, casterId, targetId) {
+exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, targetId) {
     let exeData = {
         combat: combatInfo,
         thread: thread,
-        casterId: casterId,
-        targetId: targetId,
-        skill: skillList[skillId],
+        casterId: monsterId,
+        targets: [exports.getPlayerInCombat(targetId, combatInfo)],
     }
 
-    //console.log(exeData);
+    let monster = exports.getPlayerInCombat(monsterId, combatInfo);
+    const random = Math.floor(Math.random() * (monster.skills.length));
+    exeData.skill = skillList[monster.skills[random]];
 
     let log = skillUtil.execute(exeData);
 
@@ -283,11 +361,8 @@ exports.getSoonestTimelineEntity = function(combatInfo) {
 
     var fighterList = combatInfo.team1.concat(combatInfo.team2);
 
-    //console.log(combatInfo);
-
     for (const fighter of fighterList) {
-        //console.log(fighter);
-        soonestFighter = this.compareTimelines(soonestFighter, fighter);
+        soonestFighter = exports.compareTimelines(soonestFighter, fighter);
     }
 
     return soonestFighter;
@@ -300,9 +375,9 @@ exports.getSoonestTimelineEntity = function(combatInfo) {
  * @returns the fastest player. or the player who exists if one is not defined.
  */
 exports.compareTimelines = function(player1, player2) {
-    if (player1 == null || player1 == undefined)
+    if (player1 == null || player1 == undefined || player1.health <= 0)
         return player2;
-    if (player2 == null || player2 == undefined)
+    if (player2 == null || player2 == undefined || player2.health <= 0)
         return player1;
 
     if (player1.timeline < player2.timeline)
@@ -355,14 +430,17 @@ exports.getPlayerEnemyTeam = function(playerId, combat) {
 exports.createMonsterData = function(combat, monster) {
 
     let i = 0;
-    while((player = this.getPlayerInCombat(monster + "-" + i, combat)) != null) {
+    if(this.getPlayerInCombat(monster, combat) != null) {
         i++;
+        while((this.getPlayerInCombat(monster + "-" + i, combat)) != null) {
+            i++;
+        }
     }
+    
 
     const mobData = mobList[monster];
 
     const dummy = {
-        id: monster + "-" + i,
         type: "monster",
         timeline: 0,
         stats: {
@@ -374,6 +452,14 @@ exports.createMonsterData = function(combat, monster) {
             agility: mobData.base_stats.agility + Math.floor(Math.random(mobData.mod_stats.agility)),
         },
         equipment: {}
+    }
+
+    if(i > 0) {
+        dummy.id = monster + "-" + i;
+        dummy.name = mobData.name + " (" + i + ")";
+    } else {
+        dummy.id = monster;
+        dummy.name = mobData.name;
     }
 
     dummy.health = dummy.stats.vitality;
@@ -392,9 +478,9 @@ exports.announceNewTurn = async function(thread, player) {
 
     const embed = new EmbedBuilder();
 
-    if(player.type = "human") {
+    if(player.type == "human") {
         embed
-            .setDescription('It\'s <' + player.id + '>\'s turn!')
+            .setDescription('It\'s <@' + player.id + '>\'s turn!')
             .setColor("#ffffff");
     } else {
         embed
@@ -417,6 +503,14 @@ exports.getLogger = function(log, playerId) {
     return playerLog;
 }
 
+exports.addToValueTologger = function(log, playerId, valueName, value) {
+    let playerLog = this.getLogger(log, playerId);
+    if(playerLog[valueName] == null || playerLog[valueName] == undefined) {
+        playerLog[valueName] = 0;
+    }
+    playerLog[valueName] += value;
+}
+
 /**
  * Logs the effects an entity suffered into an embed (in argument).
  * @param {*} embed the embed to log to (it adds a field)
@@ -425,32 +519,26 @@ exports.getLogger = function(log, playerId) {
  * @returns true if the entity died, false otherwise
  */
 exports.logResults = function(embed, log, entity) {
-    let title = "";
     let description = "";
-
-    if(entity.type == "player") {
-        title = "<@" + entity.id + ">";
-    } else {
-        title = entity.id;
-    }
-
-    //console.log(entity);
 
     for (const [effect, value] of Object.entries(log.find(player => player.id == entity.id))) {
         switch(effect) {
             case "damage":
                 description += "Lost " + value + " HP (" + entity.health + " left) \n";
                 break;
+            case "heal":
+                description += "Gained " + value + " HP (" + entity.health + " left) \n";
+                break;
         }
     }
 
     if(entity.health <= 0) {
         description += "Died\n";
-        embed.addFields({name: title, value: description});
+        embed.addFields({name: entity.name, value: description});
         return true;
     }
 
-    embed.addFields({name: title, value: description});
+    embed.addFields({name: entity.name, value: description});
     return false;
 }
 
@@ -470,15 +558,65 @@ exports.checkForVictory = function(combat) {
         }
     }
 
-    if(team1Alive) {
+
+
+    if(team1Alive && !team2Alive) {
         return 1;
-    } else if(team2Alive) {
+    } else if(team2Alive && !team1Alive) {
         return 2;
     }
     return 0;
 }
 
-exports.updateMainMessage = async function(combatInfo, message, state) {
+exports.rewardLoot = async function(combat, thread) {
+    var lootTable = [];
+    var totalExp = 0;
+    var totalMoney = 0;
+
+    for(const enemy of combat.team2) {
+        if(enemy.type == "monster") {
+            const enemyType = enemy.id.split("-")[0];
+            const enemyData = mobList[enemyType];
+            lootTable.push(...enemyData.loots);
+            totalExp = totalExp + enemyData.exp;
+            totalMoney = totalMoney + enemyData.money;
+        }   
+    }
+    totalExp = Math.floor(totalExp / combat.team1.length);
+    totalMoney = Math.floor(totalMoney / combat.team1.length);
+
+    for(const victor of combat.team1) {
+        if(victor.type == "human") {
+            const embed = new EmbedBuilder()
+                .setTitle( Client.client.users.cache.get(victor.id).username + '\'s earnings!')
+            player.exp.award(victor.id, totalExp);
+            player.giveMoney(victor.id, totalMoney);
+            embed.setDescription("You earned a total of " + totalExp + " experience points and " + totalMoney + " $ !");
+            
+
+            var lootDescription = "";
+
+            for(const loot of lootTable) {
+                inventory.giveItem(victor.id, loot.id, loot.pack );
+                lootDescription += loot.id + " x" + loot.pack + "\n";
+            }
+
+            if(lootDescription != "") {
+                embed.addFields({name: "Loot", value: lootDescription});
+            }
+            if(victor.health > 0)
+                player.health.set(victor.id, (victor.health > victor.vitality ? victor.vitality : victor.health));
+            else
+                player.health.set(victor.id, 0);
+
+            thread.send({ embeds: [embed] });
+        }
+    }
+
+    
+}
+
+exports.updateMainMessage = function(combatInfo, message, state) {
 
     const embed = new EmbedBuilder()
 		.setTitle('The roar of battle is heard in the distance...')
@@ -489,15 +627,22 @@ exports.updateMainMessage = async function(combatInfo, message, state) {
     switch(state) {
         case "prebattle":
             embed.setDescription("A battle is about to begin! All party members can join the fight.");
-            components.push(
-                new ActionRowBuilder()
+            const row = new ActionRowBuilder()
 		            .addComponents(
                         new ButtonBuilder()
                             .setCustomId('joinFight-' + message.id + '-1')
-                            .setLabel('Join in !')
+                            .setLabel('Join in!')
                             .setStyle(ButtonStyle.Secondary)
-                    )
-				);
+                    );
+            if(combatInfo.team1.length > 0 || combatInfo.team2.length > 0) {
+                row.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('leaveFight-' + message.id + '-1')
+                        .setLabel('Leave!')
+                        .setStyle(ButtonStyle.Secondary)
+                );
+            }
+            components.push(row);
             break;
         case "battle":
             embed.setDescription("Current turn: " + combatInfo.current_turn);
@@ -528,7 +673,7 @@ exports.updateMainMessage = async function(combatInfo, message, state) {
                 break;
             case "monster":
             case "dummy":
-                team1 += player.id + " ";
+                team1 += player.name + " ";
                 break;
         }
 
@@ -546,7 +691,7 @@ exports.updateMainMessage = async function(combatInfo, message, state) {
                 break;
             case "monster":
             case "dummy":
-                team2 += player.id + " ";
+                team2 += player.name + " ";
                 break;
         }
 

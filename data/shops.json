@@ -1,0 +1,46 @@
+{
+"item_shop1": {
+    "id": "item_shop1",
+    "name": "Item Shop 1",
+    "rarity": 1,
+    "items": {
+        "apple": {
+            "id": "apple",
+            "name": "Apple",
+            "cost": 2,
+            "type": "consumable"
+        },
+        "item3": {
+            "id": "warhandbook",
+            "name": "Old War Handbook",
+            "cost": 160,
+            "type": "key-item"
+        }
+    }
+},
+"main_shop2": {
+    "id": "main_shop2",
+    "name": "Main Shop 2",
+    "rarity": 2,
+    "items": {
+        "item4": {
+            "id": "item4",
+            "name": "Item 4",
+            "cost": 100,
+            "type": "weapon"
+        },
+        "item5": {
+            "id": "item5",
+            "name": "Item 5",
+            "cost": 200,
+            "type": "consumable"
+        },
+        "item6": {
+            "id": "item6",
+            "name": "Item 6",
+            "cost": 10,
+            "type": "key-item"
+        }
+    }
+}
+}

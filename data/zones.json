@@ -1,0 +1,86 @@
+{
+    "slime_lake": {
+        "name": "Slime Lake",
+        "description": "A quiet place with only slimes roaming around. It's a good place to train your skills.",
+        "required": {
+            "level": "",
+            "quests": "",
+            "items": ""  
+        },
+        "monsters": {
+            "group1": {
+                "m-names": ["slime", "slime", "slime"],
+                "spawn-chance": "30"
+            },
+            "group2": {
+                "m-names": ["slime", "red_slime"],
+                "spawn-chance": "25"
+            },
+            "group3": {
+                "m-names": ["slime", "blue_slime", "slime"],
+                "spawn-chance": "25"
+            },
+            "group4": {
+                "m-names": ["red_slime", "blue_slime"],
+                "spawn-chance": "15"
+            },
+            "group5": {
+                "m-names": ["king_slime"],
+                "spawn-chance": "5"
+            }
+        },
+        "shops": [""]
+    },
+    "temple": {
+        "name": "Forgotten Temple",
+        "description": "TEMPLE RUN",
+        "required": {
+            "level": "",
+            "quests": "",
+            "items": ""  
+        },
+        "monsters": {
+            "group1": {
+                "m-names": ["bird", "slime", "bird"],
+                "spawn-chance": "50"
+            },
+            "group2": {
+                "m-names": ["bird"],
+                "spawn-chance": "1000000000000"
+            }
+        },
+        "shops": [""]
+    },
+    "capital": {
+        "name": "La Capitale",
+        "description": "Tutorial/20",
+        "required": {
+            "level": "",
+            "quests": "",
+            "items": ""  
+        },
+        "monsters": {
+        },
+        "shops": ["item_shop1", "equipment_shop1"]
+    },
+    "forgotten_outpost": {
+        "name": "Forgotten Outpost",
+        "description": "A small outpost that was abandoned a long time ago.",
+        "required": {
+            "level": "10",
+            "quests": "",
+            "items": ["warhandbook"]  
+        },
+        "monsters": {
+            "group1": {
+                "m-names": ["bird", "slime", "bird"],
+                "spawn-chance": "50"
+            },
+            "group2": {
+                "m-names": ["bird"],
+                "spawn-chance": "1000000000000"
+            }
+        },
+        "shops": [""]
+    }
+}

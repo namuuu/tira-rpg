@@ -1,31 +1,162 @@
 {
-  "baguette": {
-    "name": "Baguette",
-    "number":"100",
-    "required_class":"warrior",
-    "required_level": 1,
-    "description": "Une baguette. Donne 10 points de vie.",
-    "effects": {
-      "cooldown": 50,
-      "heal": 10,
-      "damage": 0
-    }
-  },
   "debugger": {
     "name": "The Debugger",
     "number":"0",
+    "aim": "enemy-single",
     "description": "A skill only used when the developers need to test something. Unobtainable.",
     "effects": {
       "cooldown": 10,
       "damage": 40
     }
   },
+  "front_attack": {
+    "name": "Front Attack",
+    "number":"2",
+    "aim": "enemy-single",
+    "description": "A basic attack where the caster charges forward.",
+    "effects": {
+      "cooldown": 12,
+      "damage": 2
+    }
+  },
+  "acid_spin": {
+    "name": "Acid Spin",
+    "number":"6",
+    "aim": "enemy-aoe",
+    "description": "A spin attack that spits acid.",
+    "effects": {
+      "cooldown": 20,
+      "damage": 5
+    }
+  },
+  "acid_flame": {
+    "name": "Acid Flame",
+    "number":"7",
+    "aim": "enemy-single",
+    "description": "An acid flame attack.",
+    "effects": {
+      "cooldown": 30,
+      "damage": 12
+    }
+  },
+  "bite": {
+    "name": "Bite",
+    "number":"3",
+    "aim": "enemy-single",
+    "description": "A strong bite.",
+    "effects": {
+      "cooldown": 16,
+      "damage": 4
+    }
+  },
+  "peck": {
+    "name": "Peck",
+    "number":"4",
+    "aim": "enemy-single",
+    "description": "A small peck.",
+    "effects": {
+      "cooldown": 16,
+      "damage": 2
+    }
+  },
   "default": {
     "name": "Struggle",
     "number":"1",
+    "aim": "self",
     "description": "Is just struggling",
     "effects": {
       "cooldown": 10
+    }
+  },
+  "slash": {
+    "name": "Slash",
+    "number":"5",
+    "aim": "enemy-single",
+    "description": "A simple vertical slash, classic but reliable.",
+    "effects": {
+      "cooldown": 12,
+      "damage": 8
+    }
+  },
+  "light_heal": {
+    "name": "Light Heal",
+    "number":"8",
+    "aim": "ally+self-single",
+    "description": "A basic heal.",
+    "effects": {
+      "cooldown": 20,
+      "heal": 10
+    }
+  },
+  "purification": {
+    "name": "Purification",
+    "number":"9",
+    "aim": "ally-aoe",
+    "description": "A purification spell that heals all allies.",
+    "effects": {
+      "cooldown": 30,
+      "heal": 20
+    }
+  }, 
+  "gust": {
+    "name": "Gust",
+    "number":"10",
+    "type": ["buff-single"],
+    "description": "A buff that increases the caster's speed.",
+    "effects": {
+      "cooldown": 15,
+      "buff": {
+        "agility": {
+          "value": 8,
+          "duration": 3
+        }
+      }
+    }
+  },
+  "haste": {
+    "name": "Haste",
+    "number":"11",
+    "type": ["buff-aoe"],
+    "description": "A buff that increases the speed of all allies.",
+    "effects": {
+      "cooldown": 30,
+      "buff_stats": {
+        "agility": {
+          "value": 5,
+          "duration": 3
+        }
+      }
+    }
+  },
+  "toxic_spite": {
+    "name": "Toxic Spite",
+    "number":"12",
+    "type": ["damage-single"],
+    "description": "A spell that deals damage and poisons the target.",
+    "effects": {
+      "cooldown": 10,
+      "damage": 10,
+      "poison": {
+        "damage": 5,
+        "duration": 3
+      }
+    }
+  },
+  "shadow_slash": {
+    "name": "Shadow Slash",
+    "number":"13",
+    "type": ["damage-single"],
+    "description": "A slash that deals damage and lowers the target's defense.",
+    "effects": {
+      "cooldown": 15,
+      "damage": 10,
+      "poison": 5,
+      "debuff_stats": {
+        "resistance": {
+          "value": 7,
+          "duration": 3
+        } 
+      }
     }
   }
 }
