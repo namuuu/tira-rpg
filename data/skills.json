@@ -106,7 +106,10 @@
     "effects": {
       "cooldown": 15,
       "buff": {
-        "agility": 7
+        "agility": {
+          "value": 8,
+          "duration": 3
+        }
       }
     }
   },
@@ -117,8 +120,11 @@
     "description": "A buff that increases the speed of all allies.",
     "effects": {
       "cooldown": 30,
-      "buff": {
-        "agility": 5
+      "buff_stats": {
+        "agility": {
+          "value": 5,
+          "duration": 3
+        }
       }
     }
   },
@@ -130,7 +136,10 @@
     "effects": {
       "cooldown": 10,
       "damage": 10,
-      "poison": 5
+      "poison": {
+        "damage": 5,
+        "duration": 3
+      }
     }
   },
   "shadow_slash": {
@@ -142,8 +151,11 @@
       "cooldown": 15,
       "damage": 10,
       "poison": 5,
-      "debuff": {
-        "resistance": -5
+      "debuff_stats": {
+        "resistance": {
+          "value": 7,
+          "duration": 3
+        } 
       }
     }
   }
