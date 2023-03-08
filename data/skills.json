@@ -2,7 +2,7 @@
   "debugger": {
     "name": "The Debugger",
     "number":"0",
-    "type": ["damage-single"],
+    "aim": "enemy-single",
     "description": "A skill only used when the developers need to test something. Unobtainable.",
     "effects": {
       "cooldown": 10,
@@ -12,7 +12,7 @@
   "front_attack": {
     "name": "Front Attack",
     "number":"2",
-    "type": ["damage-single"],
+    "aim": "enemy-single",
     "description": "A basic attack where the caster charges forward.",
     "effects": {
       "cooldown": 12,
@@ -22,7 +22,7 @@
   "acid_spin": {
     "name": "Acid Spin",
     "number":"6",
-    "type": ["damage-aoe"],
+    "aim": "enemy-aoe",
     "description": "A spin attack that spits acid.",
     "effects": {
       "cooldown": 20,
@@ -32,7 +32,7 @@
   "acid_flame": {
     "name": "Acid Flame",
     "number":"7",
-    "type": ["damage-single"],
+    "aim": "enemy-single",
     "description": "An acid flame attack.",
     "effects": {
       "cooldown": 30,
@@ -42,7 +42,7 @@
   "bite": {
     "name": "Bite",
     "number":"3",
-    "type": ["damage-single"],
+    "aim": "enemy-single",
     "description": "A strong bite.",
     "effects": {
       "cooldown": 16,
@@ -52,7 +52,7 @@
   "peck": {
     "name": "Peck",
     "number":"4",
-    "type": ["damage-single"],
+    "aim": "enemy-single",
     "description": "A small peck.",
     "effects": {
       "cooldown": 16,
@@ -62,7 +62,7 @@
   "default": {
     "name": "Struggle",
     "number":"1",
-    "type": ["damage-single"],
+    "aim": "self",
     "description": "Is just struggling",
     "effects": {
       "cooldown": 10
@@ -71,7 +71,7 @@
   "slash": {
     "name": "Slash",
     "number":"5",
-    "type": ["damage-single"],
+    "aim": "enemy-single",
     "description": "A simple vertical slash, classic but reliable.",
     "effects": {
       "cooldown": 12,
@@ -81,7 +81,7 @@
   "light_heal": {
     "name": "Light Heal",
     "number":"8",
-    "type": ["heal-single"],
+    "aim": "ally+self-single",
     "description": "A basic heal.",
     "effects": {
       "cooldown": 20,
@@ -91,7 +91,7 @@
   "purification": {
     "name": "Purification",
     "number":"9",
-    "type": ["heal-aoe"],
+    "aim": "ally-aoe",
     "description": "A purification spell that heals all allies.",
     "effects": {
       "cooldown": 30,
