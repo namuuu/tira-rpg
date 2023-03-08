@@ -81,7 +81,6 @@ exports.checkPerms = async function(commandName, userName) {
             const query = { users: userName};
 
             admin.findOne(query).then(exists => {
-                console.log(exists);
                 if (!exists) {
                     resolve(false);
                 }
