@@ -1,18 +1,35 @@
 {
-    "leather": {
-        "id": "leather",
-        "name": "Leather",
+    "leather_helmet": {
+        "id": "leather_helmet",
+        "name": "Leather Helmet",
         "description": "A basic helmet made of leather.",
         "caracteristics": {
             "raw_buff_vit": 1
         }
     },
-    "iron": {
-        "id": "iron",
-        "name": "Iron",
+    "iron_helmet": {
+        "id": "iron_helmet",
+        "name": "Iron Helmet",
         "description": "A basic helmet made of iron.",
         "caracteristics": {
             "raw_buff_vit": 2
+        }
+    },
+    "old_helmet": {
+        "id": "old_helmet",
+        "name": "Old Helmet",
+        "description": "A basic helmet used in a war long ago.",
+        "caracteristics": {
+            "raw_buff_vit": 2
+        }
+    },
+    "slimy_crown": {
+        "id": "slimy_crown",
+        "name": "Slimy Crown",
+        "description": "A crown made of slime.",
+        "caracteristics": {
+            "raw_buff_vit": 4,
+            "raw_buff_str": 2
         }
     }
 }

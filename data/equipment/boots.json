@@ -1,16 +1,24 @@
 {
-    "leather": {
-        "id": "leather",
-        "name": "Leather",
+    "leather_boots": {
+        "id": "leather_boots",
+        "name": "Leather boots",
         "description": "Basic boots made of leather.",
         "caracteristics": {
             "raw_buff_res": 1
         }
     },
-    "iron": {
-        "id": "iron",
-        "name": "Iron",
+    "iron_boots": {
+        "id": "iron_boots",
+        "name": "Iron boots",
         "description": "Basic boots made of iron.",
+        "caracteristics": {
+            "raw_buff_res": 2
+        }
+    },
+    "old_boots": {
+        "id": "old_boots",
+        "name": "Old boots",
+        "description": "Old boots used in a war long ago",
         "caracteristics": {
             "raw_buff_res": 2
         }
