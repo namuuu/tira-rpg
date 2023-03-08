@@ -12,10 +12,17 @@ const mobList = require('../data/monster.json');
  * @returns the created thread
  */
 exports.createThread = async function(message) {
-    const thread = await message.startThread({
-        name: 'Combat Thread',
-        autoArchiveDuration: 60,
-    });
+    try {
+        var thread = await message.startThread({
+            name: 'Combat Thread',
+            autoArchiveDuration: 60,
+        });
+    } catch (error) {
+        message.reply('There was an error trying to create a thread. Maybe there\s too many threads already ?');
+        console.error(error);
+        return;
+    }
+    
 
     const embed = new EmbedBuilder()
         .setTitle("The tension is palpable...")

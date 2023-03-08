@@ -42,8 +42,6 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     
     const location = JSON.parse(fs.readFileSync('./data/zones.json', 'utf8'))[playerInfo.location];
 
-    console.log(location);
-
     if(location == null) {
         console.log("[ERROR] Tried to instanciate a combat in a non-existent location.");
         return;
@@ -51,7 +49,10 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     if(location.monsters == null || Object.values(location.monsters).length == 0) {
         console.log("[ERROR] Tried to instanciate a combat in a location with no monsters.");
         orderMessage.reply("There are no monsters in this location.").then(msg => {
-            setTimeout(() => msg.delete(), 5000);
+            setTimeout(() => {
+                msg.delete()
+                orderMessage.delete();
+            }, 5000);
         });
         return;
     }
@@ -62,7 +63,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     const message = await channel.send({ embeds: [searchEmbed] });
     const messageId = message.id;
 
-    await util.createThread(message);
+    await util.createThread(message, creator, playerInfo.location);
 
     
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
