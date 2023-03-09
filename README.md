@@ -84,7 +84,5 @@ Your discord.js version is outdated (Needed version is at least discordjs v14). 
 | Namu | Head Developer |
 | Firquen | Head Developer |
 | Roxyrooky | Developer |
-| Canfrixe | Developer |
-| Az' | Game Designer |
 | Viixyy | Game Designer |
 | Nekotaku | Game Designer |
