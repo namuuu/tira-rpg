@@ -160,6 +160,9 @@ exports.health.passiveRegen = async function(userID) {
 exports.energy.set = async function(userID, energy) {
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
+    if(energy > 3)
+        energy = 3;
+
     const query = { name: "info" };
     let options = { 
         projection: {_id: 0, class: 0, level: 0, exp: 0, money: 0, state: 0, health: 0, location: 0},
@@ -182,6 +185,9 @@ exports.energy.add = async function(userID, energy) {
 
     const info = await playerCollection.findOne(query, options);    
     const newEnergy = info.energy + energy;
+
+    if(newEnergy > 3)
+        newEnergy = 3;
 
     const update = { $set: { energy: newEnergy } };
     options = { upsert: true };
@@ -206,10 +212,13 @@ exports.energy.passiveRegen = async function(userID) {
         return 0;
     } else if ( (Date.now() - lastRegen) < 7200000) {
         energy = energy + 1;
+        var result = 1;
     } else if ( (Date.now() - lastRegen) < 10800000) {
         energy = energy + 2;
+        var result = 2;
     } else {
         energy = 3;
+        var result = 3;
     }
 
     if (energy > maxEnergy)
@@ -223,7 +232,7 @@ exports.energy.passiveRegen = async function(userID) {
     
     await playerCollection.updateOne(query, update, {upsert: true});
 
-    return energy;
+    return result;
 }
 
 exports.exp.award = async function(id, exp, channel) {

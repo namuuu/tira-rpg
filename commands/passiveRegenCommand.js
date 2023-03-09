@@ -9,18 +9,25 @@ module.exports = {
   execute(message, args) {
     authorId = message.author.id;
 
-    const health = player.health.passiveRegen(message.author.id);
-    const energy = player.energy.passiveRegen(message.author.id);
+    
 
-    const displayEmbed = new EmbedBuilder()
-      .setColor(0x0099FF)
-      .setTitle(':white_check_mark: Passive Regeneration :white_check_mark:')
-      .addFields(
-        { name: 'Health recovered', value: health },
-        { name: 'Energy recovered', value: energy }
-      )
-      .setThumbnail(message.author.displayAvatarURL());
+    player.health.passiveRegen(message.author.id).then(health => {
+      player.energy.passiveRegen(message.author.id).then(energy => {
+        player.getData(authorId, "info").then(info => {
 
-    message.channel.send({ embeds: [displayEmbed] });
-  }
+        var actualHealth = info.health;
+        var actualEnergy = info.energy;
+
+        const embed = new EmbedBuilder()
+          .setTitle(" :hibiscus: Passive Regeneration :hibiscus:")
+          .setDescription("You have recovered " + health + " health :heart: and " + energy + " energy :battery:")
+          .setColor(0xF898AA)
+          .setFooter({text: "You now have " + actualHealth + " health and " + actualEnergy + " energy."})
+          .setTimestamp();
+
+        message.channel.send({ embeds: [embed] });
+      })
+    })
+  })
+}
 }
