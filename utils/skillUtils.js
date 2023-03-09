@@ -19,7 +19,14 @@ exports.execute = function(exeData) {
 }
 
 exports.getSkill = function(skillName) {
-    return skills[skillName];
+    if(skills[skillName] != undefined)
+        return {name: skillName, skill: skills[skillName]};
+    
+    for(const skill in skills) {
+        if (skills[skill].number == skillName)
+            return {name: skill, skill: skills[skill]};
+    }
+    return null;
 }
 exports.getEffect = function(skillEffect) {
     return skillEffect.map.get(skillName);
@@ -111,15 +118,20 @@ exports.hasSkill = async function(user_id, skill_id) {
     }
 }
 
-exports.selectActiveSkill = async function(user_id, skill_id) {
+exports.selectActiveSkill = async function(user_id, query) {
     const playerCollection = Client.mongoDB.db('player-data').collection(user_id);
 
-    const query = { name: "inventory" };
     let options = { 
         projection: {_id: 0, items: 0, quantity: 0},
     };
 
-    const inventory = await playerCollection.findOne(query, options);
+    const skill = exports.getSkill(query);
+
+    console.log(skill);
+
+    const skill_id = ((skill == null || skill == undefined) ? null : skill.name);
+                                
+    const inventory = await playerCollection.findOne({ name: "inventory" }, options);
     
     if(!inventory.skills.includes(skill_id)) {
         console.error("[DEBUG] Skill " + skill_id + " hasn't been learned by user " + user_id + ". (ACTIVE_SKILL_NOT_LEARNED)");
@@ -137,36 +149,36 @@ exports.selectActiveSkill = async function(user_id, skill_id) {
     const newItems = inventory.activeSkills.concat(skill_id);
     const update = { $set: { activeSkills: newItems } };
     options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne({ name: "inventory" }, update, options);
     console.log("[DEBUG] User " + user_id + " selected skill " + skill_id + ".");
-    return true;
+    return skill;
 }
 
-exports.unselectActiveSkill = async function(user_id, skill_id) {
+exports.unselectActiveSkill = async function(user_id, query) {
     const playerCollection = Client.mongoDB.db('player-data').collection(user_id);
 
-    const query = { name: "inventory" };
-    let options = { 
-        projection: {_id: 0, items: 0, quantity: 0},
-    };
+    const skill = exports.getSkill(query);
+    const skill_id = ((skill == null || skill == undefined) ? null : skill.name);
 
-    const inventory = await playerCollection.findOne(query, options);
+    const inventory = await playerCollection.findOne({ name: "inventory" }, {projection: {_id: 0, items: 0, quantity: 0}});
 
-    if(!inventory.skills.includes(skill_id)) {
+    if(!inventory.activeSkills.includes(skill_id)) {
         console.error("[DEBUG] Skill " + skill_id + " hasn't been selected by user " + user_id + ". (ACTIVE_SKILL_NOT_ACTIVE)");
         return "not_selected";
     }
     
-    const newItems = [...(inventory.skills)];
+    const newItems = [...(inventory.activeSkills)];
     const removeIndex = newItems.indexOf(skill_id);
     if(removeIndex > -1)
         newItems.splice(removeIndex, 1);
+    console.log(newItems);
     const update = { $set: { activeSkills: newItems } };
     options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+
+    await playerCollection.updateOne({ name: "inventory" }, update, {projection: {_id: 0, items: 0, quantity: 0}});
     console.log("[DEBUG] User " + user_id + " unselected skill " + skill_id + ".");
 
-    return true;
+    return skill;
 }
 
 function getStringActiveSkill(skills) {
@@ -269,13 +281,9 @@ exports.receiveModal = async function(interaction, select) {
     else
         ret = await exports.unselectActiveSkill(userId, skill);
     
-    if(ret == true) {
-        //async function typeSkills(embed, playerId, playername)
+    if(typeof ret != "string") {
         inv.display(interaction.user, interaction, "skills", false);
-        if(select)
-            interaction.reply({content: "Skill " + skill + " successfully selected.", ephemeral: true});
-        else
-            interaction.reply({content: "Skill " + skill + " successfully unselected.", ephemeral: true});
+        interaction.deferUpdate();
     } else {
         console.log(ret);
         switch(ret) {

@@ -23,11 +23,20 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         return;
     }
 
-    const playerCollection = Client.mongoDB.db('player-data').collection(creator.id);
-    const playerInfo = await playerCollection.findOne({ name: "info" }, { _id: 0 });
+    const playerInfo = await playerUtils.getData(creator.id, "info");
 
     if(playerInfo == null) {
         console.log("[ERROR] Tried to instanciate a combat with a non-existent player.");
+        return;
+    }
+    
+    const party = (await playerUtils.getData(creator.id, "misc")).party;
+
+    if(party == null || party.owner != creator.id) {
+        console.log("[ERROR] Tried to instanciate a combat with a non-existent party.");
+        orderMessage.reply("You're not the owner of your party.").then(msg => {
+            setTimeout(() => msg.delete(), 5000);
+        });
         return;
     }
     
@@ -37,10 +46,13 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         console.log("[ERROR] Tried to instanciate a combat in a non-existent location.");
         return;
     }
-    if(location.monsters == null || location.monsters.length == 0) {
+    if(location.monsters == null || Object.values(location.monsters).length == 0) {
         console.log("[ERROR] Tried to instanciate a combat in a location with no monsters.");
         orderMessage.reply("There are no monsters in this location.").then(msg => {
-            setTimeout(() => msg.delete(), 5000);
+            setTimeout(() => {
+                msg.delete()
+                orderMessage.delete();
+            }, 5000);
         });
         return;
     }
@@ -51,7 +63,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     const message = await channel.send({ embeds: [searchEmbed] });
     const messageId = message.id;
 
-    await util.createThread(message);
+    await util.createThread(message, creator, playerInfo.location);
 
     
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
@@ -130,7 +142,8 @@ exports.softDeleteCombat = async function(channelId) {
 }
 
 
-exports.addPlayerToCombat = async function(playerId, combatId, team, interaction) {
+exports.addPlayerToCombat = async function(playerDiscord, combatId, team, interaction) {
+    const playerId = playerDiscord.id;
     let message = interaction.message;
     const combatCollection = Client.mongoDB.db('combat-data').collection(combatId);
     let info = await util.getCombatCollection(combatId);
@@ -172,6 +185,7 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
 
     const player = {
         id: playerId,
+        name: playerDiscord.username,
         type: "human",
         class: playerInfo.class,
         health: playerInfo.health + equip.stat.getCombined(playerEquip, "raw_buff_vit"),
@@ -189,11 +203,7 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
         items: playerInv.items,
     }
 
-    if (team == 1) {
-        info.team1.push(player);
-    } else if (team == 2) {
-        info.team2.push(player);
-    }
+    team == 1 ? info.team1.push(player) : info.team2.push(player); // Adds a player to their corresponding team.
 
     const update = {
         $set: {
@@ -206,7 +216,6 @@ exports.addPlayerToCombat = async function(playerId, combatId, team, interaction
     util.updateMainMessage(info, message, "prebattle");
 
     await combatCollection.updateOne({}, update, { upsert: true });
-
     await playerCollection.updateOne({ name: "info" }, { $set: { state: {name: "in-combat", combatid: combatId} } }, { upsert: true });
 
     interaction.deferUpdate();
@@ -428,10 +437,12 @@ exports.finishTurn = async function(exeData, log) {
     const caster = util.getPlayerInCombat(casterId, combat);
     const target = util.getPlayerInCombat(targetId, combat);
     let embed = new EmbedBuilder();
+
+
     let casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.id;
-    let targetName = target.type == "human" ? "<@" + target.id + ">" : target.id;
+    //let targetName = target.type == "human" ? "<@" + target.id + ">" : target.id;
     
-    embed.setDescription(casterName + " used " + skill.name + " on " + targetName + " !");
+    embed.setDescription(casterName + " used " + skill.name/* + " on " + targetName + " !"*/);
 
     let hasDied = false;
 
@@ -482,9 +493,5 @@ exports.callForVictory = async function(combat, thread, victor) {
     });
 
     thread.send("The combat is over !");
-    const threadRet = await thread.setLocked(true);
-
-    console.log(threadRet);
-
-    
+    await thread.setLocked(true);
 }

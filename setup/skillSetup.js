@@ -18,30 +18,31 @@ module.exports = {
 }
 
 function heal(exeData, quantity, log) {
-  const { combat, targetId, casterId } = exeData;
+  const { casterId, targets } = exeData;
 
-  const caster = combatUtils.getPlayerInCombat(casterId, combat);
-  const target = combatUtils.getPlayerInCombat(targetId, combat);
-  target.health = (target.health + quantity > target.stats.vitality) ? target.stats.vitality : target.health + quantity;
+  for(const target of targets) {
+    target.health = (target.health + quantity > target.stats.vitality) ? target.stats.vitality : target.health + quantity;
+  }
 
   combatUtils.addToValueTologger(log, casterId, "heal", quantity);
 }
 
 function damage(exeData, power, log) {
-  const { combat, targetId, casterId } = exeData;
+  const { combat, casterId, targets } = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
-  const target = combatUtils.getPlayerInCombat(targetId, combat);
-  
-  const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
 
-  target.health -= damage;
+  for(const target of targets) {
+      const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
 
-  combatUtils.addToValueTologger(log, targetId, "damage", damage);
+      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+      combatUtils.addToValueTologger(log, target.id, "damage", damage);
+  }
+
 }
 
 function cooldown(exeData, quantity, log) {
-  const { combat, casterId, thread } = exeData;
+  const { combat, casterId} = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
   caster.timeline += quantity;
