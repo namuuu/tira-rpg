@@ -6,6 +6,7 @@ const classes = require('../data/classes.json');
 // Player data management
 
 exports.health = {};
+exports.energy = {};
 exports.exp = {};
 exports.class = {};
 exports.stats = {};
@@ -25,7 +26,7 @@ exports.create = async function(id, className) {
 
     const skill = JSON.parse(fs.readFileSync(`./data/misc/levelRewards.json`))[className]["0"][0];
     const data = [
-        { name: "info", class: className, money: 100, level: 0, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, location: "capital" },
+        { name: "info", class: className, money: 100, level: 0, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, energy: 3, location: "capital" },
         { name: "stats", 
             strength: classData.base_stats.strength,
             vitality: classData.base_stats.vitality, 
@@ -40,7 +41,7 @@ exports.create = async function(id, className) {
             chestplate: null,
             boots: null,
         } },
-        { name: "misc", lastRegen: Date.now(), party: { owner: id, members: [] }},
+        { name: "misc", lastRegen: Date.now(), lastEnergy: Date.now(), party: { owner: id, members: [] }},
     ]
 
     const options = { ordered: true };
@@ -91,7 +92,7 @@ exports.health.set = async function(userID, health) {
 
     const query = { name: "info" };
     let options = { 
-        projection: {_id: 0, class: 0, level: 0, exp: 0},
+        projection: {_id: 0, class: 0, level: 0, exp: 0, money: 0, state: 0, energy: 0, location: 0},
     };
 
     const info = await playerCollection.findOne(query, options);
@@ -154,6 +155,75 @@ exports.health.passiveRegen = async function(userID) {
     await playerCollection.updateOne(query, update, {upsert: true});
 
     return newHealth - health;
+}
+
+exports.energy.set = async function(userID, energy) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
+
+    const query = { name: "info" };
+    let options = { 
+        projection: {_id: 0, class: 0, level: 0, exp: 0, money: 0, state: 0, health: 0, location: 0},
+    };
+
+    const info = await playerCollection.findOne(query, options);
+
+    const update = { $set: { energy: energy } };
+    options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+}
+
+exports.energy.add = async function(userID, energy) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
+
+    const query = { name: "info" };
+    let options = {
+        projection: {_id: 0, class: 0, level: 0, exp: 0, money: 0, state: 0, health: 0, location: 0},
+    };
+
+    const info = await playerCollection.findOne(query, options);    
+    const newEnergy = info.energy + energy;
+
+    const update = { $set: { energy: newEnergy } };
+    options = { upsert: true };
+    const result = await playerCollection.updateOne(query, update, options);
+}
+
+exports.energy.passiveRegen = async function(userID) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
+
+    let maxEnergy = 3;
+
+    let lastRegen = await exports.getData(userID, "misc");
+    lastRegen = lastRegen.lastEnergy;
+
+    let energy = await exports.getData(userID, "info");
+    energy = energy.energy;
+
+    if(energy >= maxEnergy)
+        return 0;
+
+    if((Date.now() - lastRegen) < 3600000) {
+        return 0;
+    } else if ( (Date.now() - lastRegen) < 7200000) {
+        energy = energy + 1;
+    } else if ( (Date.now() - lastRegen) < 10800000) {
+        energy = energy + 2;
+    } else {
+        energy = 3;
+    }
+
+    if (energy > maxEnergy)
+        energy = maxEnergy;
+
+    await exports.energy.set(userID, energy);
+
+    query = { name: "misc" };
+    
+    update = { $set: { lastEnergy: Date.now() } };
+    
+    await playerCollection.updateOne(query, update, {upsert: true});
+
+    return energy;
 }
 
 exports.exp.award = async function(id, exp, channel) {
