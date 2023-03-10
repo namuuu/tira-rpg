@@ -47,8 +47,7 @@ exports.createThread = async function(message) {
  */
 exports.deleteThread = async function(channel) {
     if (channel.isThread()) {
-        channel.delete();
-
+        channel.delete().catch(error => {});
         return;
     } else {
         channel.send("It doesn't seem like a thread...");

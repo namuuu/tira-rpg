@@ -107,7 +107,12 @@ exports.deleteCombat = async function(channel) {
         }
     }
 
-    util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
+    try {
+        util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
+    } catch (error) {
+        console.log("[ERROR] Tried to update a non-existent main message.");
+    }
+    
     util.deleteThread(channel);
 
     await combatCollection.drop(function(err, res) {
