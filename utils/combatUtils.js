@@ -720,3 +720,51 @@ exports.updateMainMessage = function(combatInfo, message, state) {
 
     message.edit({ embeds: [embed], components: components}); 
 }
+
+exports.displayTimeline = async function(message) {
+    if(!message.channel.isThread()) {
+        message.reply("Please use this command in a combat thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const combat = await exports.getCombatCollection(message.channel.id);
+
+    if(combat == null) {
+        message.reply("There is no combat going on in this thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const timelines = [];
+
+    for(const player of combat.team1.concat(combat.team2).filter(player => player.health > 0)) {
+        timelines.push({
+            id: player.id,
+            name: player.name,
+            time: player.timeline
+        })
+    }
+
+    timelines.sort((a, b) => (a.time > b.time) ? 1 : -1);
+
+    const embed = new EmbedBuilder()
+        .setTitle("Timeline")
+        .setDescription("This timeline represents the turn " + combat.current_turn + " of the battle.")
+        .setFooter({text: "The timeline of the battle. The first action is at the top, the last at the bottom."});
+
+    for(const timeline of timelines) {
+        console.log(timeline);
+        embed.addFields({name: timeline.name, value: timeline.time + ' '});
+    }
+
+    message.reply({ embeds: [embed] });
+}

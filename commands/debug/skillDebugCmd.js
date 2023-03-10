@@ -17,12 +17,16 @@ module.exports = {
     if(args.length >= 2)
         skillQuery = args[1];
 
-    console.log(skill);
-
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
             case "learn":
+                console.log(skillQuery)
+                console.log(skill.getSkill(skillQuery));
+                if(skill.getSkill(skillQuery) == null) {
+                    message.reply("Skill not found. Please specify a valid skill name.");
+                    return;
+                }
                 skill.learnSkill(authorId, skillQuery);
                 break;
             case "unlearn":

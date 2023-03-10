@@ -1,5 +1,6 @@
 const player = require('../utils/playerUtils.js');
 const combat = require('../manager/combatManager.js');
+const util = require('../utils/combatUtils.js');
 const { EmbedBuilder } = require('@discordjs/builders');
 
 module.exports = {
@@ -19,7 +20,12 @@ module.exports = {
             sendHelp(message);
         break;
         case "display":
-            
+            break;
+        case "tl":
+        case "time":
+        case "timeline":
+            util.displayTimeline(message);
+            break;
         case "encounter":
             combat.instanciateCombat(message, message.author);
             break;
