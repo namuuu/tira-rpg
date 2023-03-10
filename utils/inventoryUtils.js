@@ -135,6 +135,15 @@ async function typeMain(embed, playerId) {
          expBar += "▱";
      }
 
+     var energyBar = "";
+     for(var i = 0; i < playerInfo.energy; i++) {
+            energyBar += "▰";
+    } 
+    for(var i = 0; i < 3-playerInfo.energy ; i++) {
+        energyBar += "▱";
+    }
+
+
     const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
 
     const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerInfo.location];
@@ -147,6 +156,7 @@ async function typeMain(embed, playerId) {
         { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
         { name: 'Class', value: classData[playerInfo.class].name, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
+        { name: 'Energy', value: energyBar },
         { name: 'Money', value: '$' + playerInfo.money, inline: true},
         { name: 'Location', value: zoneName }
     );
