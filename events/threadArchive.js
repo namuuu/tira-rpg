@@ -1,18 +1,35 @@
+const { AuditLogEvent } = require('discord.js');
 const manager = require('../manager/combatManager.js');
 const combat = require('../utils/combatUtils.js');
 
 module.exports = {
     name: 'threadUpdate',
-    async trigger(interaction) {
-        console.log(interaction);
+    async trigger(oldThread, newThread) {
 
-        return; // TO REMOVE, TO PREVENT FROM CRASHES
-
-        if(interaction.locked == false && interaction.archived == false)
+        // Check if the thread has been locked or archived
+        if(oldThread.locked == newThread.locked && oldThread.archived == newThread.archived)
             return;
 
-        if(combat.getCombatCollection(interaction.id) != null) {
-            manager.deleteCombat(interaction.id);
-        }
+        // Check if it has been unlocked or unarchived
+        if(oldThread.archived || oldThread.locked)
+            return;
+
+        const fetchedLogs = await newThread.guild.fetchAuditLogs({
+            limit: 1,
+            type: AuditLogEvent.ThreadUpdate,
+          });
+        
+          const log = fetchedLogs.entries.first();
+        
+          if (!log) {
+            return console.log(
+              'A thread was updated, but no relevant audit logs were found.',
+            );
+          }
+          if (log.target.id === newThread.id) {
+            console.log(`A thread was updated by ${log.executor?.tag}.`);
+          }
+
+          console.log(log);
     }
 };
