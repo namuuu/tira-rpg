@@ -1,4 +1,5 @@
 const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const fs = require('fs');
 const player = require('../utils/playerUtils.js');
 const inventory =  require('../utils/inventoryUtils.js');
 const manager = require('../manager/combatManager.js');
@@ -569,14 +570,20 @@ exports.checkForVictory = function(combat) {
 
 exports.rewardLoot = async function(combat, thread) {
     var lootTable = [];
+    var lootTotal = 0;
     var totalExp = 0;
     var totalMoney = 0;
+
+    const lootData = JSON.parse(fs.readFileSync('./data/items.json', 'utf8'));
 
     for(const enemy of combat.team2) {
         if(enemy.type == "monster") {
             const enemyType = enemy.id.split("-")[0];
             const enemyData = mobList[enemyType];
             lootTable.push(...enemyData.loots);
+            enemyData.loots.forEach(loot => {
+                lootTotal += loot.weight;
+            });
             totalExp = totalExp + enemyData.exp;
             totalMoney = totalMoney + enemyData.money;
         }   
@@ -595,9 +602,24 @@ exports.rewardLoot = async function(combat, thread) {
 
             var lootDescription = "";
 
-            for(const loot of lootTable) {
-                inventory.giveItem(victor.id, loot.id, loot.pack );
-                lootDescription += loot.id + " x" + loot.pack + "\n";
+            const lootNumber = Math.floor(Math.random() * 3) + 1;
+            
+
+            for(let i = 0; i < lootNumber; i++) {
+                const lootRoll = Math.floor(Math.random() * lootTotal);
+                console.log(lootRoll);
+                var lootIndex = 0;
+                var lootSum = 0;
+                while(lootSum < lootRoll) {
+                    lootSum += lootTable[lootIndex].chance;
+                    lootIndex++;
+                }
+                const loot = lootTable[lootIndex];
+                const item = lootData[loot.id];
+                if(item != null && item != undefined && item.name != "none") {
+                    inventory.giveItem(victor.id, loot.id, loot.pack );
+                    lootDescription += item.name + " x" + loot.pack + "\n";
+                }
             }
 
             if(lootDescription != "") {

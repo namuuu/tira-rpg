@@ -61,13 +61,7 @@ module.exports = {
         
 
         try {
-            client.commands.get(command).execute(message, args).catch(error => {
-                console.error(error);
-                const errorEmbed = new EmbedBuilder()
-                .setColor('FF0000')
-                .setAuthor({name: 'Error!'})
-                .addFields( { name: 'Something went wrong!', value: 'Please try again later.' });
-            });
+            await client.commands.get(command).execute(message, args);
         } catch(error) {
             // Catch the error if there's a dev issue
             console.error(error);

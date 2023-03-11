@@ -40,7 +40,7 @@ exports.giveItem = async function(playerId, item, quantity) {
     // Querying the inventory in the database
     const inventory = await playerCollection.findOne(
         {name: "inventory"}, 
-        {projection: {_id: 0, skills: 0, activeSkills: 0}}
+        {projection: {_id: 0, skills: 0, activeSkills: 0, passiveSkills: 0, stats: 0, equipment: 0}}
     );
     
     // If the item is already in the inventory, we add the quantity to the existing one
@@ -60,7 +60,7 @@ exports.giveItem = async function(playerId, item, quantity) {
     }
 
     // Updating the inventory in the database
-    const result = await playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
+    playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
 
     console.groupCollapsed("Item Given");
     console.log(`Given to: ${playerId}`);

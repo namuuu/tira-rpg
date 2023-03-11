@@ -184,7 +184,7 @@ exports.energy.add = async function(userID, energy) {
     };
 
     const info = await playerCollection.findOne(query, options);    
-    const newEnergy = info.energy + energy;
+    var newEnergy = info.energy + energy;
 
     if(newEnergy > 3)
         newEnergy = 3;
@@ -361,6 +361,9 @@ exports.setState = async function (playerCollection, id, state) {
     if(playerCollection == null || playerCollection == undefined)
         playerCollection = Client.mongoDB.db('player-data').collection(id);
     const query = { name: "info" };
+
+    if(typeof state == "string")
+        state = {name: state};
 
     const update = { $set: { state: state } };
 

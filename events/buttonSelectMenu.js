@@ -40,16 +40,6 @@ module.exports = {
                 sendModal(interaction, false, args[0]);
                 break;
             case 'joinFight':
-                var energy = await player.getData(userId, "info");
-                energy = energy.energy;
-
-                if(energy < 1) {
-                    interaction.channel.send("You don't have enough energy to join a fight ! " + "<@" + interaction.user.id + ">");
-                    return;
-                } else {
-                    await player.energy.set(userId, energy - 1);
-                }
-
                 await addPlayerToCombat(user, args[0], args[1], interaction); // Adds a player to a combat (combatManager.js)
                 break;
             case 'leaveFight':

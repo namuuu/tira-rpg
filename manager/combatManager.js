@@ -96,7 +96,7 @@ exports.deleteCombat = async function(channel) {
     const combatCollection = Client.mongoDB.db('combat-data').collection(channel.id);
     const combatData = await util.getCombatCollection(channel.id);
 
-    if(combatData == null) {
+    if(combatData == null || combatData == undefined || combatData.team1 == null || combatData.team2 == null) {
         console.log("[DEBUG] Attempted to delete a non-existent combat. (NON_EXISTENT_COMBAT_DELETE_ATTEMPT)");
         return;
     }
@@ -155,10 +155,12 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
 
     if (info == null) {
         console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
+        interaction.deferUpdate();
         return;
     }
     if(team != 1 && team != 2) {
         console.log("[DEBUG] Attempted to join a non-existent team. (NON_EXISTENT_TEAM_JOIN_ATTEMPT)");
+        interaction.deferUpdate();
         return;
     }
 
@@ -438,14 +440,11 @@ exports.combatLoop = async function(thread, combatData) {
 }
 
 exports.finishTurn = async function(exeData, log) {
-    const { combat, thread, casterId, targetId, skill } = exeData;
+    const { combat, thread, casterId, targets, skill } = exeData;
     const caster = util.getPlayerInCombat(casterId, combat);
-    const target = util.getPlayerInCombat(targetId, combat);
     let embed = new EmbedBuilder();
 
-
-    let casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.id;
-    //let targetName = target.type == "human" ? "<@" + target.id + ">" : target.id;
+    let casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.name;
     
     embed.setDescription(casterName + " used " + skill.name/* + " on " + targetName + " !"*/);
 
