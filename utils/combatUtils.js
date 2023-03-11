@@ -327,17 +327,46 @@ exports.executeSkill = async function(exeData) {
     manager.finishTurn(exeData, log);
 }
 
-exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, targetId) {
+exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, targets) {
     let exeData = {
         combat: combatInfo,
         thread: thread,
+        allyTeam: exports.getPlayerAlliedTeam(monsterId, combatInfo),
+        enemyTeam: exports.getPlayerEnemyTeam(monsterId, combatInfo),
         casterId: monsterId,
-        targets: [exports.getPlayerInCombat(targetId, combatInfo)],
+        caster: exports.getPlayerInCombat(monsterId, combatInfo),
     }
 
-    let monster = exports.getPlayerInCombat(monsterId, combatInfo);
-    const random = Math.floor(Math.random() * (monster.skills.length));
-    exeData.skill = skillList[monster.skills[random]];
+    let monster = exeData.caster;
+
+    let aliveAllies = [];
+    aliveAllies.push(...exeData.allyTeam.filter((e) => e.health > 0));
+    let aliveEnemies = [];
+    aliveEnemies.push(...exeData.enemyTeam.filter((e) => e.health > 0));
+
+    exeData.skill = skillList[monster.skills[Math.floor(Math.random() * (monster.skills.length))]];
+
+    switch(exeData.skill.aim.split('-')[0]) {
+        case "self":
+            exeData.targets = [exeData.caster];
+        break;
+        case "ally":
+            if(exeData.skill.aim.split('-')[1] == "aoe")
+                exeData.targets = aliveAllies;
+            else
+                exeData.targets = [aliveAllies[Math.floor(Math.random() * (aliveAllies.length))]];
+        break;
+        case "enemy":
+            if(exeData.skill.aim.split('-')[1] == "aoe")
+                exeData.targets = aliveEnemies;
+            else 
+                exeData.targets = [aliveEnemies[Math.floor(Math.random() * (aliveEnemies.length))]];
+        break;
+        case "all":
+            exeData.targets = aliveEnemies.concat(aliveAllies);
+        break;
+        default:
+    }
 
     let log = skillUtil.execute(exeData);
 
@@ -484,7 +513,7 @@ exports.announceNewTurn = async function(thread, player) {
             .setColor("#ffffff");
     } else {
         embed
-            .setDescription('It\'s ' + player.id + '\'s turn!')
+            .setDescription('It\'s ' + player.name + '\'s turn!')
             .setColor("#ffffff");
     }
     

@@ -433,8 +433,7 @@ exports.combatLoop = async function(thread, combatData) {
         console.log("[DEBUG] This is the player's turn. Waiting for player input.");
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
-        //util.executeSkill(combatData, thread, "default", soonestFighter.id, combatData.team1[0].id);
-        await util.executeMonsterAttack(combatData, thread, soonestFighter.id, combatData.team1[0].id);
+        await util.executeMonsterAttack(combatData, thread, soonestFighter.id);
     }
 
     combatData.current_turn++;
@@ -455,11 +454,11 @@ exports.combatLoop = async function(thread, combatData) {
 }
 
 exports.finishTurn = async function(exeData, log) {
-    const { combat, thread, casterId, targets, skill } = exeData;
+    const { combat, thread, casterId, skill } = exeData;
     const caster = util.getPlayerInCombat(casterId, combat);
-    let embed = new EmbedBuilder();
+    const embed = new EmbedBuilder();
 
-    let casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.name;
+    const casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.name;
     
     embed.setDescription(casterName + " used " + skill.name/* + " on " + targetName + " !"*/);
 
