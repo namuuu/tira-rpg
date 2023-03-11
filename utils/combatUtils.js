@@ -72,6 +72,26 @@ exports.getCombatCollection = async function(threadId) {
     });
 }
 
+exports.updateCombatCollection = async function(threadId, combat) {
+    const combatDatabase = Client.mongoDB.db('combat-data').collection(threadId);
+
+    const update = {
+        $set: {
+            team1: combat.team1,
+            team2: combat.team2,
+            current_turn: combat.current_turn,
+            current_action: combat.current_action,
+            current_timeline: combat.current_timeline
+        }
+    }
+
+    await combatDatabase.updateOne({}, update, { upsert: true });
+
+    return new Promise(async resolve => {
+        resolve();
+    });
+}
+
 /**
  * adds time to a player's timeline
  * @param {*} combatId the combat concerned
@@ -654,10 +674,6 @@ exports.rewardLoot = async function(combat, thread) {
             if(lootDescription != "") {
                 embed.addFields({name: "Loot", value: lootDescription});
             }
-            if(victor.health > 0)
-                player.health.set(victor.id, (victor.health > victor.vitality ? victor.vitality : victor.health));
-            else
-                player.health.set(victor.id, 0);
 
             thread.send({ embeds: [embed] });
         }
@@ -817,4 +833,67 @@ exports.displayTimeline = async function(message) {
     }
 
     message.reply({ embeds: [embed] });
+}
+
+exports.sendForfeit = async function(message) {
+
+    // check if the command is used in a thread
+    if(!message.channel.isThread()) {
+        message.reply("Please use this command in a combat thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const combat = await exports.getCombatCollection(message.channel.id);
+
+    // check if there is a combat going on in this thread
+    if(combat == null) {
+        message.reply("There is no combat going on in this thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const player = combat.team1.find(player => player.id == message.author.id);
+
+    // check if the player is in the combat
+    if(player == null) {
+        message.reply("You are not in this combat.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    // check if the player is already KO
+    if(player.health <= 0) {
+        message.reply("You are already KO.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    player.health = 0;
+
+    await exports.updateCombatCollection(message.channel.id, combat);
+
+    exports.updateMainMessage(combat, message.channel, "battle");
+
+    const result = exports.checkForVictory(combat)
+
+    if(result != 0) {
+        manager.callForVictory(combat, message.channel, result)
+    }
 }

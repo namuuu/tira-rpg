@@ -433,7 +433,7 @@ exports.combatLoop = async function(thread, combatData) {
         console.log("[DEBUG] This is the player's turn. Waiting for player input.");
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
-        await util.executeMonsterAttack(combatData, thread, soonestFighter.id);
+        await util.executeMonsterAttack(combatData, thread, soonestFighter.id).catch(err => console.log(err));
     }
 
     combatData.current_turn++;
