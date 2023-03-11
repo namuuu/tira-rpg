@@ -29,6 +29,14 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         console.log("[ERROR] Tried to instanciate a combat with a non-existent player.");
         return;
     }
+
+    if(playerInfo.energy == 0) {
+        console.log("[ERROR] Tried to instanciate a combat with 0 energy.");
+        orderMessage.reply("You don't have enough energy to start a combat.").then(msg => {
+            setTimeout(() => msg.delete(), 5000);
+        });
+        return;
+    }
     
     const party = (await playerUtils.getData(creator.id, "misc")).party;
 
@@ -57,6 +65,12 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         return;
     }
 
+    orderMessage.reply("You consumed 1 energy!").then(msg => {
+        setTimeout(() => msg.delete(), 5000);
+    });
+
+    playerUtils.energy.add(creator.id, -1);
+
     const searchEmbed = new EmbedBuilder()
         .setTitle("Searching for an encounter...")
 
@@ -64,7 +78,6 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     const messageId = message.id;
 
     await util.createThread(message, creator, playerInfo.location);
-
     
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
     const combatData = [
@@ -87,6 +100,8 @@ exports.instanciateCombat = async function(orderMessage, creator) {
 
     await combatCollection.insertMany(combatData, { ordered: true});
     await embed.sendEncounterMessage(message, 'wild-encounter');
+
+    orderMessage.delete();
 
     return messageId;
 }
