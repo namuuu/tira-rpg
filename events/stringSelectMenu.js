@@ -28,7 +28,7 @@ module.exports = {
         const args = customId.split('-');
         const command = args.shift();
 
-        console.log(command);
+        //console.log(command);
         //console.log(args);
 
         switch(command) {
@@ -124,10 +124,8 @@ module.exports = {
         }   
 
         if(sliders.has(command)) {
-            console.log("Found command: " + command);
             sliders.get(command).interact(interaction, interaction.values, args);
         } else {
-            console.log("No command found: " + command);
         }
     }
 }

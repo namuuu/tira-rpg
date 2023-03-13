@@ -82,5 +82,18 @@
             }
         },
         "shops": [""]
+    },
+    "cinder_valley":
+    {
+        "name": "Cinder Valley",
+        "description": "The base of the moutain.",
+        "required": {
+            "level": null,
+            "quests": null,
+            "items": []  
+        },
+        "monsters": {
+        },
+        "shops": [""]
     }
 }

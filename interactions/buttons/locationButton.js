@@ -1,3 +1,5 @@
+const { ActionRowBuilder, StringSelectMenuBuilder } = require("@discordjs/builders");
+const locationJSON = require("../../data/location.json");
 
 module.exports = {
     name: "location",
@@ -8,7 +10,24 @@ module.exports = {
                     interaction.deferUpdate();
                     return;
                 }
-                interaction.reply({content: "Not implemented yet", ephemeral: true});
+                const locationData = Object.values(locationJSON);
+                const locationOptions = [];
+                for(const location of locationData) {
+                    locationOptions.push({
+                        label: location.name,
+                        value: location.id,
+                        description: location.short_description
+                    })
+                }
+
+                const slider = new ActionRowBuilder()
+                    .addComponents(
+                        new StringSelectMenuBuilder()
+                            .setCustomId("location-change_location-" + interaction.user.id)
+                            .setPlaceholder("Select a location here!")
+                            .addOptions(locationOptions),
+                    );
+                interaction.message.edit({components: [slider]});
                 break;
             default:
                 break;

@@ -54,7 +54,7 @@ module.exports = {
             .addComponents(
                 new StringSelectMenuBuilder()
                     .setCustomId('location-travel-' + message.author.id)
-                    .setPlaceholder('Select a place here!')
+                    .setPlaceholder('Select a place to go to!')
                         .addOptions(availableLocations),
             );
 
