@@ -53,7 +53,7 @@ module.exports = {
         const slider = new ActionRowBuilder()
             .addComponents(
                 new StringSelectMenuBuilder()
-                    .setCustomId('locationChoice-' + message.author.id)
+                    .setCustomId('location-travel-' + message.author.id)
                     .setPlaceholder('Select a place here!')
                         .addOptions(availableLocations),
             );
@@ -67,5 +67,6 @@ module.exports = {
             );
     
         message.reply({embeds: [embed], components: [slider, button] });
+        message.delete();
     }
 }

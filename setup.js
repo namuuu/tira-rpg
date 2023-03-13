@@ -18,7 +18,10 @@ module.exports = {
     const { setupCaracteristics } = require('./setup/caracteristicsSetup.js');
     setupCaracteristics(client);
 
-    const { setup } = require('./events/buttonSelectMenu.js');
-    setup(client);
+    const { setupButtons } = require('./events/buttonSelectMenu.js');
+    setupButtons(client);
+
+    const { setupStringSelect } = require('./events/stringSelectMenu.js');
+    setupStringSelect(client);
     }
 }

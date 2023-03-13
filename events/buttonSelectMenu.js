@@ -13,7 +13,7 @@ const buttons = new Map();
 
 module.exports = {
     name: 'interactionCreate',
-    async setup(client) {
+    async setupButtons(client) {
         const eventFiles = fs.readdirSync("./interactions/buttons").filter(file => file.endsWith('.js'));
 
         for (const file of eventFiles) {
