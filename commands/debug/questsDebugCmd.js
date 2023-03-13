@@ -81,7 +81,20 @@ module.exports = {
                 message.reply("Error, need a quest to give");
             }      
             break;
-        
+
+         case "hasQuest":
+            if(args[1] != null){
+                if((quests.hasQuest(authorId,args[1]))==true){
+                    message.reply(`This player has this quest`);
+                }else{
+                    message.reply(`This player hasn't this quest`);
+                }
+                
+            }     
+            else{
+                message.reply("Error, need a quest to give");
+            }      
+            break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");
                 break;

@@ -1,6 +1,7 @@
 const { Client, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const quests = require('../data/quests.json');
+const player = require('../utils/playerUtils.js');
 
 
 exports.getName = function(id){
@@ -47,8 +48,9 @@ exports.setQuestStatus = async function(id, status) {
 
 exports.giveQuest= async function(id, idQuest) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
-    const datas = exports.getData(id)
-    if(datas.quests[idQuest]!=null){
+    const playerData = await player.getData(id,"story")
+
+    if(playerData.quests[idQuest] == undefined){
         return
     }
     datas.quests = {
@@ -64,4 +66,14 @@ exports.giveQuest= async function(id, idQuest) {
     const update = { $set: datas };
     const options = { upsert: true };
     playerCollection.updateOne(query, update, options);
+}
+
+exports.hasQuest= async function(id, idQuest) {
+    const playerData = await player.getData(id,"story")
+
+    if(playerData.quests[idQuest] != null){
+        return true
+    }
+    return false
+
 }
