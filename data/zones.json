@@ -33,7 +33,7 @@
     },
     "temple": {
         "name": "Forgotten Temple",
-        "description": "TEMPLE RUN",
+        "description": "A temple whose history is unknown.",
         "required": {
             "level": null,
             "quests": null,
@@ -53,11 +53,11 @@
     },
     "capital": {
         "name": "La Capitale",
-        "description": "Tutorial/20",
+        "description": "It served as the last bastion of humanity.",
         "required": {
-            "level": "",
-            "quests": "",
-            "items": ""  
+            "level": null,
+            "quests": null,
+            "items": []  
         },
         "monsters": {
         },
