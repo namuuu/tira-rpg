@@ -3,9 +3,9 @@
         "name": "Slime Lake",
         "description": "A quiet place with only slimes roaming around. It's a good place to train your skills.",
         "required": {
-            "level": "",
-            "quests": "",
-            "items": ""  
+            "level": null,
+            "quests": null,
+            "items": []  
         },
         "monsters": {
             "group1": {
@@ -35,9 +35,9 @@
         "name": "Forgotten Temple",
         "description": "TEMPLE RUN",
         "required": {
-            "level": "",
-            "quests": "",
-            "items": ""  
+            "level": null,
+            "quests": null,
+            "items": []  
         },
         "monsters": {
             "group1": {
@@ -67,8 +67,8 @@
         "name": "Forgotten Outpost",
         "description": "A small outpost that was abandoned a long time ago.",
         "required": {
-            "level": "10",
-            "quests": "",
+            "level": 10,
+            "quests": null,
             "items": ["warhandbook"]  
         },
         "monsters": {
