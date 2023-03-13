@@ -18,7 +18,6 @@ module.exports = {
 
         for (const file of eventFiles) {
             const button = require(`./../interactions/buttons/${file}`);
-            console.log("Loading button: " + button.name);
             buttons.set(button.name, button);
         }
 
