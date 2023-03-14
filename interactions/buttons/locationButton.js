@@ -1,4 +1,5 @@
 const { ActionRowBuilder, StringSelectMenuBuilder } = require("@discordjs/builders");
+const player = require("../../utils/playerUtils.js");
 const locationJSON = require("../../data/location.json");
 
 module.exports = {
@@ -10,14 +11,25 @@ module.exports = {
                     interaction.deferUpdate();
                     return;
                 }
+
+                const locationInfo = (await player.getData(interaction.user.id, "story")).locations;
+                console.log(locationInfo);
+                const availableLocations = locationInfo.unlocked_locations;
+
                 const locationData = Object.values(locationJSON);
                 const locationOptions = [];
                 for(const location of locationData) {
-                    locationOptions.push({
-                        label: location.name,
-                        value: location.id,
-                        description: location.short_description
-                    })
+                    if(availableLocations.includes(location.id) && location.id != locationInfo.current_location)
+                        locationOptions.push({
+                            label: location.name,
+                            value: location.id,
+                            description: location.short_description
+                        })
+                }
+
+                if(locationOptions.length == 0) {
+                    interaction.deferUpdate();
+                    return;
                 }
 
                 const slider = new ActionRowBuilder()

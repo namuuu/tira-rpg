@@ -26,7 +26,7 @@ exports.create = async function(id, className) {
 
     const skill = JSON.parse(fs.readFileSync(`./data/misc/levelRewards.json`))[className]["0"][0];
     const data = [
-        { name: "info", class: className, money: 100, level: 1, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, energy: 3, location: "capital" },
+        { name: "info", class: className, money: 100, level: 1, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, energy: 3 },
         { name: "stats", 
             strength: classData.base_stats.strength,
             vitality: classData.base_stats.vitality, 
@@ -43,9 +43,9 @@ exports.create = async function(id, className) {
         } },
         { name: "misc", lastRegen: Date.now(), lastEnergy: Date.now(), party: { owner: id, members: [] }},
         { name : "story", locations: {
-            current_location: "serenne",
-            current_zone: "captital",
-            unlocked_locations: ["serenne"],
+            current_location: "serene",
+            current_zone: "capital",
+            unlocked_locations: ["serene"],
         }, quests:[] }
     ]
 
@@ -350,14 +350,17 @@ exports.updateStats = async function(id, className) {
     
 }
 
-exports.setLocation = async function(id, location) {
+exports.setLocation = async function(id, zone) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
-    const query = { name: "info" };
+    const query = { name: "story" };
     
-    const update = { $set: { location: location } };
+    var update = { 
+        $set: { "locations.current_zone": zone } 
+    };
+    
     const options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne(query, update, options);
 
     return true;
 }

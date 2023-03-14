@@ -2,6 +2,7 @@
     "slime_lake": {
         "name": "Slime Lake",
         "description": "A quiet place with only slimes roaming around. It's a good place to train your skills.",
+        "color": [144, 238, 144],
         "required": {
             "level": null,
             "quests": null,
@@ -54,6 +55,7 @@
     "capital": {
         "name": "La Capitale",
         "description": "It served as the last bastion of humanity.",
+        "color": [210, 180, 140],
         "required": {
             "level": null,
             "quests": null,

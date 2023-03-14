@@ -10,37 +10,41 @@ module.exports = {
     async execute(message, args) {
         var availableLocations = []; // Array of locations that the player can go to
         const playerInfo = await player.getData(message.author.id, "info");
+        const playerStory = await player.getData(message.author.id, "story");
         const playerInventory = await player.getData(message.author.id, "inventory");
-        const playerZone = zonesData[playerInfo.location];
-    
-        for(const location of Object.values(locationJSON)) {
-            for(const zone of location.zones) {
-                const zoneData = zonesData[zone]; // Data of the specific zone
 
-                if(playerInfo.location == zone) {
+        const location = locationJSON[playerStory.locations.current_location]; // Data of the location the player is in
+        const playerZone = zonesData[playerStory.locations.current_zone]; // Data of the zone the player is in
+
+        if(location == undefined)
+            return;
+
+        for(const zone of location.zones) {
+            const zoneData = zonesData[zone]; // Data of the specific zone
+
+            if(playerStory.locations.current_zone == zone) {
+                continue;
+            }
+
+            if(zoneData.required.level != null) {
+                if(playerInfo.level < zone.required.level) {
                     continue;
                 }
+            }
 
-                if(zoneData.required.level != null) {
-                    if(playerInfo.level < zone.required.level) {
+            if(zoneData.required.items != null) {
+                for(const item of zoneData.required.items) {
+                    if(!playerInventory.items.includes(item)) {
                         continue;
                     }
                 }
-
-                if(zoneData.required.items != null) {
-                    for(const item of zoneData.required.items) {
-                        if(!playerInventory.items.includes(item)) {
-                            continue;
-                        }
-                    }
-                }
-
-                availableLocations.push({
-                    label: zoneData.name,
-                    value: zone,
-                    description: zoneData.description
-                })
             }
+
+            availableLocations.push({
+                label: zoneData.name,
+                value: zone,
+                description: zoneData.description
+            });
         }
 
         const embed = new EmbedBuilder()
@@ -50,6 +54,9 @@ module.exports = {
             )
             .setFooter({text: 'Need to learn more about where you are? Use the command: t.location'})
 
+        if(playerZone.color != undefined)
+            embed.setColor(playerZone.color);
+
         const slider = new ActionRowBuilder()
             .addComponents(
                 new StringSelectMenuBuilder()
@@ -57,7 +64,7 @@ module.exports = {
                     .setPlaceholder('Select a place to go to!')
                         .addOptions(availableLocations),
             );
-
+        
         const button = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
@@ -66,7 +73,12 @@ module.exports = {
                     .setStyle(ButtonStyle.Secondary)
             );
     
-        message.reply({embeds: [embed], components: [slider, button] });
-        message.delete();
+        if(playerStory.locations.unlocked_locations.length <= 1) {
+            await message.reply({embeds: [embed], components: [slider] });
+            message.delete();
+        } else {
+            await message.reply({embeds: [embed], components: [slider, button] });
+            message.delete();
+        }
     }
 }

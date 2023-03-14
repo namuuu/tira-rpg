@@ -24,6 +24,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     }
 
     const playerInfo = await playerUtils.getData(creator.id, "info");
+    const playerStory = await playerUtils.getData(creator.id, "story");
 
     if(playerInfo == null) {
         console.log("[ERROR] Tried to instanciate a combat with a non-existent player.");
@@ -48,7 +49,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         return;
     }
     
-    const location = JSON.parse(fs.readFileSync('./data/zones.json', 'utf8'))[playerInfo.location];
+    const location = JSON.parse(fs.readFileSync('./data/zones.json', 'utf8'))[playerStory.locations.current_zone];
 
     if(location == null) {
         console.log("[ERROR] Tried to instanciate a combat in a non-existent location.");
