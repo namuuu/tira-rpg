@@ -42,7 +42,11 @@ exports.create = async function(id, className) {
             boots: null,
         } },
         { name: "misc", lastRegen: Date.now(), lastEnergy: Date.now(), party: { owner: id, members: [] }},
-        {name : "story",quests:[]}
+        { name : "story", locations: {
+            current_location: "serenne",
+            current_zone: "captital",
+            unlocked_locations: ["serenne"],
+        }, quests:[] }
     ]
 
     const options = { ordered: true };
