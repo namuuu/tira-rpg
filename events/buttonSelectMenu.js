@@ -1,3 +1,4 @@
+const fs = require("fs");
 const player = require('../utils/playerUtils.js');
 const inventory = require('../utils/inventoryUtils.js');
 const selector = require('../utils/messageTemplateUtils.js');
@@ -8,8 +9,19 @@ const { acceptInvitation } = require('../utils/partyUtils.js');
 const { sendStringAllSkills, sendModal } = require('../utils/skillUtils.js');
 const { receiveButton } = require('../utils/equipUtils.js');
 
+const buttons = new Map();
+
 module.exports = {
     name: 'interactionCreate',
+    async setupButtons(client) {
+        const eventFiles = fs.readdirSync("./interactions/buttons").filter(file => file.endsWith('.js'));
+
+        for (const file of eventFiles) {
+            const button = require(`./../interactions/buttons/${file}`);
+            buttons.set(button.name, button);
+        }
+
+    },
     async trigger(interaction, client) {
         if(interaction.message.author.id != client.user.id) return;
         if (!interaction.isButton()) return;
@@ -28,32 +40,33 @@ module.exports = {
         switch(command) {
             case 'displayInventory':
                 displayInventory(userId, interaction); // Displays the inventory of a player (inventoryUtils.js)
-                break;
+                return;
             case 'displaySkills':
                 const ret = await sendStringAllSkills(user.username, userId); // Displays all the skills of a player (skillUtils.js)
                 interaction.reply(ret);
-                break;
+                return;
             case 'select_skill':
                 sendModal(interaction, true, args[0]);
-                break;
+                return;
             case 'unselect_skill':
                 sendModal(interaction, false, args[0]);
-                break;
+                return;
             case 'joinFight':
                 await addPlayerToCombat(user, args[0], args[1], interaction); // Adds a player to a combat (combatManager.js)
-                break;
+                return;
             case 'leaveFight':
+                player.energy.add(userId, 1);
                 await removePlayerFromCombat(userId, args[0], interaction); // Removes a player from a combat (combatManager.js)
-                break;
+                return;
             case 'combat_start':
                 await startCombat(interaction); // Starts a combat (combatManager.js)
-                break;
+                return;
             case 'party_accept':
                 await acceptInvitation(userId, args[0], interaction); // Accepts a party invitation (partyUtils.js)
-                break;
+                return;
             case 'equip':	
                 receiveButton(interaction, userId, args); // Personal button handler (equipUtils.js)
-                break;
+                return;
             case 'buyItem':
 
                 if(args[0] != interaction.user.id) {
@@ -85,9 +98,13 @@ module.exports = {
                 await interaction.message.delete(); 
 
                 selector.generateShopItemsSelector(interaction, shop, "0", "0");
-            break;
+            return;
             default:
                 break;
+        }
+
+        if(buttons.has(command)) {
+            buttons.get(command).interact(interaction, args);
         }
     }
 }

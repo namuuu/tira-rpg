@@ -40,7 +40,7 @@ exports.giveItem = async function(playerId, item, quantity) {
     // Querying the inventory in the database
     const inventory = await playerCollection.findOne(
         {name: "inventory"}, 
-        {projection: {_id: 0, skills: 0, activeSkills: 0}}
+        {projection: {_id: 0, skills: 0, activeSkills: 0, passiveSkills: 0, stats: 0, equipment: 0}}
     );
     
     // If the item is already in the inventory, we add the quantity to the existing one
@@ -60,7 +60,7 @@ exports.giveItem = async function(playerId, item, quantity) {
     }
 
     // Updating the inventory in the database
-    const result = await playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
+    playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
 
     console.groupCollapsed("Item Given");
     console.log(`Given to: ${playerId}`);
@@ -135,6 +135,15 @@ async function typeMain(embed, playerId) {
          expBar += "▱";
      }
 
+     var energyBar = "";
+     for(var i = 0; i < playerInfo.energy; i++) {
+            energyBar += "▰";
+    } 
+    for(var i = 0; i < 3-playerInfo.energy ; i++) {
+        energyBar += "▱";
+    }
+
+
     const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
 
     const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerInfo.location];
@@ -147,6 +156,7 @@ async function typeMain(embed, playerId) {
         { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
         { name: 'Class', value: classData[playerInfo.class].name, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
+        { name: 'Energy', value: energyBar },
         { name: 'Money', value: '$' + playerInfo.money, inline: true},
         { name: 'Location', value: zoneName }
     );

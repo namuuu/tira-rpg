@@ -1,4 +1,5 @@
 const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const fs = require('fs');
 const player = require('../utils/playerUtils.js');
 const inventory =  require('../utils/inventoryUtils.js');
 const manager = require('../manager/combatManager.js');
@@ -47,8 +48,7 @@ exports.createThread = async function(message) {
  */
 exports.deleteThread = async function(channel) {
     if (channel.isThread()) {
-        channel.delete();
-
+        channel.delete().catch(error => {});
         return;
     } else {
         channel.send("It doesn't seem like a thread...");
@@ -69,6 +69,26 @@ exports.getCombatCollection = async function(threadId) {
 
     return new Promise(async resolve => {
         resolve(find);
+    });
+}
+
+exports.updateCombatCollection = async function(threadId, combat) {
+    const combatDatabase = Client.mongoDB.db('combat-data').collection(threadId);
+
+    const update = {
+        $set: {
+            team1: combat.team1,
+            team2: combat.team2,
+            current_turn: combat.current_turn,
+            current_action: combat.current_action,
+            current_timeline: combat.current_timeline
+        }
+    }
+
+    await combatDatabase.updateOne({}, update, { upsert: true });
+
+    return new Promise(async resolve => {
+        resolve();
     });
 }
 
@@ -327,17 +347,46 @@ exports.executeSkill = async function(exeData) {
     manager.finishTurn(exeData, log);
 }
 
-exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, targetId) {
+exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, targets) {
     let exeData = {
         combat: combatInfo,
         thread: thread,
+        allyTeam: exports.getPlayerAlliedTeam(monsterId, combatInfo),
+        enemyTeam: exports.getPlayerEnemyTeam(monsterId, combatInfo),
         casterId: monsterId,
-        targets: [exports.getPlayerInCombat(targetId, combatInfo)],
+        caster: exports.getPlayerInCombat(monsterId, combatInfo),
     }
 
-    let monster = exports.getPlayerInCombat(monsterId, combatInfo);
-    const random = Math.floor(Math.random() * (monster.skills.length));
-    exeData.skill = skillList[monster.skills[random]];
+    let monster = exeData.caster;
+
+    let aliveAllies = [];
+    aliveAllies.push(...exeData.allyTeam.filter((e) => e.health > 0));
+    let aliveEnemies = [];
+    aliveEnemies.push(...exeData.enemyTeam.filter((e) => e.health > 0));
+
+    exeData.skill = skillList[monster.skills[Math.floor(Math.random() * (monster.skills.length))]];
+
+    switch(exeData.skill.aim.split('-')[0]) {
+        case "self":
+            exeData.targets = [exeData.caster];
+        break;
+        case "ally":
+            if(exeData.skill.aim.split('-')[1] == "aoe")
+                exeData.targets = aliveAllies;
+            else
+                exeData.targets = [aliveAllies[Math.floor(Math.random() * (aliveAllies.length))]];
+        break;
+        case "enemy":
+            if(exeData.skill.aim.split('-')[1] == "aoe")
+                exeData.targets = aliveEnemies;
+            else 
+                exeData.targets = [aliveEnemies[Math.floor(Math.random() * (aliveEnemies.length))]];
+        break;
+        case "all":
+            exeData.targets = aliveEnemies.concat(aliveAllies);
+        break;
+        default:
+    }
 
     let log = skillUtil.execute(exeData);
 
@@ -484,7 +533,7 @@ exports.announceNewTurn = async function(thread, player) {
             .setColor("#ffffff");
     } else {
         embed
-            .setDescription('It\'s ' + player.id + '\'s turn!')
+            .setDescription('It\'s ' + player.name + '\'s turn!')
             .setColor("#ffffff");
     }
     
@@ -570,14 +619,20 @@ exports.checkForVictory = function(combat) {
 
 exports.rewardLoot = async function(combat, thread) {
     var lootTable = [];
+    var lootTotal = 0;
     var totalExp = 0;
     var totalMoney = 0;
+
+    const lootData = JSON.parse(fs.readFileSync('./data/items.json', 'utf8'));
 
     for(const enemy of combat.team2) {
         if(enemy.type == "monster") {
             const enemyType = enemy.id.split("-")[0];
             const enemyData = mobList[enemyType];
             lootTable.push(...enemyData.loots);
+            enemyData.loots.forEach(loot => {
+                lootTotal += loot.weight;
+            });
             totalExp = totalExp + enemyData.exp;
             totalMoney = totalMoney + enemyData.money;
         }   
@@ -596,18 +651,29 @@ exports.rewardLoot = async function(combat, thread) {
 
             var lootDescription = "";
 
-            for(const loot of lootTable) {
-                inventory.giveItem(victor.id, loot.id, loot.pack );
-                lootDescription += loot.id + " x" + loot.pack + "\n";
+            const lootNumber = Math.floor(Math.random() * 3) + 1;
+            
+
+            for(let i = 0; i < lootNumber; i++) {
+                const lootRoll = Math.floor(Math.random() * lootTotal);
+                console.log(lootRoll);
+                var lootIndex = 0;
+                var lootSum = 0;
+                while(lootSum < lootRoll) {
+                    lootSum += lootTable[lootIndex].chance;
+                    lootIndex++;
+                }
+                const loot = lootTable[lootIndex];
+                const item = lootData[loot.id];
+                if(item != null && item != undefined && item.name != "none") {
+                    inventory.giveItem(victor.id, loot.id, loot.pack );
+                    lootDescription += item.name + " x" + loot.pack + "\n";
+                }
             }
 
             if(lootDescription != "") {
                 embed.addFields({name: "Loot", value: lootDescription});
             }
-            if(victor.health > 0)
-                player.health.set(victor.id, (victor.health > victor.vitality ? victor.vitality : victor.health));
-            else
-                player.health.set(victor.id, 0);
 
             thread.send({ embeds: [embed] });
         }
@@ -719,4 +785,115 @@ exports.updateMainMessage = function(combatInfo, message, state) {
         }
 
     message.edit({ embeds: [embed], components: components}); 
+}
+
+exports.displayTimeline = async function(message) {
+    if(!message.channel.isThread()) {
+        message.reply("Please use this command in a combat thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const combat = await exports.getCombatCollection(message.channel.id);
+
+    if(combat == null) {
+        message.reply("There is no combat going on in this thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const timelines = [];
+
+    for(const player of combat.team1.concat(combat.team2).filter(player => player.health > 0)) {
+        timelines.push({
+            id: player.id,
+            name: player.name,
+            time: player.timeline
+        })
+    }
+
+    timelines.sort((a, b) => (a.time > b.time) ? 1 : -1);
+
+    const embed = new EmbedBuilder()
+        .setTitle("Timeline")
+        .setDescription("This timeline represents the turn " + combat.current_turn + " of the battle.")
+        .setFooter({text: "The timeline of the battle. The first action is at the top, the last at the bottom."});
+
+    for(const timeline of timelines) {
+        console.log(timeline);
+        embed.addFields({name: timeline.name, value: timeline.time + ' '});
+    }
+
+    message.reply({ embeds: [embed] });
+}
+
+exports.sendForfeit = async function(message) {
+
+    // check if the command is used in a thread
+    if(!message.channel.isThread()) {
+        message.reply("Please use this command in a combat thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const combat = await exports.getCombatCollection(message.channel.id);
+
+    // check if there is a combat going on in this thread
+    if(combat == null) {
+        message.reply("There is no combat going on in this thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const player = combat.team1.find(player => player.id == message.author.id);
+
+    // check if the player is in the combat
+    if(player == null) {
+        message.reply("You are not in this combat.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    // check if the player is already KO
+    if(player.health <= 0) {
+        message.reply("You are already KO.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    player.health = 0;
+
+    await exports.updateCombatCollection(message.channel.id, combat);
+
+    exports.updateMainMessage(combat, message.channel, "battle");
+
+    const result = exports.checkForVictory(combat)
+
+    if(result != 0) {
+        manager.callForVictory(combat, message.channel, result)
+    }
 }

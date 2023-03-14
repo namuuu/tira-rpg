@@ -141,6 +141,11 @@
             "id": "slime_juice",
             "pack": 1,
             "weight": 1
+        },
+        {
+            "id": "slime_juice",
+            "pack": 2,
+            "weight": 0.5
         }]
     },
     "blue_slime": {

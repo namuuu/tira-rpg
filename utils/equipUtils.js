@@ -1,4 +1,4 @@
-const { Client, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Client, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } = require('discord.js');
 const equipSetup = require('../setup/equipSetup.js');
 
 exports.stat = {};
@@ -23,9 +23,30 @@ exports.display = async function(playerId, channel) {
             makeButton("Equip", "equip-equip"),
             makeButton("Unequip", "equip-unequip"),
             makeButton("List"  , "equip-list"));
+        
+    const slider = new ActionRowBuilder()
+        .addComponents(
+            addSlider(playerId));
 
 
-    channel.send({ embeds: [embed], components: [row] });
+    channel.send({ embeds: [embed], components: [row, slider] });
+}
+
+function addSlider(playerId) {    
+    const invSelector = new StringSelectMenuBuilder()
+        .setCustomId('inventory_selector-' + playerId)
+        .setPlaceholder('Nothing selected')
+            .addOptions(
+                [
+                    {label: "Main", value: "main", description: "Display your main stats!"},
+                    {label: "Items", value: "items", description: "Display every item you own!"},
+                    {label: "Skills", value: "skills", description: "Manage your skills!"},
+                    {label: "Stats", value: "stats", description: "Get a view of your stats!"},
+                    {label: "Equipment", value: "equipment", description: "Showcase your stuff!"},
+                ]
+        )
+
+    return invSelector;
 }
 
 
@@ -158,7 +179,7 @@ exports.equip = async function(playerId, equipId, type) {
 
     const update = { $set: { equiped: inv.equiped }};
 
-    playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne(query, update, options);
 
     return true;
 }
@@ -294,10 +315,17 @@ exports.receiveButton = async function(interaction, playerId, args) {
             break;
     }
 
+
+
+    const slider = new ActionRowBuilder()
+            .addComponents(
+                addSlider(playerId));
+
     if(embed != null) {
-        interaction.update({embeds: [embed], components: [row]});
+        
+        interaction.update({embeds: [embed], components: [row, slider]});
     } else {
-        interaction.update({components: [row]});
+        interaction.update({components: [row, slider]});
     }
 
 }

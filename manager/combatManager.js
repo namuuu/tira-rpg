@@ -29,6 +29,14 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         console.log("[ERROR] Tried to instanciate a combat with a non-existent player.");
         return;
     }
+
+    if(playerInfo.energy == 0) {
+        console.log("[ERROR] Tried to instanciate a combat with 0 energy.");
+        orderMessage.reply("You don't have enough energy to start a combat.").then(msg => {
+            setTimeout(() => msg.delete(), 5000);
+        });
+        return;
+    }
     
     const party = (await playerUtils.getData(creator.id, "misc")).party;
 
@@ -57,6 +65,12 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         return;
     }
 
+    orderMessage.reply("You consumed 1 energy!").then(msg => {
+        setTimeout(() => msg.delete(), 5000);
+    });
+
+    playerUtils.energy.add(creator.id, -1);
+
     const searchEmbed = new EmbedBuilder()
         .setTitle("Searching for an encounter...")
 
@@ -64,7 +78,6 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     const messageId = message.id;
 
     await util.createThread(message, creator, playerInfo.location);
-
     
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
     const combatData = [
@@ -88,6 +101,8 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     await combatCollection.insertMany(combatData, { ordered: true});
     await embed.sendEncounterMessage(message, 'wild-encounter');
 
+    orderMessage.delete();
+
     return messageId;
 }
 
@@ -96,7 +111,7 @@ exports.deleteCombat = async function(channel) {
     const combatCollection = Client.mongoDB.db('combat-data').collection(channel.id);
     const combatData = await util.getCombatCollection(channel.id);
 
-    if(combatData == null) {
+    if(combatData == null || combatData == undefined || combatData.team1 == null || combatData.team2 == null) {
         console.log("[DEBUG] Attempted to delete a non-existent combat. (NON_EXISTENT_COMBAT_DELETE_ATTEMPT)");
         return;
     }
@@ -107,7 +122,12 @@ exports.deleteCombat = async function(channel) {
         }
     }
 
-    util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
+    try {
+        util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
+    } catch (error) {
+        console.log("[ERROR] Tried to update a non-existent main message.");
+    }
+    
     util.deleteThread(channel);
 
     await combatCollection.drop(function(err, res) {
@@ -150,10 +170,12 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
 
     if (info == null) {
         console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
+        interaction.deferUpdate();
         return;
     }
     if(team != 1 && team != 2) {
         console.log("[DEBUG] Attempted to join a non-existent team. (NON_EXISTENT_TEAM_JOIN_ATTEMPT)");
+        interaction.deferUpdate();
         return;
     }
 
@@ -411,8 +433,7 @@ exports.combatLoop = async function(thread, combatData) {
         console.log("[DEBUG] This is the player's turn. Waiting for player input.");
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
-        //util.executeSkill(combatData, thread, "default", soonestFighter.id, combatData.team1[0].id);
-        await util.executeMonsterAttack(combatData, thread, soonestFighter.id, combatData.team1[0].id);
+        await util.executeMonsterAttack(combatData, thread, soonestFighter.id).catch(err => console.log(err));
     }
 
     combatData.current_turn++;
@@ -433,14 +454,11 @@ exports.combatLoop = async function(thread, combatData) {
 }
 
 exports.finishTurn = async function(exeData, log) {
-    const { combat, thread, casterId, targetId, skill } = exeData;
+    const { combat, thread, casterId, skill } = exeData;
     const caster = util.getPlayerInCombat(casterId, combat);
-    const target = util.getPlayerInCombat(targetId, combat);
-    let embed = new EmbedBuilder();
+    const embed = new EmbedBuilder();
 
-
-    let casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.id;
-    //let targetName = target.type == "human" ? "<@" + target.id + ">" : target.id;
+    const casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.name;
     
     embed.setDescription(casterName + " used " + skill.name/* + " on " + targetName + " !"*/);
 
