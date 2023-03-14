@@ -1,0 +1,9 @@
+{
+    "quete1":{
+        "name":"quete",
+        "description":"Test quest",
+        "rewards":["Gato","Piece"],
+        "nextQuest":"quete2"
+    }
+
+}

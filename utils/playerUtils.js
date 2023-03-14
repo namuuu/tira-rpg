@@ -42,6 +42,7 @@ exports.create = async function(id, className) {
             boots: null,
         } },
         { name: "misc", lastRegen: Date.now(), lastEnergy: Date.now(), party: { owner: id, members: [] }},
+        {name : "story",quests:[]}
     ]
 
     const options = { ordered: true };

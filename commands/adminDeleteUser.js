@@ -5,9 +5,7 @@ module.exports = {
   aliases: [],
   description: "",
   requirePerm : true,
-  
   execute(message, args) {
-    console.log(args);
 
     if (args.length >= 1)
       var arg = message.mentions.members.first();
