@@ -202,7 +202,7 @@ async function typeStats(embed, playerId) {
         {name: "Vitality", value: playerStats.vitality + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_vit")})`, inline: true},
         {name: "Strength", value: playerStats.strength + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_str")})`, inline: true},
         {name: "Resistance", value: playerStats.resistance + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_res")})`, inline: true},
-        {name: "Dexterity", value: playerStats.dexterity + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
+        {name: "Spirit", value: playerStats.spirit + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
         {name: "Agility", value: playerStats.agility + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_agi")})`, inline: true},
         {name: "Intelligence", value: playerStats.intelligence + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_int")})`, inline: true},
     );

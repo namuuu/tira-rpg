@@ -215,7 +215,7 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
         stats: {
             vitality: playerStats.vitality + equip.stat.getCombined(playerEquip, "raw_buff_vit"),
             strength: playerStats.strength + equip.stat.getCombined(playerEquip, "raw_buff_str"),
-            dexterity: playerStats.dexterity + equip.stat.getCombined(playerEquip, "raw_buff_dex"),
+            spirit: playerStats.spirit + equip.stat.getCombined(playerEquip, "raw_buff_spi"),
             resistance: playerStats.resistance + equip.stat.getCombined(playerEquip, "raw_buff_res"),
             intelligence: playerStats.intelligence + equip.stat.getCombined(playerEquip, "raw_buff_int"),
             agility: playerStats.agility + equip.stat.getCombined(playerEquip, "raw_buff_agi"),

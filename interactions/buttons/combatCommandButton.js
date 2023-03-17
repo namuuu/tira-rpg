@@ -66,7 +66,7 @@ module.exports = {
                 const statEmbed = new EmbedBuilder()
                     .setDescription("The players' stats.")
                     .addFields({ name: "Strength", value: player.stats.strength + "", inline: true })
-                    .addFields({ name: "Dexterity", value: player.stats.dexterity + "", inline: true })
+                    .addFields({ name: "Spirit", value: player.stats.spirit + "", inline: true })
                     .addFields({ name: "Resistance", value: player.stats.resistance + "", inline: true })
                     .addFields({ name: "Vitality", value: player.stats.vitality + "", inline: true })
                     .addFields({ name: "Intelligence", value: player.stats.intelligence + "", inline: true })
