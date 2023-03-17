@@ -26,7 +26,7 @@ exports.create = async function(id, className) {
 
     const skill = JSON.parse(fs.readFileSync(`./data/misc/levelRewards.json`))[className]["0"][0];
     const data = [
-        { name: "info", class: className, money: 100, level: 1, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, energy: 3, location: "capital" },
+        { name: "info", class: className, money: 100, level: 1, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, max_health: classData.base_stats.vitality, energy: 3, location: "capital" },
         { name: "stats", 
             strength: classData.base_stats.strength,
             vitality: classData.base_stats.vitality, 
@@ -127,13 +127,11 @@ exports.health.passiveRegen = async function(userID) {
     //Math.floor(Date.now()/1000)
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
-    let maxHealth = await exports.getData(userID, "stats");
-    maxHealth = maxHealth.vitality;
-
     let lastRegen = await exports.getData(userID, "misc");
     lastRegen = lastRegen.lastRegen;
 
     let health = await exports.getData(userID, "info");
+    let maxHealth = health.max_health;
     health = health.health;
 
     if((Date.now() - lastRegen) < 1800000)

@@ -1,10 +1,3 @@
-const { Client, MessageEmbed, SlashCommandBuilder } = require('discord.js');
-const player = require('../../utils/playerUtils.js');
-const inventory =  require('../../utils/inventoryUtils.js');
-const rpg = require('../../utils/rpgInfoUtils.js');
-const messageTemplateUtils = require('../../utils/messageTemplateUtils.js');
-const skill = require('../../utils/skillUtils.js');
-
 module.exports = {
   name: "test",
   aliases: [],
@@ -12,9 +5,9 @@ module.exports = {
   requireCharacter: false,
   async execute(message, args) {
     
-    const string1 = "Armure du dragon";
-    const string2 = "Armure en mythridate";
-    const string3 = "Epee du dragon";
+    const string1 = "Orbe de peur";
+    const string2 = "Orbe de pejre";
+    const string3 = "aaaaaaaaaaaaaaaaaaaa";
 
     console.log(levenshteinDistance(string1, string2));
     console.log(levenshteinDistance(string1, string3));
