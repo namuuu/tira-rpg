@@ -1,5 +1,6 @@
 const { Client, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } = require('discord.js');
 const equipSetup = require('../setup/equipSetup.js');
+const playerUtils = require('./playerUtils.js');
 
 exports.stat = {};
 
@@ -152,15 +153,8 @@ exports.trash = async function(playerId, equipId, type) {
 }
 
 exports.equip = async function(playerId, equipId, type) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
-
-    const query = { name: "inventory" };
-    const options = { 
-        projection: {equipItems: 1, equiped: 1},
-        upsert: true,
-    };
-
-    const inv = await playerCollection.findOne(query, options);
+    const data = await playerUtils.getData(playerId, "info");
+    const inv = await playerUtils.getData(playerId, "inventory");
 
     const equip = inv.equipItems.filter(item => item.id == equipId).filter(item => item.type == type)[0];
     
@@ -175,35 +169,54 @@ exports.equip = async function(playerId, equipId, type) {
         return "invalidtype";
     }
 
+    // Remove old max health
+    if(inv.equiped[type] != null && inv.equiped[type].caracteristics.raw_buff_vit != undefined) {
+        data.max_health -= inv.equiped[type].caracteristics.raw_buff_vit;
+    }
+
+    // Add new max health
+    if(equip.caracteristics.raw_buff_vit != undefined) {
+        data.max_health += equip.caracteristics.raw_buff_vit;
+    }
+
+    console.log("New max health:" + data.max_health);
+
+    // Check if health is over max health
+    if(data.health > data.max_health) {
+        data.health = data.max_health;
+    }
+
     inv.equiped[type] = equip;
 
-    const update = { $set: { equiped: inv.equiped }};
-
-    await playerCollection.updateOne(query, update, options);
+    await playerUtils.updateData(playerId, {equiped: inv.equiped},  "inventory");
+    await playerUtils.updateData(playerId, {max_health: data.max_health, health: data.health}, "info");
 
     return true;
 }
 
 exports.unequip = async function(playerId, type) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
+    const data = await playerUtils.getData(playerId, "info");
+    const inv = await playerUtils.getData(playerId, "inventory");
 
-    const query = { name: "inventory" };
-    const options = { 
-        projection: {equiped: 1},
-        upsert: true,
-    };
-
-    const inv = await playerCollection.findOne(query, options);
     if(inv.equiped[type] == null) {
         console.log("ERROR: Tried to unequip an item that the user hasn't equipped.");
         return "notequip";
     }
 
+    // Remove old max health
+    if(inv.equiped[type].caracteristics.raw_buff_vit != undefined) {
+        data.max_health -= inv.equiped[type].caracteristics.raw_buff_vit;
+    }
+
+    // Check if health is over max health
+    if(data.health > data.max_health) {
+        data.health = data.max_health;
+    }
+
     inv.equiped[type] = null;
 
-    const update = { $set: { equiped: inv.equiped }};
-
-    playerCollection.updateOne(query, update, options);
+    await playerUtils.updateData(playerId, {equiped: inv.equiped},  "inventory");
+    await playerUtils.updateData(playerId, {max_health: data.max_health, health: data.health}, "info");
 
     return true;
 }

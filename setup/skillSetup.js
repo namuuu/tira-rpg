@@ -8,7 +8,10 @@ module.exports = {
     console.groupCollapsed("-- Skills --");
     console.log("Setting up Skills...");
     skillMap.set("heal", heal);
-    skillMap.set("damage", damage);
+    skillMap.set("phys_damage", phys_damage);
+    skillMap.set("mag_damage", mag_damage);
+    skillMap.set("phys_to_mag_damage", phys_to_mag_damage);
+    skillMap.set("mag_to_phys_damage", mag_to_phys_damage);
     skillMap.set("cooldown", cooldown);
 
     console.log("Skills are all setup !");
@@ -27,7 +30,7 @@ function heal(exeData, quantity, log) {
   combatUtils.addToValueTologger(log, casterId, "heal", quantity);
 }
 
-function damage(exeData, power, log) {
+function phys_damage(exeData, power, log) {
   const { combat, casterId, targets } = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
@@ -38,7 +41,45 @@ function damage(exeData, power, log) {
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
       combatUtils.addToValueTologger(log, target.id, "damage", damage);
   }
+}
 
+function phys_to_mag_damage(exeData, power, log) {
+  const { combat, casterId, targets } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  for(const target of targets) {
+      const damage = Math.floor((power * (caster.stats.strength / target.stats.spirit) + 2) / 2);
+
+      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+      combatUtils.addToValueTologger(log, target.id, "damage", damage);
+  }
+}
+
+function mag_to_phys_damage(exeData, power, log) {
+  const { combat, casterId, targets } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  for(const target of targets) {
+      const damage = Math.floor((power * (caster.stats.intelligence / target.stats.resistance) + 2) / 2);
+
+      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+      combatUtils.addToValueTologger(log, target.id, "damage", damage);
+  }
+}
+
+function mag_damage(exeData, power, log) {
+  const { combat, casterId, targets } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  for(const target of targets) {
+      const damage = Math.floor((power * (caster.stats.intelligence / target.stats.spirit) + 2) / 2);
+
+      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+      combatUtils.addToValueTologger(log, target.id, "damage", damage);
+  }
 }
 
 function cooldown(exeData, quantity, log) {

@@ -122,7 +122,6 @@ exports.display = async function(player, interaction, type, ack) {
 exports.typeMain = typeMain;
 async function typeMain(embed, playerId) {
     const playerInfo = await player.getData(playerId, "info");
-    const playerStats = await player.getData(playerId, "stats");
 
      // Experience progress bar
      var expBar = "";
@@ -144,7 +143,7 @@ async function typeMain(embed, playerId) {
     }
 
 
-    const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
+    const percHealth = Math.round((playerInfo.health / playerInfo.max_health)*100);
 
     const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerInfo.location];
     if(zone == undefined)
@@ -153,7 +152,7 @@ async function typeMain(embed, playerId) {
         var zoneName = zone.name;
 
     embed.addFields(
-        { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
+        { name: 'HP', value: `${playerInfo.health}/${playerInfo.max_health} (${percHealth}%)`, inline: true },
         { name: 'Class', value: classData[playerInfo.class].name, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
         { name: 'Energy', value: energyBar },
@@ -202,7 +201,7 @@ async function typeStats(embed, playerId) {
         {name: "Vitality", value: playerStats.vitality + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_vit")})`, inline: true},
         {name: "Strength", value: playerStats.strength + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_str")})`, inline: true},
         {name: "Resistance", value: playerStats.resistance + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_res")})`, inline: true},
-        {name: "Dexterity", value: playerStats.dexterity + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
+        {name: "Spirit", value: playerStats.spirit + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
         {name: "Agility", value: playerStats.agility + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_agi")})`, inline: true},
         {name: "Intelligence", value: playerStats.intelligence + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_int")})`, inline: true},
     );

@@ -7,7 +7,7 @@
             "strength": 10,
             "vitality": 10,
             "resistance": 10,
-            "dexterity": 10,
+            "spirit": 10,
             "agility": 10,
             "intelligence": 10
         },
@@ -15,7 +15,7 @@
             "strength": 0,
             "vitality": 0,
             "resistance": 50,
-            "dexterity": 0,
+            "spirit": 0,
             "agility": 0,
             "intelligence": 0
         },
@@ -43,7 +43,7 @@
             "strength": 9,
             "vitality": 5,
             "resistance": 4,
-            "dexterity": 7,
+            "spirit": 7,
             "agility": 10,
             "intelligence": 2
         },
@@ -51,7 +51,7 @@
             "strength": 0,
             "vitality": 0,
             "resistance": 0,
-            "dexterity": 3,
+            "spirit": 3,
             "agility": 2,
             "intelligence": 0
         },
@@ -79,7 +79,7 @@
             "strength": 5,
             "vitality": 3,
             "resistance": 2,
-            "dexterity": 3,
+            "spirit": 3,
             "agility": 10,
             "intelligence": 4
         },
@@ -87,7 +87,7 @@
             "strength": 0,
             "vitality": 0,
             "resistance": 0,
-            "dexterity": 0,
+            "spirit": 0,
             "agility": 4,
             "intelligence": 0
         },
@@ -115,7 +115,7 @@
             "strength": 4,
             "vitality": 7,
             "resistance": 3,
-            "dexterity": 15,
+            "spirit": 15,
             "agility": 7,
             "intelligence": 1
         },
@@ -123,7 +123,7 @@
             "strength": 2,
             "vitality": 2,
             "resistance": 0,
-            "dexterity": 2,
+            "spirit": 2,
             "agility": 2,
             "intelligence": 0
         },
@@ -156,7 +156,7 @@
             "strength": 5,
             "vitality": 8,
             "resistance": 4,
-            "dexterity": 18,
+            "spirit": 18,
             "agility": 8,
             "intelligence": 2
         },
@@ -164,7 +164,7 @@
             "strength": 1,
             "vitality": 4,
             "resistance": 0,
-            "dexterity": 3,
+            "spirit": 3,
             "agility": 2,
             "intelligence": 0
         },
@@ -196,7 +196,7 @@
             "strength": 12,
             "vitality": 6,
             "resistance": 4,
-            "dexterity": 12,
+            "spirit": 12,
             "agility": 12,
             "intelligence": 2
         },
@@ -204,7 +204,7 @@
             "strength": 5,
             "vitality": 2,
             "resistance": 0,
-            "dexterity": 3,
+            "spirit": 3,
             "agility": 2,
             "intelligence": 0
         },
@@ -236,7 +236,7 @@
             "strength": 15,
             "vitality": 20,
             "resistance": 5,
-            "dexterity": 15,
+            "spirit": 15,
             "agility": 15,
             "intelligence": 3
         },
@@ -244,7 +244,7 @@
             "strength": 5,
             "vitality": 5,
             "resistance": 0,
-            "dexterity": 3,
+            "spirit": 3,
             "agility": 2,
             "intelligence": 0
         },
@@ -285,7 +285,7 @@
             "strength": 13,
             "vitality": 8,
             "resistance": 5,
-            "dexterity": 10,
+            "spirit": 10,
             "agility": 15,
             "intelligence": 8
         },
@@ -293,7 +293,7 @@
             "strength": 2,
             "vitality": 0,
             "resistance": 0,
-            "dexterity": 1,
+            "spirit": 1,
             "agility": 3,
             "intelligence": 0
         },
@@ -329,7 +329,7 @@
             "strength": 15,
             "vitality": 15,
             "resistance": 10,
-            "dexterity": 5,
+            "spirit": 5,
             "agility": 7,
             "intelligence": 2
         },
@@ -337,7 +337,7 @@
             "strength": 3,
             "vitality": 3,
             "resistance": 2,
-            "dexterity": 1,
+            "spirit": 1,
             "agility": 1,
             "intelligence": 0
         },

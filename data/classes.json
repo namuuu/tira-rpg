@@ -6,7 +6,7 @@
             "strength": 15,
             "vitality": 12,
             "resistance": 14,
-            "dexterity": 8,
+            "spirit": 8,
             "agility": 6,
             "intelligence": 5
         },
@@ -14,7 +14,7 @@
             "strength": 2,
             "vitality": 1.5,
             "resistance": 1.7,
-            "dexterity": 0.5,
+            "spirit": 0.5,
             "agility": 0.5,
             "intelligence": 0.2
         }
@@ -26,7 +26,7 @@
             "strength": 12,
             "vitality": 6,
             "resistance": 6,
-            "dexterity": 14,
+            "spirit": 14,
             "agility": 14,
             "intelligence": 8
         },
@@ -34,7 +34,7 @@
             "strength": 1.2,
             "vitality": 0.5,
             "resistance": 0.8,
-            "dexterity": 2,
+            "spirit": 2,
             "agility": 1.8,
             "intelligence": 0.6
         }
@@ -46,7 +46,7 @@
             "strength": 4,
             "vitality": 8,
             "resistance": 12,
-            "dexterity": 10,
+            "spirit": 10,
             "agility": 8,
             "intelligence": 18
         },
@@ -54,7 +54,7 @@
             "strength": 0.3,
             "vitality": 1.0,
             "resistance": 1.4,
-            "dexterity": 1.2,
+            "spirit": 1.2,
             "agility": 1.0,
             "intelligence": 2.5
         }
@@ -66,7 +66,7 @@
             "strength": 6,
             "vitality": 5,
             "resistance": 8,
-            "dexterity": 15,
+            "spirit": 15,
             "agility": 14,
             "intelligence": 12
         },
@@ -74,7 +74,7 @@
             "strength": 0.7,
             "vitality": 0.5,
             "resistance": 1.0,
-            "dexterity": 2,
+            "spirit": 2,
             "agility": 1.2,
             "intelligence": 1.6
         }
@@ -86,7 +86,7 @@
             "strength": 6,
             "vitality": 12,
             "resistance": 14,
-            "dexterity": 8,
+            "spirit": 8,
             "agility": 8,
             "intelligence": 12
         },
@@ -94,7 +94,7 @@
             "strength": 0.6,
             "vitality": 1.5,
             "resistance": 1.7,
-            "dexterity": 0.8,
+            "spirit": 0.8,
             "agility": 0.8,
             "intelligence": 1.6
         }
