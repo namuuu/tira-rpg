@@ -130,6 +130,8 @@ exports.display = async function(player, interaction, type, ack) {
 exports.typeMain = typeMain;
 async function typeMain(embed, playerId) {
     const playerInfo = await player.getData(playerId, "info");
+    const playerStats = await player.getData(playerId, "stats");
+    const playerStory = await player.getData(playerId, "story");
 
      // Experience progress bar
      var expBar = "";
@@ -153,9 +155,9 @@ async function typeMain(embed, playerId) {
 
     const percHealth = Math.round((playerInfo.health / playerInfo.max_health)*100);
 
-    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerInfo.location];
+    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerStory.locations.current_zone];
     if(zone == undefined)
-        var zoneName = playerInfo.location;
+        var zoneName = playerStory.locations.current_zone;
     else
         var zoneName = zone.name;
 
