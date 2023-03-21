@@ -34,7 +34,7 @@ exports.getInventoryString = function(inventory) {
  * @param {*} item item to give
  * @param {*} quantity quantity of the item to give
  */
-exports.giveItem = async function(playerId, item, quantity) {
+exports.giveItem = async function(playerId, item, quantity, channel) {
     const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
 
     // Querying the inventory in the database
@@ -61,6 +61,14 @@ exports.giveItem = async function(playerId, item, quantity) {
 
     // Updating the inventory in the database
     playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
+
+    if(channel != undefined) {
+        const embed = new EmbedBuilder()
+            .setDescription(`<@${playerId}> received ${quantity} ${item}!`)
+            .setColor(0xFFFFFF);
+
+        channel.send({ embeds: [embed] });
+    }
 
     console.groupCollapsed("Item Given");
     console.log(`Given to: ${playerId}`);

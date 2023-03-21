@@ -302,7 +302,7 @@ exports.removePlayerFromCombat = async function(playerId, combatId, interaction)
 }
 
 exports.searchForMonsters = async function(interaction, combat) {
-    var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone];
+    var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone]; // Gets the zone data from the JSON file.
 
     if(zone == null) {
         console.log("[DEBUG] Attempted to spawn monsters in a non-existent zone. (NON_EXISTENT_ZONE_SPAWN_ATTEMPT)");
