@@ -16,7 +16,7 @@ module.exports = {
       .addFields(
          { name: "A cool Battle System", value: "Fight against a wide variety of enemies and bosses. This journey will be full of surprises!"},
          { name: "A Skill System", value: "You can acquire different skills that will help you in your journey. Use the right ones against the right enemies to maximize your efficiency!"},
-         { name: "A huge variety of amors and weapons", value: "Tira has a lot of armors and weapons to choose from. Choosing the right skills may be not enough, you may want to seek the perfect gear to complete your build!"},
+         { name: "A huge variety of armors and weapons", value: "Tira has a lot of armors and weapons to choose from. Choosing the right skills may be not enough, you may want to seek the perfect gear to complete your build!"},
          { name: "And more!", value: "We want to make a lot of cool stuff with Tira, so please bear with us! Thank you so much for playing our game!"}
       )
       .setFooter({text: "We started developing this project seriously on 23/03/2022."})
@@ -43,8 +43,21 @@ module.exports = {
       
       message.channel.send({ embeds: [mainEmbed, contributorEmbed], components: [row] });*/
 
+      const serverRuleEmbed = new EmbedBuilder()
+         .setTitle("Rules")
+         .setDescription("Here are the rules of the server. Please read them carefully.")
+         .addFields(
+            {name: "1. No spamming", value: "Please don't spam. This includes spamming the same message multiple times, spamming the same emoji multiple times, spamming the same link multiple times, etc."},
+            {name: "2. No advertising", value: "Please don't advertise your server, your youtube channel, your twitch channel, etc. This includes sending links to your server, your youtube channel, your twitch channel, etc."},
+            {name: "3. Family friendly server", value: "Any content that could shock or harm another user could be considered as forbidden. Please don't."},
+            {name: "4. Aggressive suggestions", value: "We keep the last decision on how the bot will be developed. Please don't try to force your opinion on us."}
+         )
+         .setFooter({text: "Overall, those rules are here  just to maintain a cool and friendly atmosphere in the server. Have fun!"})
+
+      message.channel.send({ embeds: [serverRuleEmbed] });
+
       //discussion.send(message.author, message.channel, "welcome_capital", "welcome_capital_1");
-      discussion.send(message.author, message.channel, "choice", "ask");
+      //discussion.send(message.author, message.channel, "choice", "ask");
   }
 }
 
