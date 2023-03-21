@@ -2,6 +2,7 @@ const { ActionRowBuilder, ButtonBuilder } = require("@discordjs/builders");
 const { ButtonStyle, EmbedBuilder } = require("discord.js");
 const fs = require("fs");
 const util = require("../../utils/combatUtils.js");
+const skillData = require("../../data/skills.json");
 
 module.exports = {
     name: "combat.command",
@@ -41,6 +42,41 @@ module.exports = {
                 }
                 break;
             case "full.data":
+                const playerId = args[1];
+                const player = util.getPlayerInCombat(playerId, combat);
+
+                const skillValue = "";
+
+                for(let i = 0; i < player.skills.length; i++) {
+                    const skill = player.skills[i];
+                    skillValue += `${skillData[skill].number} - ${skillData[skill].name}\n`;
+                }
+
+                if(skillValue == "")
+                    skillValue = "No skills";
+
+                const mainEmbed = new EmbedBuilder()
+                    .setTitle("Na'vi, your personal combat assistant")
+                    .addFields({ name: "Name", value: player.name })
+                    .addFields({ name: "Class", value: player.class })
+                    .addFields({ name: "Health", value: player.health + "/" + player.stats.vitality })
+                    .addFields({ name: "Timeline", value: player.timeline + " Timeline" })
+                    .addFields({ name: "Skills", value: skillValue })
+
+                const statEmbed = new EmbedBuilder()
+                    .setDescription("The players' stats.")
+                    .addFields({ name: "Strength", value: player.stats.strength + "", inline: true })
+                    .addFields({ name: "Spirit", value: player.stats.spirit + "", inline: true })
+                    .addFields({ name: "Resistance", value: player.stats.resistance + "", inline: true })
+                    .addFields({ name: "Vitality", value: player.stats.vitality + "", inline: true })
+                    .addFields({ name: "Intelligence", value: player.stats.intelligence + "", inline: true })
+                    .addFields({ name: "Agility", value: player.stats.agility + "", inline: true })
+                
+                if(interaction.channel.isThread()) {
+                    interaction.user.send({ embeds: [mainEmbed, statEmbed] });
+                } else {
+                    interaction.message.edit({ embeds: [mainEmbed, statEmbed] });
+                }
 
                 break;
         }
@@ -110,7 +146,7 @@ async function editDisplayer(interaction, type, combat) {
 
             // TODO: ADD STATUSES
 
-            addButton(row, "Get complete data", ButtonStyle.Secondary, `combat.command-full.data-${player.id}`);
+            addButton(row, "Get complete data ⭧", ButtonStyle.Secondary, `combat.command-full.data-${player.id}`);
             addButton(row, "Back", ButtonStyle.Secondary, "combat.command-display-back");
     }
 

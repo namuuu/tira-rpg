@@ -495,7 +495,7 @@ exports.createMonsterData = function(combat, monster) {
         stats: {
             vitality: mobData.base_stats.vitality + Math.floor(Math.random(mobData.mod_stats.vitality)),
             strength: mobData.base_stats.strength + Math.floor(Math.random(mobData.mod_stats.strength)),
-            dexterity: mobData.base_stats.dexterity + Math.floor(Math.random(mobData.mod_stats.dexterity)),
+            spirit: mobData.base_stats.spirit + Math.floor(Math.random(mobData.mod_stats.spirit)),
             resistance: mobData.base_stats.resistance + Math.floor(Math.random(mobData.mod_stats.resistance)),
             intelligence: mobData.base_stats.intelligence + Math.floor(Math.random(mobData.mod_stats.intelligence)),
             agility: mobData.base_stats.agility + Math.floor(Math.random(mobData.mod_stats.agility)),

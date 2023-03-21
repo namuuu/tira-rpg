@@ -1,0 +1,60 @@
+{
+    "welcome_capital": [{
+        "id": "welcome_capital_1",
+        "type": {
+            "name": "follow-up"
+        },
+        "embed": {
+            "description": "Welcome to the Capital, traveller!"
+        }
+    },
+    {
+        "id": "welcome_capital_2",
+        "type": {
+            "name": "end-discussion"
+        },
+        "embed": {
+            "description": "Here's an apple for you!"
+        },
+        "rewards": [{
+            "type": "item",
+            "id": "apple",
+            "amount": 1
+        }]
+    }],
+    "choice": [{
+        "id": "ask",
+        "type": {
+            "name": "multiple-choice",
+            "choices": [{
+                "id": "ask_1",
+                "text": "What is your name?"
+            },
+            {
+                "id": "ask_2",
+                "text": "Where am I?"
+            }]
+        },
+        "embed": {
+            "description": "What do you want to ask?"
+        }
+    },
+    {
+        "id": "ask_1",
+        "type": {
+            "name": "end-discussion"
+        },
+        "embed":{
+            "description": "My Name is Tira! Nice to meet you!"
+        }
+    },
+    {
+        "id": "ask_2",
+        "type": {
+            "name": "end-discussion"
+        },
+        "embed":{
+            "description": "You're currently in my-... humanity's last bastion!"
+        }
+    }]
+}

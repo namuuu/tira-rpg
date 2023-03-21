@@ -211,12 +211,13 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
         name: playerDiscord.username,
         type: "human",
         class: playerInfo.class,
-        health: playerInfo.health + equip.stat.getCombined(playerEquip, "raw_buff_vit"),
+        health: playerInfo.health,
+        max_health: playerInfo.max_health,
         timeline: 0,
         stats: {
             vitality: playerStats.vitality + equip.stat.getCombined(playerEquip, "raw_buff_vit"),
             strength: playerStats.strength + equip.stat.getCombined(playerEquip, "raw_buff_str"),
-            dexterity: playerStats.dexterity + equip.stat.getCombined(playerEquip, "raw_buff_dex"),
+            spirit: playerStats.spirit + equip.stat.getCombined(playerEquip, "raw_buff_spi"),
             resistance: playerStats.resistance + equip.stat.getCombined(playerEquip, "raw_buff_res"),
             intelligence: playerStats.intelligence + equip.stat.getCombined(playerEquip, "raw_buff_int"),
             agility: playerStats.agility + equip.stat.getCombined(playerEquip, "raw_buff_agi"),
@@ -302,7 +303,7 @@ exports.removePlayerFromCombat = async function(playerId, combatId, interaction)
 }
 
 exports.searchForMonsters = async function(interaction, combat) {
-    var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone];
+    var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone]; // Gets the zone data from the JSON file.
 
     if(zone == null) {
         console.log("[DEBUG] Attempted to spawn monsters in a non-existent zone. (NON_EXISTENT_ZONE_SPAWN_ATTEMPT)");
@@ -502,6 +503,14 @@ exports.callForVictory = async function(combat, thread, victor) {
     for(player of combat.team1.concat(combat.team2)) {
         if(player.type == "human") {
             playerUtils.setState(null, player.id, {name: "idle"});
+            const asyncedData = await playerUtils.getData(player.id, "info");
+            if(player.health > asyncedData.max_health) {
+                playerUtils.health.set(player.id, asyncedData.max_health);
+            } else if(player.health < 0) {
+                playerUtils.health.set(player.id, 0);
+            } else {
+                playerUtils.health.set(player.id, player.health);
+            }
         }
     }
 
