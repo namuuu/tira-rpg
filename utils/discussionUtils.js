@@ -12,8 +12,6 @@ exports.getData = function(category, id) {
 exports.send = function(user, channel, category, id) {
     const data = exports.getData(category, id);
 
-    console.log(data);
-
     if(data === undefined) return;
 
     const embed = getEmbed(data);
