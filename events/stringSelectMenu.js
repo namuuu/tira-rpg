@@ -124,8 +124,12 @@ module.exports = {
         }   
 
         if(sliders.has(command)) {
-            sliders.get(command).interact(interaction, interaction.values, args);
-        } else {
+            try {
+                await sliders.get(command).interact(interaction, interaction.values, args);
+            } catch (error) {
+                interaction.deferUpdate();
+                console.error(error);
+            }
         }
     }
 }
