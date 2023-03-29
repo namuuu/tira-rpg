@@ -30,7 +30,7 @@
                 "spawn-chance": "5"
             }
         },
-        "shops": [""]
+        "shops": []
     },
     "temple": {
         "name": "Forgotten Temple",
@@ -83,7 +83,7 @@
                 "spawn-chance": "1000000000000"
             }
         },
-        "shops": [""]
+        "shops": []
     },
     "cinder_valley":
     {
@@ -96,6 +96,6 @@
         },
         "monsters": {
         },
-        "shops": [""]
+        "shops": []
     }
 }

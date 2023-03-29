@@ -9,6 +9,43 @@ exports.getData = function(category, id) {
     return cat.filter(item => item.id === id)[0];
 }
 
+exports.startDiscussion = function(user, channel, discussion) {
+    const data = discussionData[discussion][0];
+
+    if(data === undefined) return;
+
+    const embed = getEmbed(data);
+
+    if(embed === null) return;
+
+    if(data.type === undefined) {
+        channel.send({ embeds: [embed] });
+        return;
+    }
+
+    const row = new ActionRowBuilder();
+
+    switch(data.type.name) {
+        case "follow-up":
+            row.addComponents(getNextButton(category, id, user.id));
+            channel.send({ embeds: [embed], components: [row] });
+            break;
+        case "end-discussion":
+            channel.send({ embeds: [embed] });
+            break;
+        case "multiple-choice":
+            data.type.choices.forEach(choice => {
+                row.addComponents(makeButton(choice.text, category, choice.id, user.id));
+            });
+            channel.send({ embeds: [embed], components: [row] });
+            break;
+    }
+
+    if(data.rewards !== undefined) {
+        giveRewards(user, data.rewards);
+    }
+}
+
 exports.send = function(user, channel, category, id) {
     const data = exports.getData(category, id);
 
