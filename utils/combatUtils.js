@@ -451,7 +451,8 @@ exports.createMonsterData = function(combat, monster) {
             intelligence: mobData.base_stats.intelligence + Math.floor(Math.random(mobData.mod_stats.intelligence)),
             agility: mobData.base_stats.agility + Math.floor(Math.random(mobData.mod_stats.agility)),
         },
-        equipment: {}
+        equipment: {},
+        effects: {},
     }
 
     if(i > 0) {

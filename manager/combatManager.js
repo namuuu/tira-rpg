@@ -199,6 +199,7 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
             agility: playerStats.agility + equip.stat.getCombined(playerEquip, "raw_buff_agi"),
         },
         equipment: {},
+        effects: {},
         skills: playerInv.activeSkills,
         items: playerInv.items,
     }
@@ -403,6 +404,8 @@ exports.combatLoop = async function(thread, combatData) {
 
     await util.announceNewTurn(thread, soonestFighter);
 
+    this.updateEffects(soonestFighter, "before");
+
     if(soonestFighter.type == "human") {
         combatData.current_action.current_player_id = soonestFighter.id;
         combatData.current_action.aim_at = null;
@@ -438,6 +441,7 @@ exports.finishTurn = async function(exeData, log) {
     const target = util.getPlayerInCombat(targetId, combat);
     let embed = new EmbedBuilder();
 
+    this.updateEffects(caster, "after");
 
     let casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.id;
     //let targetName = target.type == "human" ? "<@" + target.id + ">" : target.id;
@@ -463,6 +467,39 @@ exports.finishTurn = async function(exeData, log) {
     } 
     this.combatLoop(thread, combat);
 }
+
+exports.updateEffects = function(player, situation) {
+
+    if(Object.keys(player.effects).length > 0) {
+        for(var i = 0; i < Object.keys(player.effects).length; i++) {
+            if(player.effects[Object.keys(player.effects)[i]].proc.split('-')[0] == 'damage') {
+                if(situation == "after") {
+                    if(player.effects[Object.keys(player.effects)[i]].proc.split('-')[1] == 'after') {
+                        console.log("Damage effect: " + player.effects[Object.keys(player.effects)[i]].value);
+                        player.stats.vitality -= player.effects[Object.keys(player.effects)[i]].value;
+                    }
+                } else if(situation == "before") {
+                    if(player.effects[Object.keys(player.effects)[i]].proc.split('-')[1] == 'before') {
+                        player.stats.vitality -= player.effects[Object.keys(player.effects)[i]].value;
+                    }
+                }
+            }
+
+            if(player.effects[Object.keys(player.effects)[i]].proc == "buff" || player.effects[Object.keys(player.effects)[i]].duration == 1 || situation == "after") {
+                player.stats[player.effects[Object.keys(player.effects)[i]].stat] -= player.effects[Object.keys(player.effects)[i]].value;
+            }
+                
+            if (situation == "after") {
+                console.log("Duration: " + player.effects[Object.keys(player.effects)[i]].duration);
+                if(player.effects[Object.keys(player.effects)[i]].duration > 1) {
+                    player.effects[Object.keys(player.effects)[i]].duration = player.effects[Object.keys(player.effects)[i]].duration - 1;
+                } else {
+                    delete player.effects[Object.keys(player.effects)[i]];
+                }
+            }
+        }
+    }
+    }
 
 exports.callForVictory = async function(combat, thread, victor) {
     switch(combat.type) {

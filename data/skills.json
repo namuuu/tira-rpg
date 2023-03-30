@@ -75,7 +75,7 @@
     "description": "A simple vertical slash, classic but reliable.",
     "effects": {
       "cooldown": 12,
-      "damage": 8
+      "damage": 1
     }
   },
   "light_heal": {
@@ -101,12 +101,14 @@
   "gust": {
     "name": "Gust",
     "number":"10",
-    "type": ["buff-single"],
+    "aim": "ally-single",
     "description": "A buff that increases the caster's speed.",
     "effects": {
       "cooldown": 15,
-      "buff": {
+      "buff_stats": {
         "agility": {
+          "proc": "buff",
+          "stat": "agility",
           "value": 8,
           "duration": 3
         }
@@ -116,12 +118,14 @@
   "haste": {
     "name": "Haste",
     "number":"11",
-    "type": ["buff-aoe"],
+    "aim": "ally-aoe",
     "description": "A buff that increases the speed of all allies.",
     "effects": {
       "cooldown": 30,
       "buff_stats": {
         "agility": {
+          "proc": "buff",
+          "stat": "agility",
           "value": 5,
           "duration": 3
         }
@@ -131,13 +135,14 @@
   "toxic_spite": {
     "name": "Toxic Spite",
     "number":"12",
-    "type": ["damage-single"],
+    "aim": "enemy-single",
     "description": "A spell that deals damage and poisons the target.",
     "effects": {
       "cooldown": 10,
       "damage": 10,
       "poison": {
-        "damage": 5,
+        "proc": "damage-after",
+        "value": 5,
         "duration": 3
       }
     }
@@ -145,14 +150,20 @@
   "shadow_slash": {
     "name": "Shadow Slash",
     "number":"13",
-    "type": ["damage-single"],
+    "aim": "enemy-single",
     "description": "A slash that deals damage and lowers the target's defense.",
     "effects": {
       "cooldown": 15,
-      "damage": 10,
-      "poison": 5,
+      "damage": 1,
+      "poison": {
+        "proc": "damage-after",
+        "value": 5,
+        "duration": 3
+      },
       "debuff_stats": {
         "resistance": {
+          "proc": "debuff",
+          "stat": "resistance",
           "value": 7,
           "duration": 3
         } 

@@ -43,7 +43,7 @@ module.exports = {
                 var energy = await player.getData(userId, "info");
                 energy = energy.energy;
 
-                if(energy < 1) {
+                if(energy > 100000) {
                     interaction.channel.send("You don't have enough energy to join a fight ! " + "<@" + interaction.user.id + ">");
                     return;
                 } else {
