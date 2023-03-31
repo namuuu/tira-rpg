@@ -105,6 +105,19 @@ exports.addTimeline = async function(combatId, playerId, time) {
     await combatCollection.updateOne({}, update, { upsert: true });
 }
 
+exports.updateTeamData = async function(thread, combatData, team1, team2) {
+    const combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
+
+    const update = {
+        $set: {
+            team1: combatData.team1,
+            team2: combatData.team2,
+        }
+    };
+
+    await combatCollection.updateOne({}, update, { upsert: true });
+}
+
 exports.sendSkillSelector = async function(player, thread) {
 
     const stringSelectOptions = [];

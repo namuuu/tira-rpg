@@ -38,4 +38,4 @@ client.once('ready', () => {
     client.user.setPresence({ activities: [{name: 'Battling'}], status: 'online'});
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN_NAMU_SHARD);

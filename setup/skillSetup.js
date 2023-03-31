@@ -78,9 +78,7 @@ function debuff_stats(exeData, debuffs, log) {
 }
 
 function poison(exeData, poison, log) {
-  const { casterId, targets } = exeData;
-
-  console.log('got to poison');
+  const { targets } = exeData;
 
   for(const target of targets) {
     target.effects['poison'] = poison;
@@ -88,7 +86,7 @@ function poison(exeData, poison, log) {
 }
 
 function burn(exeData, burn, log) {
-  const { casterId, targets } = exeData;
+  const { targets } = exeData;
 
   for(const target of targets) {
     target.effects['burn'] = burn;
