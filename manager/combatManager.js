@@ -466,7 +466,7 @@ exports.combatLoop = async function(thread, combatData) {
 }
 
 exports.finishTurn = async function(exeData, log) {
-    const { combat, thread, casterId, skill } = exeData;
+    const { combat, thread, casterId, targetId, skill } = exeData;
     const caster = util.getPlayerInCombat(casterId, combat);
     const target = util.getPlayerInCombat(targetId, combat);
     let embed = new EmbedBuilder();
