@@ -34,13 +34,13 @@ exports.getInventoryString = function(inventory) {
  * @param {*} item item to give
  * @param {*} quantity quantity of the item to give
  */
-exports.giveItem = async function(playerId, item, quantity) {
+exports.giveItem = async function(playerId, item, quantity, channel) {
     const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
 
     // Querying the inventory in the database
     const inventory = await playerCollection.findOne(
         {name: "inventory"}, 
-        {projection: {_id: 0, skills: 0, activeSkills: 0}}
+        {projection: {_id: 0, skills: 0, activeSkills: 0, passiveSkills: 0, stats: 0, equipment: 0}}
     );
     
     // If the item is already in the inventory, we add the quantity to the existing one
@@ -60,7 +60,15 @@ exports.giveItem = async function(playerId, item, quantity) {
     }
 
     // Updating the inventory in the database
-    const result = await playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
+    playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
+
+    if(channel != undefined) {
+        const embed = new EmbedBuilder()
+            .setDescription(`<@${playerId}> received ${quantity} ${item}!`)
+            .setColor(0xFFFFFF);
+
+        channel.send({ embeds: [embed] });
+    }
 
     console.groupCollapsed("Item Given");
     console.log(`Given to: ${playerId}`);
@@ -123,6 +131,7 @@ exports.typeMain = typeMain;
 async function typeMain(embed, playerId) {
     const playerInfo = await player.getData(playerId, "info");
     const playerStats = await player.getData(playerId, "stats");
+    const playerStory = await player.getData(playerId, "story");
 
      // Experience progress bar
      var expBar = "";
@@ -144,16 +153,16 @@ async function typeMain(embed, playerId) {
     }
 
 
-    const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
+    const percHealth = Math.round((playerInfo.health / playerInfo.max_health)*100);
 
-    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerInfo.location];
+    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerStory.locations.current_zone];
     if(zone == undefined)
-        var zoneName = playerInfo.location;
+        var zoneName = playerStory.locations.current_zone;
     else
         var zoneName = zone.name;
 
     embed.addFields(
-        { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
+        { name: 'HP', value: `${playerInfo.health}/${playerInfo.max_health} (${percHealth}%)`, inline: true },
         { name: 'Class', value: classData[playerInfo.class].name, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
         { name: 'Energy', value: energyBar },
@@ -202,7 +211,7 @@ async function typeStats(embed, playerId) {
         {name: "Vitality", value: playerStats.vitality + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_vit")})`, inline: true},
         {name: "Strength", value: playerStats.strength + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_str")})`, inline: true},
         {name: "Resistance", value: playerStats.resistance + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_res")})`, inline: true},
-        {name: "Dexterity", value: playerStats.dexterity + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
+        {name: "Spirit", value: playerStats.spirit + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
         {name: "Agility", value: playerStats.agility + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_agi")})`, inline: true},
         {name: "Intelligence", value: playerStats.intelligence + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_int")})`, inline: true},
     );

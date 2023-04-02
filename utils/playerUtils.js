@@ -26,12 +26,12 @@ exports.create = async function(id, className) {
 
     const skill = JSON.parse(fs.readFileSync(`./data/misc/levelRewards.json`))[className]["0"][0];
     const data = [
-        { name: "info", class: className, money: 100, level: 1, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, energy: 3, location: "capital" },
+        { name: "info", class: className, money: 100, level: 1, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, max_health: classData.base_stats.vitality, energy: 3, location: "capital" },
         { name: "stats", 
             strength: classData.base_stats.strength,
             vitality: classData.base_stats.vitality, 
             resistance: classData.base_stats.resistance, 
-            dexterity: classData.base_stats.dexterity,
+            spirit: classData.base_stats.spirit,
             agility: classData.base_stats.agility,
             intelligence: classData.base_stats.intelligence,
         },
@@ -42,6 +42,11 @@ exports.create = async function(id, className) {
             boots: null,
         } },
         { name: "misc", lastRegen: Date.now(), lastEnergy: Date.now(), party: { owner: id, members: [] }},
+        { name : "story", locations: {
+            current_location: "serene",
+            current_zone: "capital",
+            unlocked_locations: ["serene"],
+        }, quests:[] }
     ]
 
     const options = { ordered: true };
@@ -122,13 +127,11 @@ exports.health.passiveRegen = async function(userID) {
     //Math.floor(Date.now()/1000)
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
-    let maxHealth = await exports.getData(userID, "stats");
-    maxHealth = maxHealth.vitality;
-
     let lastRegen = await exports.getData(userID, "misc");
     lastRegen = lastRegen.lastRegen;
 
     let health = await exports.getData(userID, "info");
+    let maxHealth = health.max_health;
     health = health.health;
 
     if((Date.now() - lastRegen) < 1800000)
@@ -184,7 +187,7 @@ exports.energy.add = async function(userID, energy) {
     };
 
     const info = await playerCollection.findOne(query, options);    
-    const newEnergy = info.energy + energy;
+    var newEnergy = info.energy + energy;
 
     if(newEnergy > 3)
         newEnergy = 3;
@@ -260,7 +263,7 @@ exports.levelUpStats = async function(id, level) {
     const strength = classes[userClass].base_stats.strength*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.strength)*0.5);
     const vitality = classes[userClass].base_stats.vitality*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.vitality)*0.5);
     const resistance = classes[userClass].base_stats.resistance*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.resistance)*0.5);
-    const dexterity = classes[userClass].base_stats.dexterity*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.dexterity)*0.5);
+    const spirit = classes[userClass].base_stats.spirit*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.spirit)*0.5);
     const agility = classes[userClass].base_stats.agility*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.agility)*0.5);
     const intelligence = classes[userClass].base_stats.intelligence*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.intelligence)*0.5);
 
@@ -268,7 +271,7 @@ exports.levelUpStats = async function(id, level) {
     const update = { $set: { strength: strength,
                              vitality: vitality,
                              resistance: resistance,
-                             dexterity: dexterity,
+                             spirit: spirit,
                              agility: agility,
                              intelligence: intelligence, }};
     const result = await playerCollection.updateOne(query, update, {upsert: false});
@@ -328,7 +331,7 @@ exports.updateStats = async function(id, className) {
     const strength = classes[className].base_stats.strength;
     const vitality = classes[className].base_stats.vitality;
     const resistance = classes[className].base_stats.resistance;
-    const dexterity = classes[className].base_stats.dexterity;
+    const spirit = classes[className].base_stats.spirit;
     const agility = classes[className].base_stats.agility;
     const intelligence = classes[className].base_stats.intelligence;
 
@@ -336,7 +339,7 @@ exports.updateStats = async function(id, className) {
     const update = { $set: { strength: strength,
                              vitality: vitality,
                              resistance: resistance,
-                             dexterity: dexterity,
+                             spirit: spirit,
                              agility: agility,
                              intelligence: intelligence, }};
     const result = await playerCollection.updateOne(query, update, {upsert: false});
@@ -345,14 +348,17 @@ exports.updateStats = async function(id, className) {
     
 }
 
-exports.setLocation = async function(id, location) {
+exports.setLocation = async function(id, zone) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
-    const query = { name: "info" };
+    const query = { name: "story" };
     
-    const update = { $set: { location: location } };
+    var update = { 
+        $set: { "locations.current_zone": zone } 
+    };
+    
     const options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne(query, update, options);
 
     return true;
 }
@@ -361,6 +367,9 @@ exports.setState = async function (playerCollection, id, state) {
     if(playerCollection == null || playerCollection == undefined)
         playerCollection = Client.mongoDB.db('player-data').collection(id);
     const query = { name: "info" };
+
+    if(typeof state == "string")
+        state = {name: state};
 
     const update = { $set: { state: state } };
 

@@ -174,7 +174,6 @@ exports.unselectActiveSkill = async function(user_id, query) {
     const removeIndex = newItems.indexOf(skill_id);
     if(removeIndex > -1)
         newItems.splice(removeIndex, 1);
-    console.log(newItems);
     const update = { $set: { activeSkills: newItems } };
     options = { upsert: true };
 
