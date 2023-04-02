@@ -4,6 +4,7 @@ const util = require('../utils/combatUtils.js');
 const embed = require('../utils/messageTemplateUtils.js');
 const playerUtils = require('../utils/playerUtils.js');
 const equip = require('../utils/equipUtils.js');
+const passives = require('../utils/combat/passiveUtil.js');
 
 
 /**
@@ -418,6 +419,7 @@ exports.combatLoop = async function(thread, combatData) {
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
         //util.executeSkill(combatData, thread, "default", soonestFighter.id, combatData.team1[0].id);
+        await new Promise(r => setTimeout(r, 1500));
         await util.executeMonsterAttack(combatData, thread, soonestFighter.id, combatData.team1[0].id);
     }
 
@@ -474,6 +476,7 @@ exports.finishTurn = async function(exeData, log) {
 
 exports.updateEffects = function(player, situation, exeData, thread) {
     const { combat } = exeData;
+    var update = false;
 
     //console.log(Object.values(player.effects));
     //console.log(Object.keys(player.effects));
@@ -485,12 +488,23 @@ exports.updateEffects = function(player, situation, exeData, thread) {
 
         console.log("Effect: " + key + " | Situation: " + value.situation + " | Proc: " + value.proc + " | Value: " + value.value);
 
+        update = true;
         player.effects[key].duration--;
+
+        for(const passive of Object.values(passives)) {
+            if(passive.name == key) {
+                passive.proc(exeData, player, value);
+            }
+        }
 
         if(player.effects[key].duration <= 0) {
             delete player.effects[key];
             continue;
         }
+    }
+
+    if(!update) {
+        return;
     }
 
     if(combat.team1.includes(player)) {
@@ -500,6 +514,8 @@ exports.updateEffects = function(player, situation, exeData, thread) {
     if(combat.team2.includes(player)) {
         combat.team2[combat.team2.indexOf(player)] = player;
     }
+
+
 
     util.updateTeamData(thread, combat, combat.team1, combat.team2);
     
