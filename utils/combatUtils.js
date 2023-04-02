@@ -125,6 +125,19 @@ exports.addTimeline = async function(combatId, playerId, time) {
     await combatCollection.updateOne({}, update, { upsert: true });
 }
 
+exports.updateTeamData = async function(thread, combatData, team1, team2) {
+    const combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
+
+    const update = {
+        $set: {
+            team1: combatData.team1,
+            team2: combatData.team2,
+        }
+    };
+
+    await combatCollection.updateOne({}, update, { upsert: true });
+}
+
 exports.sendSkillSelector = async function(player, thread) {
 
     const stringSelectOptions = [];
@@ -500,7 +513,8 @@ exports.createMonsterData = function(combat, monster) {
             intelligence: mobData.base_stats.intelligence + Math.floor(Math.random(mobData.mod_stats.intelligence)),
             agility: mobData.base_stats.agility + Math.floor(Math.random(mobData.mod_stats.agility)),
         },
-        equipment: {}
+        equipment: {},
+        effects: {},
     }
 
     if(i > 0) {

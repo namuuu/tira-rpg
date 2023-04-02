@@ -4,6 +4,7 @@ const util = require('../utils/combatUtils.js');
 const embed = require('../utils/messageTemplateUtils.js');
 const playerUtils = require('../utils/playerUtils.js');
 const equip = require('../utils/equipUtils.js');
+const passives = require('../utils/combat/passiveUtil.js');
 
 
 /**
@@ -223,6 +224,7 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
             agility: playerStats.agility + equip.stat.getCombined(playerEquip, "raw_buff_agi"),
         },
         equipment: {},
+        effects: {},
         skills: playerInv.activeSkills,
         items: playerInv.items,
     }
@@ -424,8 +426,13 @@ exports.startCombat = async function(interaction) {
 
 exports.combatLoop = async function(thread, combatData) {
     const soonestFighter = util.getSoonestTimelineEntity(combatData);
+    const exeData = {
+        combat: combatData,
+    }
 
     await util.announceNewTurn(thread, soonestFighter);
+
+    this.updateEffects(soonestFighter, "before", exeData, thread);
 
     if(soonestFighter.type == "human") {
         combatData.current_action.current_player_id = soonestFighter.id;
@@ -435,7 +442,9 @@ exports.combatLoop = async function(thread, combatData) {
         console.log("[DEBUG] This is the player's turn. Waiting for player input.");
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
-        await util.executeMonsterAttack(combatData, thread, soonestFighter.id).catch(err => console.log(err));
+        //util.executeSkill(combatData, thread, "default", soonestFighter.id, combatData.team1[0].id);
+        await new Promise(r => setTimeout(r, 1500));
+        await util.executeMonsterAttack(combatData, thread, soonestFighter.id, combatData.team1[0].id);
     }
 
     combatData.current_turn++;
@@ -444,6 +453,7 @@ exports.combatLoop = async function(thread, combatData) {
         $set: {
             current_turn: combatData.current_turn,
             current_action: combatData.current_action,
+
         }
     };
     
@@ -458,7 +468,11 @@ exports.combatLoop = async function(thread, combatData) {
 exports.finishTurn = async function(exeData, log) {
     const { combat, thread, casterId, skill } = exeData;
     const caster = util.getPlayerInCombat(casterId, combat);
-    const embed = new EmbedBuilder();
+    const target = util.getPlayerInCombat(targetId, combat);
+    let embed = new EmbedBuilder();
+
+    this.updateEffects(caster, "after", exeData, thread);
+
 
     const casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.name;
     
@@ -483,6 +497,82 @@ exports.finishTurn = async function(exeData, log) {
     } 
     this.combatLoop(thread, combat);
 }
+
+exports.updateEffects = function(player, situation, exeData, thread) {
+    const { combat } = exeData;
+    var update = false;
+
+    //console.log(Object.values(player.effects));
+    //console.log(Object.keys(player.effects));
+
+    for (const [key, value] of Object.entries(player.effects)) {
+        if(situation != value.situation) {
+            continue;
+        }
+
+        console.log("Effect: " + key + " | Situation: " + value.situation + " | Proc: " + value.proc + " | Value: " + value.value);
+
+        update = true;
+        player.effects[key].duration--;
+
+        for(const passive of Object.values(passives)) {
+            if(passive.name == key) {
+                passive.proc(exeData, player, value);
+            }
+        }
+
+        if(player.effects[key].duration <= 0) {
+            delete player.effects[key];
+            continue;
+        }
+    }
+
+    if(!update) {
+        return;
+    }
+
+    if(combat.team1.includes(player)) {
+        combat.team1[combat.team1.indexOf(player)] = player;
+    }
+
+    if(combat.team2.includes(player)) {
+        combat.team2[combat.team2.indexOf(player)] = player;
+    }
+
+
+
+    util.updateTeamData(thread, combat, combat.team1, combat.team2);
+    
+    /*if(Object.keys(player.effects).length > 0) {
+        for(var i = 0; i < Object.keys(player.effects).length; i++) {
+            if(player.effects[Object.keys(player.effects)[i]].proc.split('-')[0] == 'damage') {
+                if(situation == "after") {
+                    if(player.effects[Object.keys(player.effects)[i]].proc.split('-')[1] == 'after') {
+                        console.log("Damage effect: " + player.effects[Object.keys(player.effects)[i]].value);
+                        player.stats.vitality -= player.effects[Object.keys(player.effects)[i]].value;
+                    }
+                } else if(situation == "before") {
+                    if(player.effects[Object.keys(player.effects)[i]].proc.split('-')[1] == 'before') {
+                        player.stats.vitality -= player.effects[Object.keys(player.effects)[i]].value;
+                    }
+                }
+            }
+
+            if(player.effects[Object.keys(player.effects)[i]].proc == "buff" || player.effects[Object.keys(player.effects)[i]].duration == 1 || situation == "after") {
+                player.stats[player.effects[Object.keys(player.effects)[i]].stat] -= player.effects[Object.keys(player.effects)[i]].value;
+            }
+                
+            if (situation == "after") {
+                console.log("Duration: " + player.effects[Object.keys(player.effects)[i]].duration);
+                if(player.effects[Object.keys(player.effects)[i]].duration > 1) {
+                    player.effects[Object.keys(player.effects)[i]].duration = player.effects[Object.keys(player.effects)[i]].duration - 1;
+                } else {
+                    delete player.effects[Object.keys(player.effects)[i]];
+                }
+            }
+        }
+    }*/
+    }
 
 exports.callForVictory = async function(combat, thread, victor) {
     switch(combat.type) {

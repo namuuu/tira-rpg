@@ -12,6 +12,9 @@ exports.execute = function(exeData) {
 
     // Apply the attack's effects
     for(const effect of Object.entries(skillEffectList)) {
+        if(typeof effect[1] == 'object') {
+            skillEffect.map.get(effect[0])(exeData, effect, log);
+        }
         skillEffect.map.get(effect[0])(exeData, effect[1], log); 
     }
     

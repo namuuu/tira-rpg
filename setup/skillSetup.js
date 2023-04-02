@@ -13,6 +13,10 @@ module.exports = {
     skillMap.set("phys_to_mag_damage", phys_to_mag_damage);
     skillMap.set("mag_to_phys_damage", mag_to_phys_damage);
     skillMap.set("cooldown", cooldown);
+    skillMap.set("buff_stats", buff_stats);
+    skillMap.set("debuff_stats", debuff_stats);
+    skillMap.set("poison", poison);
+    skillMap.set("burn", burn);
 
     console.log("Skills are all setup !");
     console.groupEnd();
@@ -87,4 +91,45 @@ function cooldown(exeData, quantity, log) {
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
   caster.timeline += quantity;
+}
+
+function buff_stats(exeData, buffs, log) {
+  const { casterId, targets } = exeData;
+
+  for(const buff of buffs) {
+    for(const target of targets) {
+      target.stats[buff.stat] += buff.value;
+      target.effects.push(buff);
+    }
+  }
+}
+
+function debuff_stats(exeData, debuffs, log) {
+  const { casterId, targets } = exeData;
+
+  const arrayDebuffs = Object.values(Object.values(debuffs));
+
+  for(const debuff of arrayDebuffs) {
+    for(const target of targets) {
+      target.stats[debuff.stat] -= debuff.value;
+      if (debuff.stat != undefined)
+      target.effects[debuff.stat] = debuff;
+    }
+  }
+}
+
+function poison(exeData, poison, log) {
+  const { targets } = exeData;
+
+  for(const target of targets) {
+    target.effects['poison'] = poison;
+  }
+}
+
+function burn(exeData, burn, log) {
+  const { targets } = exeData;
+
+  for(const target of targets) {
+    target.effects['burn'] = burn;
+  }
 }
