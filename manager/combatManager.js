@@ -305,6 +305,18 @@ exports.removePlayerFromCombat = async function(playerId, combatId, interaction)
 }
 
 exports.searchForMonsters = async function(interaction, combat) {
+    var bestPlayer;
+
+    for(player of combat.team1) {
+        if(bestPlayer == null) {
+            bestPlayer = player;
+        } else {
+            if(player.max_health > bestPlayer.max_health) {
+                bestPlayer = player;
+            }
+        }
+    }
+
     var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone]; // Gets the zone data from the JSON file.
 
     if(zone == null) {

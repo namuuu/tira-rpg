@@ -1,4 +1,12 @@
 {
+    "all": {
+        "10": [
+            {
+                "name": "Forgotten Outpost",
+                "type": "location"
+            }
+        ]
+    },
     "warrior":{
         "0": [
             {
