@@ -84,7 +84,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
     const combatData = [
         {
-            zone: playerInfo.location,
+            zone: playerStory.locations.current_location,
             type: 'wild-encounter',
             creator: creator.id,
             current_turn: 0,

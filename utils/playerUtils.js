@@ -26,7 +26,7 @@ exports.create = async function(id, className) {
 
     const skill = JSON.parse(fs.readFileSync(`./data/misc/levelRewards.json`))[className]["0"][0];
     const data = [
-        { name: "info", class: className, money: 100, level: 1, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, max_health: classData.base_stats.vitality, energy: 3, location: "capital" },
+        { name: "info", class: className, money: 100, level: 1, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, max_health: classData.base_stats.vitality, energy: 3 },
         { name: "stats", 
             strength: classData.base_stats.strength,
             vitality: classData.base_stats.vitality, 
