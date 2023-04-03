@@ -84,8 +84,8 @@
                 "spawn-chance": "20"
             },
             "group3": {
-                "m-names": ["fallen_archer", "fallen_knight"],
-                "spawn-chance": "20"
+                "m-names": ["fallen_archer"],
+                "spawn-chance": "20000"
             },
             "group4": {
                 "m-names": ["fallen_archer", "shadow_rat", "shadow_rat"],

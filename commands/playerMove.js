@@ -33,14 +33,17 @@ module.exports = {
                 }
             }
 
+            var hasItem = true;
             if(zoneData.required.items != undefined) {
                 for(const item of zoneData.required.items) {
                     if(!Object.entries(playerInventory.items).includes(item)) {
                         console.log("Item not found: " + item);
-                        continue;
+                        hasItem = false;
                     }
                 }
             }
+            if(!hasItem)
+                continue;
 
             availableLocations.push({
                 label: zoneData.name,

@@ -3,9 +3,9 @@
 exports.poison = {
     name: "poison",
     proc: function(exeData, player, value) {
-        const { combat, casterId, targets } = exeData;
+        const { combat } = exeData;
 
-        const caster = getPlayer(casterId, combat);
+        const caster = getPlayer(player.id, combat);
         
         caster.health = caster.health-value.value;
 
@@ -18,9 +18,9 @@ exports.poison = {
 exports.burn = {
     name: "burn",
     proc: function(exeData, player, value) {
-        const { combat, casterId, targets } = exeData;
+        const { combat } = exeData;
 
-        const caster = getPlayer(casterId, combat);
+        const caster = getPlayer(player.id, combat);
         
         caster.health = caster.health-value.value;
 
