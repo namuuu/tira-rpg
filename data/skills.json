@@ -161,7 +161,33 @@
       "poison": {
         "proc": "damage",
         "situation": "after",
-        "value": 5,
+        "value": 3,
+        "duration": 3
+      }
+    }
+  },
+  "arrow": {
+    "name": "Arrow",
+    "number":"14",
+    "aim": "enemy-single",
+    "description": "A basic arrow attack.",
+    "effects": {
+      "cooldown": 8,
+      "phys_damage": 8
+    }
+  },
+  "fire_arrow": {
+    "name": "Fire Arrow",
+    "number":"15",
+    "aim": "enemy-single",
+    "description": "An arrow that deals damage and burns the target.",
+    "effects": {
+      "cooldown": 15,
+      "phys_damage": 10,
+      "burn": {
+        "proc": "damage",
+        "situation": "before",
+        "value": 3,
         "duration": 3
       }
     }

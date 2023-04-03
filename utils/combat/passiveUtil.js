@@ -7,7 +7,7 @@ exports.poison = {
 
         const caster = getPlayer(casterId, combat);
         
-        caster.health--;
+        caster.health = caster.health-value.value;
 
         if(caster.health <= 0) {
             caster.health = 1;
@@ -15,6 +15,20 @@ exports.poison = {
     }
 }
 
+exports.burn = {
+    name: "burn",
+    proc: function(exeData, player, value) {
+        const { combat, casterId, targets } = exeData;
+
+        const caster = getPlayer(casterId, combat);
+        
+        caster.health = caster.health-value.value;
+
+        if(caster.health <= 0) {
+            caster.health = 1;
+        }
+    }
+}
 
 
 

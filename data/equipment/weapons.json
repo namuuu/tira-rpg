@@ -57,8 +57,17 @@
         "name": "Broken Sword",
         "description": "An old sword found in an old battlefield. It's not very useful, but it's better than nothing.",
         "caracteristics": {
-            "raw_buff_vit": 2,
+            "raw_buff_vit": 3,
             "raw_buff_str": 1
+        }
+    },
+    "broken_bow": {
+        "id": "broken_bow",
+        "name": "Broken Bow",
+        "description": "An old bow found in an old battlefield. It's not very useful, but it's better than nothing.",
+        "caracteristics": {
+            "raw_buff_agi": 1,
+            "raw_buff_dex": 3
         }
     }
 }

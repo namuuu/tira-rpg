@@ -379,5 +379,64 @@
             "pack": 1,
             "weight": 0.1
         }]
+    },
+    "fallen_archer": {
+        "name": "Fallen Archer",
+        "exp": 12,
+        "money": 15,
+        "base_stats": {
+            "strength": 15,
+            "vitality": 8,
+            "resistance": 6,
+            "spirit": 8,
+            "agility": 14,
+            "intelligence": 8
+        },
+        "mod_stats": {
+            "strength": 3,
+            "vitality": 1,
+            "resistance": 2,
+            "spirit": 1,
+            "agility": 3,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "boots": null
+        },
+        "skills": [{
+            "id": "arrow",
+            "weight": 2
+        },
+        {
+            "id": "fire_arrow",
+            "weight": 1
+        },
+        {
+            "id": "gust",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "broken_bow",
+            "pack": 1,
+            "weight": 0.2
+        },
+        {
+            "id": "old_helmet",
+            "pack": 1,
+            "weight": 0.1
+        },
+        {
+            "id": "old_chestplate",
+            "pack": 1,
+            "weight": 0.1
+        },
+        {
+            "id": "old_boots",
+            "pack": 1,
+            "weight": 0.1
+        }]
     }
 }

@@ -96,7 +96,9 @@ function cooldown(exeData, quantity, log) {
 function buff_stats(exeData, buffs, log) {
   const { casterId, targets } = exeData;
 
-  for(const buff of buffs) {
+  const arrayBuffs = Object.values(Object.values(buffs));
+
+  for(const buff of arrayBuffs) {
     for(const target of targets) {
       target.stats[buff.stat] += buff.value;
       target.effects.push(buff);
@@ -112,8 +114,7 @@ function debuff_stats(exeData, debuffs, log) {
   for(const debuff of arrayDebuffs) {
     for(const target of targets) {
       target.stats[debuff.stat] -= debuff.value;
-      if (debuff.stat != undefined)
-      target.effects[debuff.stat] = debuff;
+      target.effects.push(debuff);
     }
   }
 }
