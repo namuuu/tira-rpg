@@ -334,11 +334,7 @@ exports.searchForMonsters = async function(interaction, combat) {
     }
 
     for(var m in monsters) {
-        console.log(monsters[m]);
-        console.log(monsters[m].min_level);
-        console.log(bestPlayer.level);
         if(monsters[m].min_level != undefined && monsters[m].min_level > bestPlayer.level) {
-            console.log(monsters[m]);
             monsters.splice(m, 1);
         }
     }
