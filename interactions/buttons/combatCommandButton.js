@@ -45,7 +45,9 @@ module.exports = {
                 const playerId = args[1];
                 const player = util.getPlayerInCombat(playerId, combat);
 
-                const skillValue = "";
+                console.log(player);
+
+                var skillValue = "";
 
                 for(let i = 0; i < player.skills.length; i++) {
                     const skill = player.skills[i];
@@ -55,13 +57,24 @@ module.exports = {
                 if(skillValue == "")
                     skillValue = "No skills";
 
-                const mainEmbed = new EmbedBuilder()
+                var mainEmbed = new EmbedBuilder()
+                    .setTitle("Na'vi, your personal combat assistant")
+                    .addFields({ name: "Name", value: player.name })
+                    .addFields({ name: "Health", value: player.health + "/" + player.stats.vitality })
+                    .addFields({ name: "Timeline", value: player.timeline + " Timeline" })
+                    .addFields({ name: "Skills", value: skillValue })
+
+                if(player.type == "player") {
+
+                var mainEmbed = new EmbedBuilder()
                     .setTitle("Na'vi, your personal combat assistant")
                     .addFields({ name: "Name", value: player.name })
                     .addFields({ name: "Class", value: player.class })
                     .addFields({ name: "Health", value: player.health + "/" + player.stats.vitality })
                     .addFields({ name: "Timeline", value: player.timeline + " Timeline" })
                     .addFields({ name: "Skills", value: skillValue })
+
+                }
 
                 const statEmbed = new EmbedBuilder()
                     .setDescription("The players' stats.")
