@@ -317,6 +317,8 @@ exports.searchForMonsters = async function(interaction, combat) {
         }
     }
 
+    bestPlayer = await playerUtils.getData(bestPlayer.id, "info");
+
     var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone]; // Gets the zone data from the JSON file.
 
     if(zone == null) {
@@ -329,6 +331,16 @@ exports.searchForMonsters = async function(interaction, combat) {
     if(monsters == null || monsters == undefined || monsters.length == 0) {
         console.log("[DEBUG] Attempted to spawn monsters in a zone with no monsters. (ZONE_WITH_NO_MONSTERS_SPAWN_ATTEMPT)");
         return false;
+    }
+
+    for(var m in monsters) {
+        console.log(monsters[m]);
+        console.log(monsters[m].min_level);
+        console.log(bestPlayer.level);
+        if(monsters[m].min_level != undefined && monsters[m].min_level > bestPlayer.level) {
+            console.log(monsters[m]);
+            monsters.splice(m, 1);
+        }
     }
 
     var maxRange = 0;
@@ -415,7 +427,7 @@ exports.startCombat = async function(interaction) {
                 return;
             }
             const ret = exports.searchForMonsters(interaction, combatData);
-            if(!ret) {
+            if(ret == false) {
                 return;
             }
             break;
@@ -486,7 +498,6 @@ exports.finishTurn = async function(exeData, log) {
     if(caster.type == "human") {
         const user = await Client.client.users.fetch(caster.id);
         const avatar = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png";
-        console.log(avatar);
         embed.setAuthor({ name: caster.name + " used " + skill.name + "!", iconURL: avatar });
     } else {
         embed.setAuthor({ name: caster.name + " used " + skill.name + "!" });

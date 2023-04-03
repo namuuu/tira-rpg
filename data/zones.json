@@ -27,7 +27,8 @@
             },
             "group5": {
                 "m-names": ["king_slime"],
-                "spawn-chance": "10000000000000000000000"
+                "spawn-chance": "10000000000000000000000",
+                "min_level": 10
             }
         },
         "shops": []

@@ -117,7 +117,7 @@ exports.obtain = async function(playerId, equipId, type) {
 
     playerCollection.updateOne(query, update, options);
 
-    console.log("DEBUG: " + equip.name + " added to " + playerId + "'s inventory.");
+    console.log("[DEBUG] " + equip.name + " added to " + playerId + "'s inventory.");
 }
 
 exports.trash = async function(playerId, equipId, type) {
@@ -179,7 +179,7 @@ exports.equip = async function(playerId, equipId, type) {
         data.max_health += equip.caracteristics.raw_buff_vit;
     }
 
-    console.log("New max health:" + data.max_health);
+    console.log("New max health: " + data.max_health);
 
     // Check if health is over max health
     if(data.health > data.max_health) {
