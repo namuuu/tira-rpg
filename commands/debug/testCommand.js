@@ -43,7 +43,7 @@ module.exports = {
       
       message.channel.send({ embeds: [mainEmbed, contributorEmbed], components: [row] });*/
 
-      const serverRuleEmbed = new EmbedBuilder()
+      /*const serverRuleEmbed = new EmbedBuilder()
          .setTitle("Rules")
          .setDescription("Here are the rules of the server. Please read them carefully.")
          .addFields(
@@ -54,7 +54,9 @@ module.exports = {
          )
          .setFooter({text: "Overall, those rules are here  just to maintain a cool and friendly atmosphere in the server. Have fun!"})
 
-      message.channel.send({ embeds: [serverRuleEmbed] });
+      message.channel.send({ embeds: [serverRuleEmbed] });*/
+
+      console.log(message.author.avatarURL({format: "png", size: 1024}));
 
       //discussion.send(message.author, message.channel, "welcome_capital", "welcome_capital_1");
       //discussion.send(message.author, message.channel, "choice", "ask");
