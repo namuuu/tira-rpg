@@ -317,6 +317,8 @@ exports.searchForMonsters = async function(interaction, combat) {
         }
     }
 
+    bestPlayer = playerUtils.getData(bestPlayer.id, "info");
+
     var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone]; // Gets the zone data from the JSON file.
 
     if(zone == null) {
@@ -329,6 +331,13 @@ exports.searchForMonsters = async function(interaction, combat) {
     if(monsters == null || monsters == undefined || monsters.length == 0) {
         console.log("[DEBUG] Attempted to spawn monsters in a zone with no monsters. (ZONE_WITH_NO_MONSTERS_SPAWN_ATTEMPT)");
         return false;
+    }
+
+    for(var m in monsters) {
+        console.log(m);
+        if(monsters[m].min_level != undefined && monsters[m].min_level > bestPlayer.level) {
+            monsters.splice(m, 1);
+        }
     }
 
     var maxRange = 0;
