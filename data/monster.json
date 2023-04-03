@@ -277,8 +277,8 @@
             "weight": 0.5
         }]
     },
-    "rat_shadow": {
-        "name": "Rat Shadow",
+    "shadow_rat": {
+        "name": "Shadow Rat",
         "exp": 9,
         "money": 8,
         "base_stats": {
@@ -326,7 +326,7 @@
         "exp": 12,
         "money": 15,
         "base_stats": {
-            "strength": 15,
+            "strength": 18,
             "vitality": 15,
             "resistance": 10,
             "spirit": 5,
@@ -385,11 +385,11 @@
         "exp": 12,
         "money": 15,
         "base_stats": {
-            "strength": 15,
+            "strength": 14,
             "vitality": 8,
             "resistance": 6,
             "spirit": 8,
-            "agility": 14,
+            "agility": 19,
             "intelligence": 8
         },
         "mod_stats": {
@@ -437,6 +437,54 @@
             "id": "old_boots",
             "pack": 1,
             "weight": 0.1
+        }]
+    },
+    "lost_soul": {
+        "name": "Lost Soul of the Warfield",
+        "exp": 25,
+        "money": 100,
+        "base_stats": {
+            "strength": 25,
+            "vitality": 18,
+            "resistance": 15,
+            "spirit": 15,
+            "agility": 12,
+            "intelligence": 5
+        },
+        "mod_stats": {
+            "strength": 4,
+            "vitality": 3,
+            "resistance": 2,
+            "spirit": 2,
+            "agility": 1,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "boots": null
+        },
+        "skills": [{
+            "id": "shadow_slash",
+            "weight": 2
+        },
+        {
+            "id": "toxic_spite",
+            "weight": 1
+        },
+        {
+            "id": "haste",
+            "weight": 0.5
+        },
+        {
+            "id": "fallen_lionheart_slash",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "lionheart_sword",
+            "pack": 1,
+            "weight": 1
         }]
     }
 }

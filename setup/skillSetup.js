@@ -101,7 +101,7 @@ function buff_stats(exeData, buffs, log) {
   for(const buff of arrayBuffs) {
     for(const target of targets) {
       target.stats[buff.stat] += buff.value;
-      target.effects.push(buff);
+      target.effects[buff.stat] = buff;
     }
   }
 }
@@ -114,7 +114,7 @@ function debuff_stats(exeData, debuffs, log) {
   for(const debuff of arrayDebuffs) {
     for(const target of targets) {
       target.stats[debuff.stat] -= debuff.value;
-      target.effects.push(debuff);
+      target.effects[debuff.stat] = debuff;
     }
   }
 }

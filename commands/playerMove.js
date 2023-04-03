@@ -26,15 +26,17 @@ module.exports = {
                 continue;
             }
 
-            if(zoneData.required.level != null) {
-                if(playerInfo.level < zone.required.level) {
+            if(zoneData.required.level != undefined) {
+                if(playerInfo.level < zoneData.required.level) {
+                    console.log("Level too low: " + zoneData.required.level);
                     continue;
                 }
             }
 
-            if(zoneData.required.items != null) {
+            if(zoneData.required.items != undefined) {
                 for(const item of zoneData.required.items) {
-                    if(!playerInventory.items.includes(item)) {
+                    if(!Object.entries(playerInventory.items).includes(item)) {
+                        console.log("Item not found: " + item);
                         continue;
                     }
                 }

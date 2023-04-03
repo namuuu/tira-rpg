@@ -10,7 +10,7 @@
             "cost": 2,
             "type": "consumable"
         },
-        "item3": {
+        "warhandbook": {
             "id": "warhandbook",
             "name": "Old War Handbook",
             "cost": 160,

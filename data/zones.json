@@ -75,12 +75,24 @@
         },
         "monsters": {
             "group1": {
-                "m-names": ["bird", "slime", "bird"],
-                "spawn-chance": "50"
+                "m-names": ["shadow_rat", "shadow_rat"],
+                "spawn-chance": "20"
             },
             "group2": {
-                "m-names": ["bird"],
-                "spawn-chance": "1000000000000"
+                "m-names": ["fallen_knight"],
+                "spawn-chance": "20"
+            },
+            "group3": {
+                "m-names": ["fallen_archer", "fallen_knight"],
+                "spawn-chance": "20"
+            },
+            "group4": {
+                "m-names": ["fallen_archer", "shadow_rat", "shadow_rat"],
+                "spawn-chance": "20"
+            },
+            "group5": {
+                "m-names": ["fallen_knight", "fallen_knight", "lost_soul"],
+                "spawn-chance": "20"
             }
         },
         "shops": []

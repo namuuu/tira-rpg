@@ -141,9 +141,8 @@
     "description": "A spell that deals damage and poisons the target.",
     "effects": {
       "cooldown": 10,
-      "damage": 10,
+      "phys_damage": 10,
       "poison": {
-        "proc": "damage",
         "situation": "after",
         "value": 5,
         "duration": 3
@@ -159,7 +158,6 @@
       "cooldown": 15,
       "phys_damage": 10,
       "poison": {
-        "proc": "damage",
         "situation": "after",
         "value": 3,
         "duration": 3
@@ -185,9 +183,23 @@
       "cooldown": 15,
       "phys_damage": 10,
       "burn": {
-        "proc": "damage",
         "situation": "before",
         "value": 3,
+        "duration": 3
+      }
+    }
+  },
+  "fallen_lionheart_slash": {
+    "name": "Fallen Lionheart's Slash",
+    "number":"16",
+    "aim": "enemy-aoe",
+    "description": "A powerful slash that deals tremendous damage and poisons them.",
+    "effects": {
+      "cooldown": 30,
+      "phys_damage": 20,
+      "poison": {
+        "situation": "after",
+        "value": 5,
         "duration": 3
       }
     }
