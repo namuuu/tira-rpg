@@ -317,7 +317,7 @@ exports.searchForMonsters = async function(interaction, combat) {
         }
     }
 
-    bestPlayer = playerUtils.getData(bestPlayer.id, "info");
+    bestPlayer = await playerUtils.getData(bestPlayer.id, "info");
 
     var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone]; // Gets the zone data from the JSON file.
 
@@ -334,8 +334,11 @@ exports.searchForMonsters = async function(interaction, combat) {
     }
 
     for(var m in monsters) {
-        console.log(m);
+        console.log(monsters[m]);
+        console.log(monsters[m].min_level);
+        console.log(bestPlayer.level);
         if(monsters[m].min_level != undefined && monsters[m].min_level > bestPlayer.level) {
+            console.log(monsters[m]);
             monsters.splice(m, 1);
         }
     }
@@ -424,7 +427,7 @@ exports.startCombat = async function(interaction) {
                 return;
             }
             const ret = exports.searchForMonsters(interaction, combatData);
-            if(!ret) {
+            if(ret == false) {
                 return;
             }
             break;
@@ -495,7 +498,6 @@ exports.finishTurn = async function(exeData, log) {
     if(caster.type == "human") {
         const user = await Client.client.users.fetch(caster.id);
         const avatar = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png";
-        console.log(avatar);
         embed.setAuthor({ name: caster.name + " used " + skill.name + "!", iconURL: avatar });
     } else {
         embed.setAuthor({ name: caster.name + " used " + skill.name + "!" });
