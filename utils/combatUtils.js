@@ -360,7 +360,7 @@ exports.executeSkill = async function(exeData) {
     manager.finishTurn(exeData, log);
 }
 
-exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, targets) {
+exports.executeMonsterAttack = async function(combatInfo, thread, monsterId) {
     let exeData = {
         combat: combatInfo,
         thread: thread,
@@ -552,7 +552,7 @@ exports.announceNewTurn = async function(thread, player) {
     }
     
 
-    thread.send({ embeds: [embed] });
+    return thread.send({ embeds: [embed] });
 }
 
 exports.getLogger = function(log, playerId) {

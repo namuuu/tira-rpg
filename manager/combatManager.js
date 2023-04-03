@@ -430,11 +430,10 @@ exports.combatLoop = async function(thread, combatData) {
         combat: combatData,
     }
 
-    await util.announceNewTurn(thread, soonestFighter);
-
     this.updateEffects(soonestFighter, "before", exeData, thread);
 
     if(soonestFighter.type == "human") {
+        await new Promise(r => setTimeout(r, 1500));
         combatData.current_action.current_player_id = soonestFighter.id;
         combatData.current_action.aim_at = null;
         combatData.current_action.skill = null;
@@ -442,9 +441,8 @@ exports.combatLoop = async function(thread, combatData) {
         console.log("[DEBUG] This is the player's turn. Waiting for player input.");
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
-        //util.executeSkill(combatData, thread, "default", soonestFighter.id, combatData.team1[0].id);
-        await new Promise(r => setTimeout(r, 1500));
-        await util.executeMonsterAttack(combatData, thread, soonestFighter.id, combatData.team1[0].id);
+        await new Promise(r => setTimeout(r, 2500));
+        await util.executeMonsterAttack(combatData, thread, soonestFighter.id);
     }
 
     combatData.current_turn++;
@@ -473,10 +471,14 @@ exports.finishTurn = async function(exeData, log) {
 
     this.updateEffects(caster, "after", exeData, thread);
 
-
-    const casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.name;
-    
-    embed.setDescription(casterName + " used " + skill.name/* + " on " + targetName + " !"*/);
+    if(caster.type == "human") {
+        const user = await Client.client.users.fetch(caster.id);
+        const avatar = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png";
+        console.log(avatar);
+        embed.setAuthor({ name: caster.name + " used " + skill.name + "!", iconURL: avatar });
+    } else {
+        embed.setAuthor({ name: caster.name + " used " + skill.name + "!" });
+    }
 
     let hasDied = false;
 
@@ -510,7 +512,7 @@ exports.updateEffects = function(player, situation, exeData, thread) {
             continue;
         }
 
-        console.log("Effect: " + key + " | Situation: " + value.situation + " | Proc: " + value.proc + " | Value: " + value.value);
+        //console.log("Effect: " + key + " | Situation: " + value.situation + " | Proc: " + value.proc + " | Value: " + value.value);
 
         update = true;
         player.effects[key].duration--;
