@@ -291,6 +291,18 @@ exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
 
     var field = "";
 
+    const rewards = JSON.parse(fs.readFileSync("./data/misc/levelRewards.json", "utf8"))["all"];
+    if(rewards != undefined && rewards[level] != undefined) {
+        for(reward of Object.values(rewards[level])) {
+            switch(reward.type) {
+                case "location":
+                    field += `Tu as maintenant accès à la zone ${reward.name}.\n`
+                    break;
+            }
+        }
+    }
+
+
     const levelRewards = JSON.parse(fs.readFileSync("./data/misc/levelRewards.json", "utf8"))[userClass];
     if(levelRewards != undefined && levelRewards[level] != undefined) {
         for(let i=0; i<levelRewards[level].length; i++) {
@@ -301,6 +313,7 @@ exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
                     const { learnSkill } = require("./skillUtils.js");
                     learnSkill(id, reward.id);
                     field += `Skill: ${reward.name}\n`;
+                    break;
             }
         }
     }
