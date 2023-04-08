@@ -1,7 +1,7 @@
 
 
 exports.poison = {
-    name: "poison",
+    id: "poison",
     proc: function(exeData, player, value) {
         const { combat } = exeData;
 
@@ -16,7 +16,7 @@ exports.poison = {
 }
 
 exports.burn = {
-    name: "burn",
+    id: "burn",
     proc: function(exeData, player, value) {
         const { combat } = exeData;
 
@@ -27,6 +27,39 @@ exports.burn = {
         if(caster.health <= 0) {
             caster.health = 1;
         }
+    }
+}
+
+exports["solar-gauge"] = {
+    id: "solar-gauge",
+    proc: function(exeData, player, value) {
+        const { combat } = exeData;
+
+        const caster = getPlayer(player.id, combat);
+        
+        caster.effects["solar-gauge"].value += 10;
+    }
+}
+
+exports["lunar-gauge"] = {
+    id: "lunar-gauge",
+    proc: function(exeData, player, value) {
+        const { combat } = exeData;
+
+        const caster = getPlayer(player.id, combat);
+        
+        caster.effects["lunar-gauge"].value += 20;
+    }
+}
+
+exports["buff-stats"] = {
+    id: "buff-stats",
+    onEnd: function(exeData, player, value) {
+        const { combat } = exeData;
+
+        const caster = getPlayer(player.id, combat);
+
+        console.log(value);
     }
 }
 

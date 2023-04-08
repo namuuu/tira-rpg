@@ -1,19 +1,22 @@
 const skillMap = new Map();
-const { ConnectionService } = require('discord.js');
 const combatUtils = require('../utils/combatUtils.js');
+const skillData = require('../utils/combat/skillData.js');
 
 module.exports = {
   map: skillMap,
   setupSkills() {
     console.groupCollapsed("-- Skills --");
     console.log("Setting up Skills...");
-    skillMap.set("heal", heal);
-    skillMap.set("phys_damage", phys_damage);
+
+    for(const skill of Object.values(skillData)) {
+      skillMap.set(skill.id, skill.func);
+      console.log(`> Skill ${skill.name} setup !`);
+    }
+
     skillMap.set("mag_damage", mag_damage);
     skillMap.set("phys_to_mag_damage", phys_to_mag_damage);
     skillMap.set("mag_to_phys_damage", mag_to_phys_damage);
     skillMap.set("cooldown", cooldown);
-    skillMap.set("buff_stats", buff_stats);
     skillMap.set("debuff_stats", debuff_stats);
     skillMap.set("poison", poison);
     skillMap.set("burn", burn);
@@ -24,28 +27,28 @@ module.exports = {
   
 }
 
-function heal(exeData, quantity, log) {
-  const { casterId, targets } = exeData;
+// function heal(exeData, quantity, log) {
+//   const { casterId, targets } = exeData;
 
-  for(const target of targets) {
-    target.health = (target.health + quantity > target.stats.vitality) ? target.stats.vitality : target.health + quantity;
-  }
+//   for(const target of targets) {
+//     target.health = (target.health + quantity > target.stats.vitality) ? target.stats.vitality : target.health + quantity;
+//   }
 
-  combatUtils.addToValueTologger(log, casterId, "heal", quantity);
-}
+//   combatUtils.addToValueTologger(log, casterId, "heal", quantity);
+// }
 
-function phys_damage(exeData, power, log) {
-  const { combat, casterId, targets } = exeData;
+// function phys_damage(exeData, power, log) {
+//   const { combat, casterId, targets } = exeData;
 
-  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+//   const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
-  for(const target of targets) {
-      const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+//   for(const target of targets) {
+//       const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
 
-      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
-      combatUtils.addToValueTologger(log, target.id, "damage", damage);
-  }
-}
+//       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+//       combatUtils.addToValueTologger(log, target.id, "damage", damage);
+//   }
+// }
 
 function phys_to_mag_damage(exeData, power, log) {
   const { combat, casterId, targets } = exeData;
@@ -86,24 +89,36 @@ function mag_damage(exeData, power, log) {
   }
 }
 
+function phys_low_health_damage(exeData, quantity, log) {
+  const { combat, casterId, targets } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  for(const target of targets) {
+      const damage = Math.floor((quantity * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+
+      if(target.health < target.max_health * 0.15) {
+        damage = Math.floor(damage * 2);
+      }
+
+      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+      combatUtils.addToValueTologger(log, target.id, "damage", damage);
+  }
+}
+
+function earnSolarGauge(exeData, quantity, log) {
+  const { casterId } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  caster.effects["solar-gauge"] += quantity;
+}
+
 function cooldown(exeData, quantity, log) {
   const { combat, casterId} = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
   caster.timeline += quantity;
-}
-
-function buff_stats(exeData, buffs, log) {
-  const { casterId, targets } = exeData;
-
-  const arrayBuffs = Object.values(Object.values(buffs));
-
-  for(const buff of arrayBuffs) {
-    for(const target of targets) {
-      target.stats[buff.stat] += buff.value;
-      target.effects[buff.stat] = buff;
-    }
-  }
 }
 
 function debuff_stats(exeData, debuffs, log) {

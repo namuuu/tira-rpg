@@ -199,6 +199,8 @@ exports.unequip = async function(playerId, type) {
     const inv = await playerUtils.getData(playerId, "inventory");
 
     if(inv.equiped[type] == null) {
+        console.log(inv);
+        console.log(type);
         console.log("ERROR: Tried to unequip an item that the user hasn't equipped.");
         return "notequip";
     }
@@ -335,6 +337,7 @@ exports.receiveButton = async function(interaction, playerId, args) {
             } else {
                 console.log("DEBUG: " + result);
                 interaction.reply({content: "You don't have a helmet equipped.", ephemeral: true});
+                return;
             };
             break;
         case "unequipchestplate":
@@ -348,6 +351,7 @@ exports.receiveButton = async function(interaction, playerId, args) {
                         makeButton("List"  , "equip-list"));
                 } else {
                     interaction.reply({content: "You don't have a chestplate equipped.", ephemeral: true});
+                    return;
                 }});
                 break;
         case "unequipboots":
@@ -361,6 +365,7 @@ exports.receiveButton = async function(interaction, playerId, args) {
                         makeButton("List"  , "equip-list"));
                 } else {
                     interaction.reply({content: "You don't have boots equipped.", ephemeral: true});
+                    return;
                 }});
                 break;
         default:
@@ -376,8 +381,10 @@ exports.receiveButton = async function(interaction, playerId, args) {
             .addComponents(
                 addSlider(playerId));
 
+    if(row.components.length == 0)
+        return;
+
     if(embed != null) {
-        
         interaction.update({embeds: [embed], components: [row, slider]});
     } else {
         interaction.update({components: [row, slider]});

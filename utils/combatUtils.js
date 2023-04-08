@@ -223,7 +223,7 @@ exports.receiveSkillSelector = async function(interaction) {
             exports.executeSkill(exeData)
         break;
         case "ally":
-            const remainingAllies = exeData.enemyTeam.filter(player => player.health > 0 && player.id != interaction.user.id);
+            const remainingAllies = exeData.allyTeam.filter(player => player.health > 0 && player.id != interaction.user.id);
             if(skillList[skillId].aim.split('-')[1] == "aoe") {
                 exeData.targets = remainingAllies;
                 exports.executeSkill(exeData);
@@ -535,6 +535,24 @@ exports.createMonsterData = function(combat, monster) {
 
 
     return dummy;
+}
+
+exports.setInitialPassives = function(player) {
+    if(player.class != undefined) {
+        switch(player.class) {
+            case "warrior":
+                player.effects["solar-gauge"] = {
+                    situation: "before",
+                    value: 0,
+                }
+                break;
+            case "ranger":
+                player.effects["lunar-gauge"] = {
+                    situation: "before",
+                    value: 70,
+            }
+        }
+    }
 }
 
 exports.announceNewTurn = async function(thread, player) {

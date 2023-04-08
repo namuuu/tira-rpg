@@ -119,7 +119,7 @@
   "haste": {
     "name": "Haste",
     "number":"11",
-    "aim": "ally-aoe",
+    "aim": "ally+self-aoe",
     "description": "A buff that increases the speed of all allies.",
     "effects": {
       "cooldown": 30,
@@ -202,6 +202,36 @@
         "value": 5,
         "duration": 3
       }
+    }
+  },
+  "machette": {
+    "name": "Machette",
+    "number":"17",
+    "aim": "enemy-single",
+    "description": "A simple but reliable coup, does double damage if the enemy is below 15% health.",
+    "effects": {
+      "cooldown": 12,
+      "phys_low_health_damage": 16
+    }
+  },
+  "circular_swing": {
+    "name": "Circular Swing",
+    "number":"18",
+    "aim": "enemy-aoe",
+    "description": "A swing that deals damage to all enemies.",
+    "effects": {
+      "cooldown": 20,
+      "phys_damage": 10
+    }
+  },
+  "holy_guard": {
+    "name": "Holy Guard",
+    "number":"19",
+    "aim": "ally-single",
+    "description": "[TBD] A buff that increases the target's defense.",
+    "effects": {
+      "cooldown": 15,
+      "earn_solar_gauge": 7
     }
   }
 }

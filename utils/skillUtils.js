@@ -6,16 +6,17 @@ const player = require('../utils/playerUtils.js');
 const inv = require("./inventoryUtils.js");
 
 
-exports.execute = function(exeData) {
-    const skillEffectList = exeData.skill["effects"];
+exports.execute = function(data) {
+    const skillEffectList = data.skill["effects"];
     let log = [];
 
     // Apply the attack's effects
     for(const effect of Object.entries(skillEffectList)) {
         if(typeof effect[1] == 'object') {
-            skillEffect.map.get(effect[0])(exeData, effect, log);
+            skillEffect.map.get(effect[0])(data, effect, log);
+            continue;   
         }
-        skillEffect.map.get(effect[0])(exeData, effect[1], log); 
+        skillEffect.map.get(effect[0])(data, effect[1], log); 
     }
     
     return log;

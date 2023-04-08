@@ -5,6 +5,7 @@ const embed = require('../utils/messageTemplateUtils.js');
 const playerUtils = require('../utils/playerUtils.js');
 const equip = require('../utils/equipUtils.js');
 const passives = require('../utils/combat/passiveUtil.js');
+const skillMap = require("../setup/skillSetup.js").map;
 
 
 /**
@@ -228,6 +229,8 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
         skills: playerInv.activeSkills,
         items: playerInv.items,
     }
+
+    util.setInitialPassives(player);
 
     team == 1 ? info.team1.push(player) : info.team2.push(player); // Adds a player to their corresponding team.
 
@@ -538,16 +541,20 @@ exports.updateEffects = function(player, situation, exeData, thread) {
         //console.log("Effect: " + key + " | Situation: " + value.situation + " | Proc: " + value.proc + " | Value: " + value.value);
 
         update = true;
-        player.effects[key].duration--;
+        
 
         for(const passive of Object.values(passives)) {
-            if(passive.name == key) {
+            if(passive.id == key) {
                 passive.proc(exeData, player, value);
             }
         }
 
-        if(player.effects[key].duration <= 0) {
-            delete player.effects[key];
+        if(player.effects[key].duration != undefined) {
+            player.effects[key].duration--;
+            if (player.effects[key].duration <= 0) {
+
+                delete player.effects[key];
+            }
             continue;
         }
     }
