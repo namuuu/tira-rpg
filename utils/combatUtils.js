@@ -610,6 +610,8 @@ exports.logResults = function(embed, log, entity) {
             case "heal":
                 description += "Gained " + value + " HP (" + entity.health + " left) \n";
                 break;
+            case "failed":
+                description += "Failed !\n";
         }
     }
 

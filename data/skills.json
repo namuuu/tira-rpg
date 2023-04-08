@@ -107,9 +107,6 @@
       "cooldown": 15,
       "buff_stats": {
         "agility": {
-          "proc": "buff",
-          "situation": "after",
-          "stat": "agility",
           "value": 8,
           "duration": 3
         }
@@ -125,9 +122,6 @@
       "cooldown": 30,
       "buff_stats": {
         "agility": {
-          "proc": "buff",
-          "situation": "after",
-          "stat": "agility",
           "value": 5,
           "duration": 3
         }
@@ -228,10 +222,137 @@
     "name": "Holy Guard",
     "number":"19",
     "aim": "ally-single",
-    "description": "[TBD] A buff that increases the target's defense.",
+    "description": "A buff that increases the target's defense.",
     "effects": {
       "cooldown": 15,
-      "earn_solar_gauge": 7
+      "earn_solar_gauge": 7,
+      "buff_stats": {
+        "defense": {
+          "type": "percentage",
+          "value": 5,
+          "duration": 3
+        }
+      }
     }
+  },
+  "holy_thrust": {
+    "name": "Holy Thrust",
+    "number":"20",
+    "aim": "enemy-single",
+    "description": "Consumes 10 holy gauge to increase its damage",
+    "effects": {
+      "cooldown": 15,
+      "holy_thrust": 1,
+      "buff_stats": {
+        "strength": {
+          "type": "percentage",
+          "value": 5,
+          "duration": 3
+        }
+      }
+    }
+  },
+  "restless_stab": {
+    "name": "Restless Stab",
+    "number":"21",
+    "aim": "enemy-single",
+    "description": "A flashing stab that deals more damage if the caster is faster than the target.",
+    "effects": {
+      "cooldown": 15,
+      "restless_stab": 13
+    }
+  },
+  "sand_sweep": {
+    "name": "Sand Sweep",
+    "number":"22",
+    "aim": "enemy-single",
+    "description": "The caster sends a sand wave that slows the enemy.",
+    "effects": {
+      "slow": 10
+    }
+  },
+  "thrust": {
+    "name": "Thrust",
+    "number":"23",
+    "aim": "enemy-single",
+    "description": "A basic thrust attack.",
+    "effects": {
+      "cooldown": 8,
+      "phys_damage": 8
+    }
+  },
+  "quick_slash": {
+    "name": "Quick Slash",
+    "number":"24",
+    "aim": "enemy-single",
+    "description": "A slash optimized to surprise the enemy by its speed.",
+    "effects": {
+      "cooldown": 6,
+      "phys_damage": 6
+    }
+  },
+  "poison_bite": {
+    "name": "Poison Bite",
+    "number":"25",
+    "aim": "enemy-single",
+    "description": "An attack designed to poison the target.",
+    "effects": {
+      "cooldown": 10,
+      "poison": {
+        "situation": "after",
+        "value": 5,
+        "duration": 3
+      }
+    }
+  },
+  "wind_spell": {
+    "name": "Wind Spell",
+    "number":"26",
+    "aim": "enemy-single",
+    "description": "The most basic magic spell, deals damage.",
+    "effects": {
+      "cooldown": 15,
+      "phys_damage": 10
+    }
+  },
+  "brush_cut": {
+    "name": "Brush Cut",
+    "number":"27",
+    "aim": "enemy-single",
+    "description": "A basic paint skill that uses paint to increase its damage.",
+    "effects": {
+      "cooldown": 15,
+      "brush_cut": 8
+    }
+  },
+  "decoloration": {
+    "name": "Decoloration",
+    "number":"28",
+    "aim": "enemy-single",
+    "description": "Uses a paint technique to remove paint from the target and lower its intelligence.",
+    "effects": {
+      "cooldown": 15,
+      "decoloration": 1
+    }
+  },
+  "splatter": {
+    "name": "Splatter",
+    "number":"29",
+    "aim": "enemy-single",
+    "description": "An all-out paint attack that deals damage if the target has a least 2 paint layers.",
+    "effects": {
+      "cooldown": 15,
+      "splatter": 20
+    }
+  },
+  "paint_festival": {
+    "name": "Paint Festival",
+    "number":"30",
+    "aim": "all",
+    "description": "Sends paint in every direction, painting everyone on the battlefield",
+    "effects": {
+      "paint_festival": 1
+    }
+  },
   }
 }
