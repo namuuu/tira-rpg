@@ -8,18 +8,17 @@ const inv = require("./inventoryUtils.js");
 
 exports.execute = function(data) {
     const skillEffectList = data.skill["effects"];
-    let log = [];
 
     // Apply the attack's effects
     for(const effect of Object.entries(skillEffectList)) {
         if(typeof effect[1] == 'object') {
-            skillEffect.map.get(effect[0])(data, effect, log);
+            skillEffect.map.get(effect[0])(data, effect);
             continue;   
         }
-        skillEffect.map.get(effect[0])(data, effect[1], log); 
+        skillEffect.map.get(effect[0])(data, effect[1]); 
     }
     
-    return log;
+    return;
 }
 
 exports.getSkill = function(skillName) {

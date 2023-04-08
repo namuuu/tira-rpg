@@ -59,7 +59,7 @@ function phys_to_mag_damage(exeData, power, log) {
       const damage = Math.floor((power * (caster.stats.strength / target.stats.spirit) + 2) / 2);
 
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
-      combatUtils.addToValueTologger(log, target.id, "damage", damage);
+      combatUtils.log.add(log, target.id, "damage", damage);
   }
 }
 
@@ -72,7 +72,7 @@ function mag_to_phys_damage(exeData, power, log) {
       const damage = Math.floor((power * (caster.stats.intelligence / target.stats.resistance) + 2) / 2);
 
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
-      combatUtils.addToValueTologger(log, target.id, "damage", damage);
+      combatUtils.log.add(log, target.id, "damage", damage);
   }
 }
 
@@ -85,7 +85,7 @@ function mag_damage(exeData, power, log) {
       const damage = Math.floor((power * (caster.stats.intelligence / target.stats.spirit) + 2) / 2);
 
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
-      combatUtils.addToValueTologger(log, target.id, "damage", damage);
+      combatUtils.log.add(log, target.id, "damage", damage);
   }
 }
 
@@ -102,7 +102,7 @@ function phys_low_health_damage(exeData, quantity, log) {
       }
 
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
-      combatUtils.addToValueTologger(log, target.id, "damage", damage);
+      combatUtils.log.add(log, target.id, "damage", damage);
   }
 }
 

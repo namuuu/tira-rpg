@@ -490,8 +490,8 @@ exports.combatLoop = async function(thread, combatData) {
     await combatCollection.updateOne({}, update, { upsert: true });
 }
 
-exports.finishTurn = async function(exeData, log) {
-    const { combat, thread, casterId, targetId, skill } = exeData;
+exports.finishTurn = async function(exeData) {
+    const { combat, thread, casterId, targetId, skill, log } = exeData;
     const caster = util.getPlayerInCombat(casterId, combat);
     const target = util.getPlayerInCombat(targetId, combat);
     let embed = new EmbedBuilder();
@@ -509,7 +509,7 @@ exports.finishTurn = async function(exeData, log) {
     let hasDied = false;
 
     for(player of log) {
-        if(util.logResults(embed, log, util.getPlayerInCombat(player.id, combat)) == true) {
+        if(util.log.print(embed, player, util.getPlayerInCombat(player.id, combat)) == true) {
             hasDied = true;
         }
     }

@@ -85,7 +85,9 @@
     "description": "A basic heal.",
     "effects": {
       "cooldown": 20,
-      "heal": 10
+      "heal": {
+        "value": 10
+      }
     }
   },
   "purification": {
@@ -95,7 +97,9 @@
     "description": "A purification spell that heals all allies.",
     "effects": {
       "cooldown": 30,
-      "heal": 20
+      "heal": {
+        "value": 20
+      }
     }
   }, 
   "gust": {
@@ -354,5 +358,48 @@
       "paint_festival": 1
     }
   },
+  "blood_needle": {
+    "name": "Blood Needle",
+    "number":"31",
+    "aim": "enemy-single",
+    "description": "Sacrifices some of your health for damage",
+    "effects": {
+      "cooldown": 15,
+      "phys_damage": 10,
+      "self_damage": {
+        "value": 4,
+        "type": "percentage",
+        "until": 40,
+        "untilDeath": false
+      }
+    }
+  },
+  "life_bulb": {
+    "name": "Life Bulb",
+    "number":"32",
+    "aim": "self",
+    "description": "A healing spell that heals lightly the caster.",
+    "effects": {
+      "cooldown": 15,
+      "heal": {
+        "value": 10,
+        "type": "percentage-full"
+      }
+    }
+  },
+  "hemoglojab": {
+    "name": "Hemoglojab",
+    "number":"33",
+    "aim": "enemy-single",
+    "description": "A basic magic attack that deals damage and lowers the target's defense.",
+    "effects": {
+      "cooldown": 15,
+      "phys_damage": 16,
+      "self_damage": {
+        "value": 9,
+        "type": "percentage",
+        "untilDeath": true
+      }
+    }
   }
 }

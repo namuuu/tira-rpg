@@ -6,6 +6,9 @@ const manager = require('../manager/combatManager.js');
 const skillUtil = require('../utils/skillUtils.js');
 const skillList = require('../data/skills.json');
 const mobList = require('../data/monster.json');
+const logger = require('./combat/loggerData.js');
+
+exports.log = {};
 
 /**
  * Creates a thread from a message
@@ -100,7 +103,7 @@ exports.updateCombatCollection = async function(threadId, combat) {
  * @returns 
  */
 exports.addTimeline = async function(combatId, playerId, time) {
-    let combatInfo = await this.getCombatCollection(combatId);
+    let combatInfo = await exports.getCombatCollection(combatId);
 
     if (combatInfo == null) {
         console.log("[DEBUG] Attempted to modify a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
@@ -344,7 +347,8 @@ exports.receiveTargetSelector = async function(interaction) {
 
 exports.executeSkill = async function(exeData) {
     const { thread } = exeData;
-    let log = skillUtil.execute(exeData);
+    exeData.log = [];
+    skillUtil.execute(exeData);
 
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
@@ -357,7 +361,7 @@ exports.executeSkill = async function(exeData) {
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
-    manager.finishTurn(exeData, log);
+    manager.finishTurn(exeData);
 }
 
 exports.executeMonsterAttack = async function(combatInfo, thread, monsterId) {
@@ -368,6 +372,7 @@ exports.executeMonsterAttack = async function(combatInfo, thread, monsterId) {
         enemyTeam: exports.getPlayerEnemyTeam(monsterId, combatInfo),
         casterId: monsterId,
         caster: exports.getPlayerInCombat(monsterId, combatInfo),
+        log: []
     }
 
     let monster = exeData.caster;
@@ -401,7 +406,7 @@ exports.executeMonsterAttack = async function(combatInfo, thread, monsterId) {
         default:
     }
 
-    let log = skillUtil.execute(exeData);
+    skillUtil.execute(exeData);
 
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
@@ -414,7 +419,7 @@ exports.executeMonsterAttack = async function(combatInfo, thread, monsterId) {
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
-    manager.finishTurn(exeData, log);
+    manager.finishTurn(exeData);
 }
 
 exports.getSoonestTimelineEntity = function(combatInfo) {
@@ -573,23 +578,38 @@ exports.announceNewTurn = async function(thread, player) {
     return thread.send({ embeds: [embed] });
 }
 
-exports.getLogger = function(log, playerId) {
+exports.log.getPlayer = function(log, playerId) {
     let playerLog = log.find(player => player.id == playerId);
+
     if(playerLog == null || playerLog == undefined) {
         playerLog = {
             id: playerId,
         };
         log.push(playerLog);
     }
+
     return playerLog;
 }
 
-exports.addToValueTologger = function(log, playerId, valueName, value) {
-    let playerLog = this.getLogger(log, playerId);
+exports.log.getPlayerLog = function(log, playerId, logName) {
+    let playerLog = exports.getLogger(log, playerId);
+    if(playerLog[logName] == null || playerLog[logName] == undefined) {
+        return null;
+    }
+    return playerLog[logName];
+}
+
+exports.log.addInteger = function(log, playerId, valueName, value) {
+    let playerLog = exports.log.getPlayer(log, playerId);
     if(playerLog[valueName] == null || playerLog[valueName] == undefined) {
         playerLog[valueName] = 0;
     }
     playerLog[valueName] += value;
+}
+
+exports.log.addObject = function(log, playerId, object) {
+    let playerLog = exports.getLogger(log, playerId);
+    playerLog[object.name] = object;
 }
 
 /**
@@ -599,19 +619,13 @@ exports.addToValueTologger = function(log, playerId, valueName, value) {
  * @param {*} entity the entity that suffered the effects and is being logged
  * @returns true if the entity died, false otherwise
  */
-exports.logResults = function(embed, log, entity) {
+exports.log.print = function(embed, log, entity) {
     let description = "";
 
-    for (const [effect, value] of Object.entries(log.find(player => player.id == entity.id))) {
-        switch(effect) {
-            case "damage":
-                description += "Lost " + value + " HP (" + entity.health + " left) \n";
-                break;
-            case "heal":
-                description += "Gained " + value + " HP (" + entity.health + " left) \n";
-                break;
-            case "failed":
-                description += "Failed !\n";
+    for(const [effect, value] of Object.entries(log)) {
+        const effectLogger = Object.values(logger).filter(logger => logger.id == effect)[0];
+        if(effectLogger != null) {
+            description += effectLogger.get(value, entity);
         }
     }
 
@@ -690,7 +704,6 @@ exports.rewardLoot = async function(combat, thread) {
 
             for(let i = 0; i < lootNumber; i++) {
                 const lootRoll = Math.floor(Math.random() * lootTotal);
-                console.log(lootRoll);
                 var lootIndex = 0;
                 var lootSum = 0;
                 while(lootSum < lootRoll) {
@@ -930,4 +943,17 @@ exports.sendForfeit = async function(message) {
     if(result != 0) {
         manager.callForVictory(combat, message.channel, result)
     }
+}
+
+exports.purgeCombat = async function() {
+    Client.mongoDB.db("combat-data").listCollections().toArray(function(err, collections) {
+        if(err) {
+            console.log(err);
+            return;
+        }
+
+        for(const collection of collections) {
+            Client.mongoDB.db("combat-data").collection(collection.name).drop();
+        }
+    }); 
 }

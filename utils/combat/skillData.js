@@ -7,11 +7,19 @@ const combatUtils = require("../../utils/combatUtils.js");
 exports.heal = {
     id: "heal",
     name: "Heal",
-    func: function (data, quantity, log) {
+    func: function (data, params, log) {
         const { casterId, targets } = data;
       
         for(const target of targets) {
-          target.health = (target.health + quantity > target.stats.vitality) ? target.stats.vitality : target.health + quantity;
+            const quantity = params.value;
+
+            if(params.type == "percentage-full")
+                quantity = Math.floor(target.max_health * params.value / 100);
+
+            if(params.type == "percentage-current")
+                quantity = Math.floor(target.health * params.value / 100);
+
+            target.health = (target.health + quantity > target.max_health) ? target.stats.vitality : target.health + quantity;
         }
       
         // combatUtils.addToValueTologger(log, casterId, "heal", quantity);
@@ -21,8 +29,8 @@ exports.heal = {
 exports.physDamage = {
     id: "phys_damage",
     name: "Physical Damage",
-    func: function (data, power, log) {
-        const { combat, casterId, targets } = data;
+    func: function (data, power) {
+        const { combat, casterId, targets, log } = data;
       
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
       
@@ -30,7 +38,7 @@ exports.physDamage = {
             const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
       
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
-            combatUtils.addToValueTologger(log, target.id, "damage", damage);
+            combatUtils.log.addInteger(log, target.id, "damage", damage);
         }
       }
 }
@@ -38,7 +46,7 @@ exports.physDamage = {
 exports.buffStats = {
     id: "buff_stats",
     name: "Buff Stats",
-    func: function (data, parameters, log) {
+    func: function (data, parameters) {
         const { combat, casterId, targets } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
@@ -70,13 +78,13 @@ exports.buffStats = {
 exports.holyThrust = {
     id: "holy_thrust",
     name: "Holy Thrust",
-    func: function (data, power, log) {
-        const { combat, casterId, targets } = data;
+    func: function (data, power) {
+        const { combat, casterId, targets, log } = data;
       
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
         if(caster.effects["solar-gauge"].value < 10) {
-            combatUtils.addToValueTologger(log, casterId, "failed", 0);
+            combatUtils.log.add(log, casterId, "failed", 0);
             return;
         }
 
@@ -89,7 +97,7 @@ exports.holyThrust = {
             caster.effects["solar-gauge"].value += Math.floor(damage / 3);
       
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
-            combatUtils.addToValueTologger(log, target.id, "damage", damage);
+            combatUtils.log.addInteger(log, target.id, "damage", damage);
         }
     }
 }
@@ -97,7 +105,7 @@ exports.holyThrust = {
 exports.restlessStab = {
     id: "restless_stab",
     name: "Restless Stab",
-    func: function (data, power, log) {
+    func: function (data, power ) {
         const { combat, casterId, targets } = data;
       
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
@@ -116,7 +124,7 @@ exports.restlessStab = {
 exports.slow = {
     id: "slow",
     name: "Slow",
-    func: function (data, parameters, log) {
+    func: function (data, parameters) {
         const { combat, casterId, targets } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
@@ -132,8 +140,8 @@ exports.slow = {
 exports.brushCut = {
     id: "brush_cut",
     name: "Brush Cut",
-    func: function (data, power, log) {
-        const { combat, casterId, targets } = data;
+    func: function (data, power) {
+        const { combat, casterId, targets, log } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
         let damage;
 
@@ -148,7 +156,7 @@ exports.brushCut = {
 
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
 
-            combatUtils.addToValueTologger(log, target.id, "damage", damage);
+            combatUtils.log.addInteger(log, target.id, "damage", damage);
         }
     }
 }
@@ -156,8 +164,8 @@ exports.brushCut = {
 exports.decoloration = {
     id: "decoloration",
     name: "Decoloration",
-    func: function (data, power, log) {
-        const { combat, casterId, targets } = data;
+    func: function (data) {
+        const { combat, casterId, targets, log } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
         for(const target of targets) {
@@ -177,8 +185,8 @@ exports.decoloration = {
 exports.splatter = {
     id: "splatter",
     name: "Splatter",
-    func: function (data, power, log) {
-        const { combat, casterId, targets } = data;
+    func: function (data, power) {
+        const { combat, casterId, targets, log } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
         const effective = false;
@@ -197,7 +205,7 @@ exports.splatter = {
 
                 target.health = (target.health - damage < 0) ? 0 : target.health - damage;
 
-                combatUtils.addToValueTologger(log, target.id, "damage", damage);
+                combatUtils.log.addInteger(log, target.id, "damage", damage);
             }
         }
     }
@@ -206,7 +214,7 @@ exports.splatter = {
 exports.paintFestival = {
     id: "paint_festival",
     name: "Paint Festival",
-    func: function (data, power, log) {
+    func: function (data) {
         const { combat, casterId, targets } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
@@ -222,3 +230,33 @@ exports.paintFestival = {
         }
     }
 }
+
+exports.selfDamage = {
+    id: "self_damage",
+    name: "Self Damage",
+    func: function (data, params) {
+        const { combat, casterId, targets, log } = data;
+        const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+        // If the caster is already below the threshold, don't do anything
+        if(params.until != undefined && caster.max_health * (params.until / 100) > caster.health)
+            return;
+
+        const damage = params.value;
+
+        if(params.type = "percentage")
+            damage = Math.floor(caster.max_health * (damage / 100));
+
+        caster.health = caster.health - damage;
+
+        if(params.untilDeath == false && caster.health < 0) {
+            damage += caster.health;
+            caster.health = 1;
+        }
+
+        if(caster.health < 0)
+            caster.health = 0;
+
+        combatUtils.log.addInteger(log, casterId, "damage", damage);
+    }
+}   
