@@ -54,12 +54,17 @@ exports["lunar-gauge"] = {
 
 exports["buff-stats"] = {
     id: "buff-stats",
-    onEnd: function(exeData, player, value) {
+    proc: function(exeData, player, value) {
         const { combat } = exeData;
 
         const caster = getPlayer(player.id, combat);
 
-        console.log(value);
+        for(const {stat, val} of Object.entries(caster.stats)) {
+            if(value[stat] != undefined && value[stat].duration == 0) {
+                caster.stats[stat] -= val;
+                delete caster.effects["buff-stats"][stat];
+            }
+        }
     }
 }
 

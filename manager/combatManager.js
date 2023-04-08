@@ -541,7 +541,6 @@ exports.updateEffects = function(player, situation, exeData, thread) {
         //console.log("Effect: " + key + " | Situation: " + value.situation + " | Proc: " + value.proc + " | Value: " + value.value);
 
         update = true;
-        
 
         for(const passive of Object.values(passives)) {
             if(passive.id == key) {
@@ -552,7 +551,9 @@ exports.updateEffects = function(player, situation, exeData, thread) {
         if(player.effects[key].duration != undefined) {
             player.effects[key].duration--;
             if (player.effects[key].duration <= 0) {
-
+                if(player.effects[key].onEnd != undefined) {
+                    player.effects[key].onEnd(exeData, player, value);
+                }
                 delete player.effects[key];
             }
             continue;

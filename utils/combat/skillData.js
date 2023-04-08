@@ -41,24 +41,20 @@ exports.buffStats = {
     func: function (data, parameters, log) {
         const { combat, casterId, targets } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
-      
-        console.log("Params: ", data, parameters, log);
 
         for(const target of targets) {
             if(target.effects["buff-stats"] == undefined) {
-                target.effects["buff-stats"] = {};
+                target.effects["buff-stats"] = {situation: "after"};
             }
 
             for(const [key, value] of Object.entries(parameters[1])) {
-                console.log("Key: ", key, "Value: ", value);
-
                 if(target.effects["buff-stats"][key] != undefined) {
                     target.stats[key] -= target.effects["buff-stats"][key].value;
                 }
             
                 target.effects["buff-stats"][key] = {
                     value: value.value,
-                    duration: value.duration
+                    duration: value.duration,
                 };
 
                 target.stats[key] += value.value;
