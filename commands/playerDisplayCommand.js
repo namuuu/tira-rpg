@@ -3,7 +3,7 @@ const inv = require('../utils/inventoryUtils.js');
 
 module.exports = {
     name: "display",
-    aliases: [],
+    aliases: [ "inv", "inventory"],
     description: "",
     requireCharacter: true,
 

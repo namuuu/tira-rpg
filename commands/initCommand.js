@@ -4,7 +4,7 @@ const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
     name: "init",
-    aliases: ["start"],
+    aliases: ["start", "begin"],
     description: "",
     requireCharacter: false,
     execute(message, args) {
