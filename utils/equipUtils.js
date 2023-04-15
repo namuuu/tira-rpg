@@ -385,9 +385,9 @@ exports.receiveButton = async function(interaction, playerId, args) {
         return;
 
     if(embed != null) {
-        interaction.update({embeds: [embed], components: [row, slider]});
+        interaction.update({embeds: [embed], components: [slider, row]});
     } else {
-        interaction.update({components: [row, slider]});
+        interaction.update({components: [slider, row]});
     }
 
 }
