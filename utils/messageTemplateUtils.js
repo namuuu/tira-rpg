@@ -33,14 +33,7 @@ exports.generateSelector = async function(message) {
 					list
 				),
 		);
-	const embed = new EmbedBuilder()
-		.setTitle(":crossed_swords: Welcome to Tira's RPG ! :crossed_swords:")
-        .setDescription("This is the _class selector_, this choice will be definitive so choose it **carefully**")
-		.addFields(
-            { name: "Details", value:"To check more details about the classes, go on [our gitbook](https://tira-rpg.gitbook.io/tiras-project/lore/introduction) !" }
-        )
-        .setFooter({text: "Choose your class below to start your new adventure !"})
-        .setColor(0x00bfff)
+	
 
 	return message.reply({embeds: [embed], components: [row] });
 }

@@ -32,6 +32,12 @@ module.exports = {
         const args = customId.split('-');
         const command = args.shift();
 
+        // The only button supported without a player is the welcome button
+        if(command == "welcome") {
+            buttons.get(command).interact(interaction, args);
+            return;
+        }
+
         if(!(await player.doesExists(user.id))) return;
 
         // console.log("Command: " + command);

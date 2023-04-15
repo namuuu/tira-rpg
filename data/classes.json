@@ -1,7 +1,7 @@
 {
     "warrior": {
         "name": "Solar Warrior",
-        "description": "Les guerriers sont des unités équilibrées, possédant des options viables dans la plupart des situations.",
+        "description": "Solar Warriors are balanced units, having viable options in most situations.",
         "base_stats": {
             "strength": 15,
             "vitality": 12,
@@ -21,7 +21,7 @@
     },
     "assassin": {
         "name": "Lurker of the Abyss",
-        "description": "Les rôdeurs sont des unités rapides, mais plus fragiles. Elles peuvent créer des situations très avantageuses si elles parviennent à exécuter leur plan.",
+        "description": "Lurkers can create very advantageous situations if they manage to execute their plan.",
         "base_stats": {
             "strength": 12,
             "vitality": 6,
@@ -41,7 +41,7 @@
     },
     "magician": {
         "name": "Paint Mage",
-        "description": "Les magiciens se servent d'attaques élémentaires pour se battre, cela leur permettant  d'accroître le potentiel offensif de ses alliés, ou gêner ses adversaires.",
+        "description": "Paint Mages use their mastery of paintcraft to create powerful spells.",
         "base_stats": {
             "strength": 4,
             "vitality": 8,
@@ -61,7 +61,7 @@
     },
     "ranger": {
         "name": "Lunar Ranger",
-        "description": "Les tireurs ont besoin d'utiliser des munitions afin de réaliser des dégâts, et bien que puissants la gestoin de leur stock est un élément primordial pour tout bon tireur.",
+        "description": "Lunar need to manage resources carefully to deal a lot of damage.",
         "base_stats": {
             "strength": 6,
             "vitality": 5,
@@ -81,7 +81,7 @@
     },
     "healer": {
         "name": "Divine Light",
-        "description": "Les soigneurs possédent des sorts au même titre que les magiciens, mais ceux-ci ont des capacitées plus démarquées, au prix de dégâts plus faibles.",
+        "description": "Divine Lights are a very versatile class, able to heal and deal damage.",
         "base_stats": {
             "strength": 6,
             "vitality": 12,
