@@ -13,34 +13,46 @@ module.exports = {
 
     // Setting up useful data
     const authorId = message.author.id;
-    let skillQuery = "debugger";
-    if(args.length >= 2)
-        skillQuery = args[1];
+    let skillQuery = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    if(args.length > 1)
+        skillQuery = args.slice(1).join(" ");
+
+    var id, skillSearched;
 
     // Checks the first argument, considered as the "debug command"
     try {
         switch(args[0]) {
             case "learn":
-                console.log(skillQuery)
-                console.log(skill.getSkill(skillQuery));
-                if(skill.getSkill(skillQuery) == null) {
+                var {name: id, skill: skillSearched} = skill.searchSkill(skillQuery);
+                if(id == null) {
                     message.reply("Skill not found. Please specify a valid skill name.");
                     return;
                 }
-                skill.learnSkill(authorId, skillQuery);
+                skill.learnSkill(authorId, id);
                 break;
             case "unlearn":
-                skill.unlearnSkill(authorId, skillQuery);
+                var {id, skillSearched} = skill.searchSkill(skillQuery);
+                if(id == null) {
+                    message.reply("Skill not found. Please specify a valid skill name.");
+                    return;
+                }
+                skill.unlearnSkill(authorId, id);
                 break;
             case "select":
-                skill.selectActiveSkill(authorId, skillQuery);
+                var {id, skillSearched} = skill.searchSkill(skillQuery);
+                if(id == null) {
+                    message.reply("Skill not found. Please specify a valid skill name.");
+                    return;
+                }
+                skill.selectActiveSkill(authorId, id);
                 break;
             case "unselect":
-                skill.unselectActiveSkill(authorId, skillQuery);
-                break;
-            case "get":
-                const queryResult = skill.searchSkill(skillQuery);
-                message.reply({embeds: [skill.displaySkill(queryResult)]});
+                var {id, skillSearched} = skill.searchSkill(skillQuery);
+                if(id == null) {
+                    message.reply("Skill not found. Please specify a valid skill name.");
+                    return;
+                }
+                skill.unselectActiveSkill(authorId, id);
                 break;
             case "test": {
                 await skill.learnSkill(authorId, "slash");

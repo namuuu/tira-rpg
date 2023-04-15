@@ -21,16 +21,6 @@ exports.execute = function(data) {
     return;
 }
 
-exports.getSkill = function(skillName) {
-    if(skills[skillName] != undefined)
-        return {name: skillName, skill: skills[skillName]};
-    
-    for(const skill in skills) {
-        if (skills[skill].number == skillName)
-            return {name: skill, skill: skills[skill]};
-    }
-    return null;
-}
 exports.getEffect = function(skillEffect) {
     return skillEffect.map.get(skillName);
 }
@@ -41,14 +31,32 @@ exports.searchSkill = function(query) {
             if (skills[skill].number == query)
                 return skills[skill];
         }
+        console.log(query + " is not a valid skill number.");
+        return null;
     } else {
+        var minDist = 3;
+        var minSkill = null;
+        query = query.toLowerCase();
+
         // The string does not contain a number
-        for(const skill in skills) {
+        for(const [id, skill] of Object.entries(skills)) {
+            const distance = levenshteinDistance(skill.name.toLocaleLowerCase(), query);
             if(skill == query)
                 return skills[skill];
+            if(distance < minDist) {
+                minDist = distance;
+                minSkill = id;
+            }
         }
     }
+
+    if(minSkill == null) {
+        return null;
+    }
+
+    return {name: minSkill, skill: skills[minSkill]};
 }
+
 exports.displaySkill = function(skill) {
     return new EmbedBuilder()
         .setTitle(`#${skill.number} - ${skill.name}`)
@@ -128,9 +136,7 @@ exports.selectActiveSkill = async function(user_id, query) {
         projection: {_id: 0, items: 0, quantity: 0},
     };
 
-    const skill = exports.getSkill(query);
-
-    console.log(skill);
+    const skill = exports.searchSkill(query);
 
     const skill_id = ((skill == null || skill == undefined) ? null : skill.name);
                                 
@@ -140,7 +146,7 @@ exports.selectActiveSkill = async function(user_id, query) {
         console.error("[DEBUG] Skill " + skill_id + " hasn't been learned by user " + user_id + ". (ACTIVE_SKILL_NOT_LEARNED)");
         return "not_learned";
     }
-    if(inventory.activeSkills.length > 4) {
+    if(inventory.activeSkills.length >= 4) {
         console.error("[DEBUG] 4 Active Skills already used by user " + user_id + ". (ACTIVE_SKILL_MAX_SIZE)");
         return "max_size";
     }
@@ -160,7 +166,7 @@ exports.selectActiveSkill = async function(user_id, query) {
 exports.unselectActiveSkill = async function(user_id, query) {
     const playerCollection = Client.mongoDB.db('player-data').collection(user_id);
 
-    const skill = exports.getSkill(query);
+    const skill = exports.searchSkill(query);
     const skill_id = ((skill == null || skill == undefined) ? null : skill.name);
 
     const inventory = await playerCollection.findOne({ name: "inventory" }, {projection: {_id: 0, items: 0, quantity: 0}});
@@ -287,7 +293,6 @@ exports.receiveModal = async function(interaction, select) {
         inv.display(interaction.user, interaction, "skills", false);
         interaction.deferUpdate();
     } else {
-        console.log(ret);
         switch(ret) {
             case "not_learned":
                 interaction.reply({content: "You haven't learned this skill yet!", ephemeral: true});
@@ -310,3 +315,24 @@ exports.receiveModal = async function(interaction, select) {
 exports.sendStringAllSkills = sendStringAllSkills;
 exports.getStringActiveSkill = getStringActiveSkill;
 
+const levenshteinDistance = (str1 = '', str2 = '') => {
+    const track = Array(str2.length + 1).fill(null).map(() =>
+    Array(str1.length + 1).fill(null));
+    for (let i = 0; i <= str1.length; i += 1) {
+       track[0][i] = i;
+    }
+    for (let j = 0; j <= str2.length; j += 1) {
+       track[j][0] = j;
+    }
+    for (let j = 1; j <= str2.length; j += 1) {
+       for (let i = 1; i <= str1.length; i += 1) {
+          const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+          track[j][i] = Math.min(
+             track[j][i - 1] + 1, // deletion
+             track[j - 1][i] + 1, // insertion
+             track[j - 1][i - 1] + indicator, // substitution
+          );
+       }
+    }
+    return track[str2.length][str1.length];
+  };
