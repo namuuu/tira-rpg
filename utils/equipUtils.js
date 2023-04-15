@@ -30,7 +30,7 @@ exports.display = async function(playerId, channel) {
             addSlider(playerId));
 
 
-    channel.send({ embeds: [embed], components: [row, slider] });
+    channel.send({ embeds: [embed], components: [slider, row] });
 }
 
 function addSlider(playerId) {    
@@ -152,11 +152,13 @@ exports.trash = async function(playerId, equipId, type) {
     console.log("DEBUG: " + equip.name + " trashed from " + playerId + "'s inventory.");
 }
 
-exports.equip = async function(playerId, equipId, type) {
+exports.equip = async function(playerId, query, type) {
     const data = await playerUtils.getData(playerId, "info");
     const inv = await playerUtils.getData(playerId, "inventory");
 
-    const equip = inv.equipItems.filter(item => item.id == equipId).filter(item => item.type == type)[0];
+    inv.equipItems = inv.equipItems.filter(item => item.type == type);
+
+    const equip = exports.leveinsteinSearch(query, inv.equipItems)[0].equip;
     
     if(equip == null) {
         console.log("ERROR: Tried to equip an item that the user doesn't possess.");
