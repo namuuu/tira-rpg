@@ -74,6 +74,7 @@ npm install dotenv
 As for our testing, your internet provider most likely blocks your BDD requests, causing them to never return. 
 
 ### TypeError: Cannot read properties of undefined (reading 'Guilds')
+### Uncaught TypeError TypeError: channel.isTextBased is not a function
 
 Your discord.js version is outdated (Needed version is at least discordjs v14). Please reinstall it with `npm install discord.js@^14.0.2`
 
