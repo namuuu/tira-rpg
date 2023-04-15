@@ -337,9 +337,6 @@ exports.searchForMonsters = async function(interaction, combat) {
     }
 
     for(var m in monsters) {
-        console.log(monsters[m]);
-        console.log(monsters[m].min_level);
-        console.log(bestPlayer.level);
         if(monsters[m].min_level != undefined && monsters[m].min_level > bestPlayer.level) {
             console.log(monsters[m]);
             monsters.splice(m, 1);
@@ -392,12 +389,11 @@ exports.addEntityToCombat = async function(thread, entity) {
         }
     };
 
-    // Modifying the main embed to represent the players
-    util.updateMainMessage(info, originMessage, "prebattle");
-
     await combatCollection.updateOne({}, update, { upsert: true });
 
     console.log("[DEBUG] " + entity + " joined combat " + combatId); 
+
+    return combatCollection;
 }
 
 exports.startCombat = async function(interaction) {
@@ -429,7 +425,7 @@ exports.startCombat = async function(interaction) {
                 interaction.reply({ content: "You need at least one player in your team!", ephemeral: true });
                 return;
             }
-            const ret = exports.searchForMonsters(interaction, combatData);
+            const ret = await exports.searchForMonsters(interaction, combatData);
             if(ret == false) {
                 return;
             }
@@ -451,7 +447,8 @@ exports.startCombat = async function(interaction) {
     exports.combatLoop(thread, combatData);
 }
 
-exports.combatLoop = async function(thread, combatData) {
+exports.combatLoop = async function(thread) {
+    const combatData = await util.getCombatCollection(thread.id);
     const soonestFighter = util.getSoonestTimelineEntity(combatData);
     const exeData = {
         combat: combatData,

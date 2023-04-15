@@ -818,11 +818,13 @@ exports.updateMainMessage = function(combatInfo, message, state) {
     let team1Value = (team1.length > 0) ? team1 : "Waiting for players...";
     let team2Value = (team2.length > 0) ? team2 : "Waiting for players...";
 
+    console.log(combatInfo);
+
     if(state != "cancelled")
         switch(combatInfo.type) {
             case "wild-encounter":
                 embed.addFields({name: "Players", value: team1Value});
-                if(team2.length > 0)
+                if(combatInfo.team2.length > 0)
                     embed.addFields({name: "Monsters", value: team2Value});
                 break;
             default:
