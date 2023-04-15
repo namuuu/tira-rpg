@@ -41,7 +41,7 @@ function addSlider(playerId) {
                 [
                     {label: "Main", value: "main", description: "Display your main stats!"},
                     {label: "Items", value: "items", description: "Display every item you own!"},
-                    {label: "Skills", value: "skills", description: "Manage your skills!"},
+                    {label: "Abilities", value: "abilities", description: "Manage your abilities!"},
                     {label: "Stats", value: "stats", description: "Get a view of your stats!"},
                     {label: "Equipment", value: "equipment", description: "Showcase your stuff!"},
                 ]

@@ -1,4 +1,4 @@
-const combatUtils = require("../../utils/combatUtils.js");
+const combatUtils = require("../combatUtils.js");
 
 
 
@@ -31,6 +31,8 @@ exports.physDamage = {
     name: "Physical Damage",
     func: function (data, power) {
         const { combat, casterId, targets, log } = data;
+
+        console.log(data);
       
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
       

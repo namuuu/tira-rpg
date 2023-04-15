@@ -1,10 +1,10 @@
 const { EmbedBuilder } = require("discord.js");
-const util = require("../utils/skillUtils.js");
+const util = require("../utils/abilityUtils.js");
 
 module.exports = {
-  name: "skill",
-  aliases: [],
-  description: "Get information about different skills!",
+  name: "ability",
+  aliases: ["abi", "abilities"],
+  description: "Get information about different abilities!",
   requireCharacter: true,
   async execute(message, args) {
     if(args.length == 0) {
@@ -16,20 +16,20 @@ module.exports = {
     switch(args[0]) {
         case "search":
             if(args.length < 2) {
-                message.reply("Please specify a skill name!");
+                message.reply("Please specify a ability name!");
                 return;
             }
-            const { name: id, skill } = util.searchSkill(args.slice(1).join(" "));
+            const { name: id, ability } = util.searchAbility(args.slice(1).join(" "));
             if(id == null) {
-                message.reply("Skill not found!");
+                message.reply("Ability not found!");
                 return;
             }
 
             const embed = new EmbedBuilder()
-                .setTitle("#" + skill.number + " - "  + skill.name)
-                .setDescription(skill.description)
+                .setTitle("#" + ability.number + " - "  + ability.name)
+                .setDescription(ability.description)
 
-            switch(skill.aim) {
+            switch(ability.aim) {
                 case "self":
                     embed.addFields({name: "Target", value: "Self"});
                     break;

@@ -39,9 +39,9 @@ module.exports = {
                 if(!(await player.doesExists(user.id)) || user.id != args[0]) return;
                 inv.display(user, interaction, interaction.values[0], true);
                 break;
-            case 'combat_skill_selector':
+            case 'combat_ability_selector':
                 if(!(await player.doesExists(user.id))) return;
-                combat.receiveSkillSelector(interaction);
+                combat.receiveAbilitySelector(interaction);
                 break;
             case 'combat_target_selector':
                 if(!(await player.doesExists(user.id))) return;

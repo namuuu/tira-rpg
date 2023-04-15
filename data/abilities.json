@@ -3,7 +3,7 @@
     "name": "The Debugger",
     "number":0,
     "aim": "enemy-single",
-    "description": "A skill only used when the developers need to test something. Unobtainable.",
+    "description": "A ability only used when the developers need to test something. Unobtainable.",
     "effects": {
       "cooldown": 10,
       "phys_damage": 40
@@ -323,7 +323,7 @@
     "name": "Brush Cut",
     "number":"27",
     "aim": "enemy-single",
-    "description": "A basic paint skill that uses paint to increase its damage.",
+    "description": "A basic paint ability that uses paint to increase its damage.",
     "effects": {
       "cooldown": 15,
       "brush_cut": 8

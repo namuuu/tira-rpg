@@ -64,8 +64,8 @@ module.exports = {
 
                     for(const [className, classInfo] of Object.entries(classData)) {
                         list.push({
-                            label: className,
-                            value: classInfo.name,
+                            label: classInfo.name,
+                            value: className,
                             description: classInfo.description
                         });
                     }

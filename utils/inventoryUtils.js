@@ -4,7 +4,7 @@ const player = require('../utils/playerUtils.js');
 const classData = require('../data/classes.json');
 const { calculateExpToNextLevel } = require('../utils/rpgInfoUtils.js');
 const equip = require('./equipUtils.js');
-const skill = require('./skillUtils.js');
+const ability = require('./abilityUtils.js');
 
 exports.getInventoryString = function(inventory) {
     let rawdata = fs.readFileSync('./data/items.json');
@@ -40,7 +40,7 @@ exports.giveItem = async function(playerId, item, quantity, channel) {
     // Querying the inventory in the database
     const inventory = await playerCollection.findOne(
         {name: "inventory"}, 
-        {projection: {_id: 0, skills: 0, activeSkills: 0, passiveSkills: 0, stats: 0, equipment: 0}}
+        {projection: {_id: 0, abilities: 0, activeAbilities: 0, stats: 0, equipment: 0}}
     );
     
     // If the item is already in the inventory, we add the quantity to the existing one
@@ -94,8 +94,8 @@ exports.display = async function(player, interaction, type, ack) {
         case "items":
             embed = (await typeItems(embed, playerId)).embed;
             break;
-        case "skills":
-            ret = (await typeSkills(embed, playerId, player.username));
+        case "abilities":
+            ret = (await typeAbilities(embed, playerId, player.username));
             embed = ret.embed;
             buttons.addComponents(ret.components);
             break;
@@ -219,31 +219,31 @@ async function typeStats(embed, playerId) {
     return {embed: embed};
 }
 
-exports.typeSkills = typeSkills;
-async function typeSkills(embed, playerId, playername) {
-    var data = JSON.parse(fs.readFileSync('./data/skills.json'));
+exports.typeAbilities = typeAbilities;
+async function typeAbilities(embed, playerId, playername) {
+    var data = JSON.parse(fs.readFileSync('./data/abilities.json'));
     const playerData = await player.getData(playerId, "inventory");
-    const skills = playerData.skills.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
-    const activeSkills = playerData.activeSkills.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
+    const abilities = playerData.abilities.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
+    const activeAbilities = playerData.activeAbilities.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
 
-    embed.setTitle(`${playername}'s Skills`)
-         .setFooter({text: 'Need to get more info about a specific skill ? Type t.skill <number>'})
+    embed.setTitle(`${playername}'s Abilities`)
+         .setFooter({text: 'Need to get more info about a specific ability ? Type t.ability <number>'})
 
     try {
-        embed.setDescription(skills.length != 0 ? skills.map(skill => `# ${data[skill].number} - ${data[skill].name}`).join(", ") : "No skills learned.");
+        embed.setDescription(abilities.length != 0 ? abilities.map(ability => `# ${data[ability].number} - ${data[ability].name}`).join(", ") : "No ability learned.");
     } catch (error) {
-        embed.setDescription("No skills learned. (There may be an error!)");
+        embed.setDescription("No ability learned. (There may be an error!)");
         console.error(error);
     }
 
     try {
-        embed.addFields({name: "Active Skills", value: skill.getStringActiveSkill(activeSkills)});
+        embed.addFields({name: "Active Abilities", value: ability.getStingActiveAbilities(activeAbilities)});
     } catch (error) {
         console.error(error);
-        embed.addFields({name: "Active Skills", value: "No active skills selected. (There may be an error!)"});
+        embed.addFields({name: "Active Abilities", value: "No active ability. (There may be an error!)"});
     }
 
-    return {embed: embed, components: sendButtonChangeSkill(playerId, skills.length != 0, activeSkills.length != 0)};
+    return {embed: embed, components: sendButtonAbility(playerId, abilities.length != 0, activeAbilities.length != 0)};
 }
 
 exports.typeEquipment = typeEquipment;
@@ -262,21 +262,21 @@ async function typeEquipment(embed, playerId) {
     return {embed: embed, components: components};
 }
 
-function sendButtonChangeSkill(userId, skillEnable, activeSkillEnable) {
+function sendButtonAbility(userId, abilityEnable, activeAbilityEnable) {
     const components = [];
     components.push(
         new ButtonBuilder()
-            .setCustomId("select_skill-" + userId)
-            .setLabel("Select Skill")
+            .setCustomId("selectAbility-" + userId)
+            .setLabel("Select Ability")
             .setStyle("Secondary")
-            .setDisabled(!skillEnable)
+            .setDisabled(!abilityEnable)
     )
     components.push(
         new ButtonBuilder()
-            .setCustomId("unselect_skill-" + userId)
-            .setLabel("Unselect Skill")
+            .setCustomId("unselectAbility-" + userId)
+            .setLabel("Unselect Ability")
             .setStyle("Secondary")
-            .setDisabled(!activeSkillEnable),
+            .setDisabled(!activeAbilityEnable),
     );
 
     return components;
@@ -291,7 +291,7 @@ function addSlider(playerId) {
                 [
                     {label: "Main", value: "main", description: "Display your main stats!"},
                     {label: "Items", value: "items", description: "Display every item you own!"},
-                    {label: "Skills", value: "skills", description: "Manage your skills!"},
+                    {label: "Abilities", value: "abilities", description: "Manage your abilities!"},
                     {label: "Stats", value: "stats", description: "Get a view of your stats!"},
                     {label: "Equipment", value: "equipment", description: "Showcase your stuff!"},
                 ]

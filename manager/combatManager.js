@@ -5,7 +5,6 @@ const embed = require('../utils/messageTemplateUtils.js');
 const playerUtils = require('../utils/playerUtils.js');
 const equip = require('../utils/equipUtils.js');
 const passives = require('../utils/combat/passiveUtil.js');
-const skillMap = require("../setup/skillSetup.js").map;
 
 
 /**
@@ -94,7 +93,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
                 current_player_id: null,
                 current_player_team: null,
                 aim_at: null,
-                skill: null,
+                ability: null,
             },
             team1: [],
             team2: [],
@@ -226,7 +225,7 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
         },
         equipment: {},
         effects: {},
-        skills: playerInv.activeSkills,
+        abilities: playerInv.activeAbilities,
         items: playerInv.items,
     }
 
@@ -338,7 +337,6 @@ exports.searchForMonsters = async function(interaction, combat) {
 
     for(var m in monsters) {
         if(monsters[m].min_level != undefined && monsters[m].min_level > bestPlayer.level) {
-            console.log(monsters[m]);
             monsters.splice(m, 1);
         }
     }
@@ -361,7 +359,6 @@ exports.searchForMonsters = async function(interaction, combat) {
         }
     }
 
-    console.log(interaction);
     const startMessage = await interaction.channel.fetchStarterMessage();
     util.updateMainMessage(combat, startMessage, "battle");
 
@@ -466,8 +463,8 @@ exports.combatLoop = async function(thread, combatData) {
         await new Promise(r => setTimeout(r, 1500));
         combatData.current_action.current_player_id = soonestFighter.id;
         combatData.current_action.aim_at = null;
-        combatData.current_action.skill = null;
-        util.sendSkillSelector(soonestFighter, thread);
+        combatData.current_action.ability = null;
+        util.sendAbilitySelector(soonestFighter, thread);
         console.log("[DEBUG] This is the player's turn. Waiting for player input.");
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
@@ -491,7 +488,7 @@ exports.combatLoop = async function(thread, combatData) {
 }
 
 exports.finishTurn = async function(exeData) {
-    const { combat, thread, casterId, targetId, skill, log } = exeData;
+    const { combat, thread, casterId, targetId, ability, log } = exeData;
     const caster = util.getPlayerInCombat(casterId, combat);
     const target = util.getPlayerInCombat(targetId, combat);
     let embed = new EmbedBuilder();
@@ -501,9 +498,9 @@ exports.finishTurn = async function(exeData) {
     if(caster.type == "human") {
         const user = await Client.client.users.fetch(caster.id);
         const avatar = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png";
-        embed.setAuthor({ name: caster.name + " used " + skill.name + "!", iconURL: avatar });
+        embed.setAuthor({ name: caster.name + " used " + ability.name + "!", iconURL: avatar });
     } else {
-        embed.setAuthor({ name: caster.name + " used " + skill.name + "!" });
+        embed.setAuthor({ name: caster.name + " used " + ability.name + "!" });
     }
 
     let hasDied = false;

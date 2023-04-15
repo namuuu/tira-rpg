@@ -2,7 +2,7 @@ const { ActionRowBuilder, ButtonBuilder } = require("@discordjs/builders");
 const { ButtonStyle, EmbedBuilder } = require("discord.js");
 const fs = require("fs");
 const util = require("../../utils/combatUtils.js");
-const skillData = require("../../data/skills.json");
+const abilityData = require("../../data/abilities.json");
 
 module.exports = {
     name: "combat.command",
@@ -47,22 +47,22 @@ module.exports = {
 
                 console.log(player);
 
-                var skillValue = "";
+                var abilityValue = "";
 
-                for(let i = 0; i < player.skills.length; i++) {
-                    const skill = player.skills[i];
-                    skillValue += `${skillData[skill].number} - ${skillData[skill].name}\n`;
+                for(let i = 0; i < player.abilities.length; i++) {
+                    const ability = player.abilities[i];
+                    abilityValue += `${abilityData[ability].number} - ${abilityData[ability].name}\n`;
                 }
 
-                if(skillValue == "")
-                    skillValue = "No skills";
+                if(abilityValue == "")
+                    abilityValue = "No ability";
 
                 var mainEmbed = new EmbedBuilder()
                     .setTitle("Na'vi, your personal combat assistant")
                     .addFields({ name: "Name", value: player.name })
                     .addFields({ name: "Health", value: player.health + "/" + player.stats.vitality })
                     .addFields({ name: "Timeline", value: player.timeline + " Timeline" })
-                    .addFields({ name: "Skills", value: skillValue })
+                    .addFields({ name: "Abilities", value: abilityValue })
 
                 if(player.type == "player") {
 
@@ -72,7 +72,7 @@ module.exports = {
                     .addFields({ name: "Class", value: player.class })
                     .addFields({ name: "Health", value: player.health + "/" + player.stats.vitality })
                     .addFields({ name: "Timeline", value: player.timeline + " Timeline" })
-                    .addFields({ name: "Skills", value: skillValue })
+                    .addFields({ name: "Abilities", value: abilityValue })
 
                 }
 
@@ -144,18 +144,18 @@ async function editDisplayer(interaction, type, combat) {
             const player = combat;
             embed.setDescription(`${player.name}'s data.`);
 
-            let skillString = "";
-            const skillData = JSON.parse(fs.readFileSync("./data/skills.json", "utf8"));
+            let abilityString = "";
+            const abilityData = JSON.parse(fs.readFileSync("./data/abilities.json", "utf8"));
 
             embed.addFields({ name: "HP: " + player.health + "/" + player.stats.vitality, value: getHealthBar(player.health, player.stats.vitality) });
 
-            if(player.skills.length == 0)
-                skillString = "*No skill currently active.*";
-            for(let i = 0; i < player.skills.length; i++) {
-                skillString += `${skillData[player.skills[i]].name},`;
+            if(player.abilities.length == 0)
+                abilityString = "*No ability currently active.*";
+            for(let i = 0; i < player.abilities.length; i++) {
+                abilityString += `${abilityData[player.abilities[i]].name},`;
             }
 
-            embed.addFields({ name: "Skills:", value: skillString.substring(0, skillString.length - 1) });
+            embed.addFields({ name: "Abilities:", value: abilityString.substring(0, abilityString.length - 1) });
 
             // TODO: ADD STATUSES
 

@@ -2,6 +2,7 @@ const { Client, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const rpgInfoUtils = require('./rpgInfoUtils.js');
 const classes = require('../data/classes.json');
+const abilitySetup = require('../setup/abilitySetup.js');
 
 // Player data management
 
@@ -24,7 +25,7 @@ exports.create = async function(id, className) {
 
     const classData = classes[className];
 
-    const skill = JSON.parse(fs.readFileSync(`./data/misc/levelRewards.json`))[className]["0"][0];
+    const ability = JSON.parse(fs.readFileSync(`./data/misc/levelRewards.json`))[className]["0"][0];
     const data = [
         { name: "info", class: className, money: 100, level: 1, exp: 0, state: {name: "idle"}, health: classData.base_stats.vitality, max_health: classData.base_stats.vitality, energy: 3 },
         { name: "stats", 
@@ -35,7 +36,7 @@ exports.create = async function(id, className) {
             agility: classData.base_stats.agility,
             intelligence: classData.base_stats.intelligence,
         },
-        { name: "inventory", items: [], equipItems: [], skills: [skill.id] , activeSkills: [skill.id], equiped: {
+        { name: "inventory", items: [], equipItems: [], abilities: [ability.id] , activeAbilities: [ability.id], equiped: {
             weapon: null,
             helmet: null,
             chestplate: null,
@@ -77,7 +78,7 @@ exports.getData = async function(id, name) {
 
 exports.getEquiped = async function(id) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
-    const result = await playerCollection.findOne({ name: "inventory" }, { projection: {_id: 0, items: 0, equipItems: 0, skills: 0, activeSkills: 0} });
+    const result = await playerCollection.findOne({ name: "inventory" }, { projection: {_id: 0, items: 0, equipItems: 0, abilities: 0, activeAbilities: 0} });
 
     return result.equiped;
 }   
@@ -309,10 +310,10 @@ exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
             const reward = levelRewards[level][i];
 
             switch(reward.type) {
-                case "skill":
-                    const { learnSkill } = require("./skillUtils.js");
-                    learnSkill(id, reward.id);
-                    field += `Skill: ${reward.name}\n`;
+                case "ability":
+                    const { learnAbility } = require("./abilityUtils.js");
+                    learnAbility(id, reward.id);
+                    field += `Ability: ${reward.name}\n`;
                     break;
             }
         }

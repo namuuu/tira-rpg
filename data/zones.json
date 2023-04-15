@@ -1,7 +1,7 @@
 {
     "slime_lake": {
         "name": "Slime Lake",
-        "description": "A quiet place with only slimes roaming around. It's a good place to train your skills.",
+        "description": "A quiet place with only slimes roaming around. It's a good place to train your abilities.",
         "color": [144, 238, 144],
         "required": {
             "level": null,

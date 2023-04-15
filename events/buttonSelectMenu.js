@@ -6,7 +6,7 @@ const shopsData = require('../data/shops.json');
 const { displayInventory } = require('../utils/inventoryUtils.js');
 const { startCombat, addPlayerToCombat, removePlayerFromCombat } = require('../manager/combatManager.js');
 const { acceptInvitation } = require('../utils/partyUtils.js');
-const { sendStringAllSkills, sendModal } = require('../utils/skillUtils.js');
+const { sendStringAllAbilities, sendModal } = require('../utils/abilityUtils.js');
 const { receiveButton } = require('../utils/equipUtils.js');
 
 const buttons = new Map();
@@ -47,14 +47,14 @@ module.exports = {
             case 'displayInventory':
                 displayInventory(userId, interaction); // Displays the inventory of a player (inventoryUtils.js)
                 return;
-            case 'displaySkills':
-                const ret = await sendStringAllSkills(user.username, userId); // Displays all the skills of a player (skillUtils.js)
+            case 'displayAbilities':
+                const ret = await sendStringAllAbilities(user.username, userId); // Displays all the abilities of a player (abilityUtils.js)
                 interaction.reply(ret);
                 return;
-            case 'select_skill':
+            case 'selectAbility':
                 sendModal(interaction, true, args[0]);
                 return;
-            case 'unselect_skill':
+            case 'unselectAbility':
                 sendModal(interaction, false, args[0]);
                 return;
             case 'joinFight':
