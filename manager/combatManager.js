@@ -355,19 +355,26 @@ exports.searchForMonsters = async function(interaction, combat) {
         currentRange += parseInt(monsters[i]["spawn-chance"]);
         if (random <= currentRange) {
             for(var j in monsters[i]["m-names"]) {
-                await exports.addEntityToCombat(interaction.channel, monsters[i]["m-names"][j]);
+                combat = await exports.addEntityToCombat(interaction.channel, monsters[i]["m-names"][j]);
             }
             break;
         }
     }
 
-    return true;
+    console.log(interaction);
+    const startMessage = await interaction.channel.fetchStarterMessage();
+    util.updateMainMessage(combat, startMessage, "battle");
+
+    if(combat.team2.length == 0) {
+        return false;
+    }
+
+    return combat;
 }
 
 exports.addEntityToCombat = async function(thread, entity) {
     let combatId = thread.id;
     let combatCollection = await util.getCombatCollection(combatId);
-    let originMessage = await thread.fetchStarterMessage();
 
     if (combatCollection == null) {
         console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
@@ -393,7 +400,7 @@ exports.addEntityToCombat = async function(thread, entity) {
 
     console.log("[DEBUG] " + entity + " joined combat " + combatId); 
 
-    return combatCollection;
+    return info;
 }
 
 exports.startCombat = async function(interaction) {
@@ -426,9 +433,9 @@ exports.startCombat = async function(interaction) {
                 return;
             }
             const ret = await exports.searchForMonsters(interaction, combatData);
-            if(ret == false) {
+            if(ret == false)
                 return;
-            }
+            combatData = ret;
             break;
         case "pvp":
             if (combatData.team1.length == 0 || combatData.team2.length == 0) {
@@ -447,8 +454,7 @@ exports.startCombat = async function(interaction) {
     exports.combatLoop(thread, combatData);
 }
 
-exports.combatLoop = async function(thread) {
-    const combatData = await util.getCombatCollection(thread.id);
+exports.combatLoop = async function(thread, combatData) {
     const soonestFighter = util.getSoonestTimelineEntity(combatData);
     const exeData = {
         combat: combatData,
@@ -478,9 +484,6 @@ exports.combatLoop = async function(thread) {
 
         }
     };
-    
-    const startMessage = await thread.fetchStarterMessage();
-    util.updateMainMessage(combatData, startMessage, "battle");
 
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
