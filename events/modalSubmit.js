@@ -1,5 +1,5 @@
 const player = require('../utils/playerUtils.js');
-const skill = require('../utils/skillUtils.js');
+const skill = require('../utils/abilityUtils.js');
 const equip = require('../utils/equipUtils.js');
 
 module.exports = {
@@ -17,10 +17,10 @@ module.exports = {
         if(!(await player.doesExists(user.id))) return;
 
         switch(command) {
-            case 'select_skill':
+            case 'selectAbility':
                 skill.receiveModal(interaction, true);
                 break;
-            case 'unselect_skill':
+            case 'unselectAbility':
                 skill.receiveModal(interaction, false);
                 break;
             case 'equip':

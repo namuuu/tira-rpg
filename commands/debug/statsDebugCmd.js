@@ -1,5 +1,4 @@
 const player = require('../../utils/playerUtils.js');
-const skill = require('../../utils/skillUtils.js');
 
 module.exports = {
   name: "debug-stat",
@@ -28,6 +27,15 @@ module.exports = {
                     message.reply(author.username + "'s current state: " + state.name);
                 else
                     message.reply("State is null or undefined.");
+                break;
+            case "free":
+                player.setState(null, authorId, {name: "idle"});
+                message.reply("Set " + author.username + "'s state to idle.");
+                break;
+            case "add-energy":
+                player.energy.add(authorId, query);
+                message.reply("Added " + query + " energy to " + author.username + ".");
+                break;
             case "add-exp":
                 player.exp.award(authorId, query, message.channel);
                 break;

@@ -61,7 +61,7 @@ module.exports = {
         
 
         try {
-            client.commands.get(command).execute(message, args);
+            await client.commands.get(command).execute(message, args);
         } catch(error) {
             // Catch the error if there's a dev issue
             console.error(error);

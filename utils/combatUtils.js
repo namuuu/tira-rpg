@@ -1,10 +1,14 @@
 const { Client, EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const fs = require('fs');
 const player = require('../utils/playerUtils.js');
 const inventory =  require('../utils/inventoryUtils.js');
 const manager = require('../manager/combatManager.js');
-const skillUtil = require('../utils/skillUtils.js');
-const skillList = require('../data/skills.json');
+const abilityUtil = require('./abilityUtils.js');
+const abilityList = require('../data/abilities.json');
 const mobList = require('../data/monster.json');
+const logger = require('./combat/loggerData.js');
+
+exports.log = {};
 
 /**
  * Creates a thread from a message
@@ -47,8 +51,7 @@ exports.createThread = async function(message) {
  */
 exports.deleteThread = async function(channel) {
     if (channel.isThread()) {
-        channel.delete();
-
+        channel.delete().catch(error => {});
         return;
     } else {
         channel.send("It doesn't seem like a thread...");
@@ -72,6 +75,26 @@ exports.getCombatCollection = async function(threadId) {
     });
 }
 
+exports.updateCombatCollection = async function(threadId, combat) {
+    const combatDatabase = Client.mongoDB.db('combat-data').collection(threadId);
+
+    const update = {
+        $set: {
+            team1: combat.team1,
+            team2: combat.team2,
+            current_turn: combat.current_turn,
+            current_action: combat.current_action,
+            current_timeline: combat.current_timeline
+        }
+    }
+
+    await combatDatabase.updateOne({}, update, { upsert: true });
+
+    return new Promise(async resolve => {
+        resolve();
+    });
+}
+
 /**
  * adds time to a player's timeline
  * @param {*} combatId the combat concerned
@@ -80,7 +103,7 @@ exports.getCombatCollection = async function(threadId) {
  * @returns 
  */
 exports.addTimeline = async function(combatId, playerId, time) {
-    let combatInfo = await this.getCombatCollection(combatId);
+    let combatInfo = await exports.getCombatCollection(combatId);
 
     if (combatInfo == null) {
         console.log("[DEBUG] Attempted to modify a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
@@ -105,25 +128,38 @@ exports.addTimeline = async function(combatId, playerId, time) {
     await combatCollection.updateOne({}, update, { upsert: true });
 }
 
-exports.sendSkillSelector = async function(player, thread) {
+exports.updateTeamData = async function(thread, combatData, team1, team2) {
+    const combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
+
+    const update = {
+        $set: {
+            team1: combatData.team1,
+            team2: combatData.team2,
+        }
+    };
+
+    await combatCollection.updateOne({}, update, { upsert: true });
+}
+
+exports.sendAbilitySelector = async function(player, thread) {
 
     const stringSelectOptions = [];
 
-    for (const skillId of player.skills) {
-        const skill = skillList[skillId];
+    for (const abilityId of player.abilities) {
+        const ability = abilityList[abilityId];
         stringSelectOptions.push({
-            label: skill.name,
-            value: skillId,
-            description: skill.description,
+            label: ability.name,
+            value: abilityId,
+            description: ability.description,
         });
     }
 
     if(stringSelectOptions.length == 0) {
-        const skill = skillList["default"];
+        const ability = abilityList["default"];
         stringSelectOptions.push({
-            label: skill.name,
+            label: ability.name,
             value: "default",
-            description: skill.description,
+            description: ability.description,
         });
     }
 
@@ -132,20 +168,20 @@ exports.sendSkillSelector = async function(player, thread) {
     const row = new ActionRowBuilder()
         .addComponents(
             new StringSelectMenuBuilder()
-                .setCustomId('combat_skill_selector')
-                .setPlaceholder('Choose a skill !')
+                .setCustomId('combat_ability_selector')
+                .setPlaceholder('Choose an ability !')
                 .addOptions(stringSelectOptions)
         );
 
 
 
     const embed = new EmbedBuilder()
-        .setDescription("Which skill do you want to use, <@" + player.id + "> ?")
+        .setDescription("Which ability do you want to use, <@" + player.id + "> ?")
 
     await thread.send({ embeds: [embed], components: [row] });
 }
 
-exports.receiveSkillSelector = async function(interaction) {
+exports.receiveAbilitySelector = async function(interaction) {
     const thread = interaction.channel;
     const combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
     let combatInfo = await this.getCombatCollection(thread.id);
@@ -161,9 +197,10 @@ exports.receiveSkillSelector = async function(interaction) {
         return;
     }
 
-    const skillId = interaction.values[0];
+    const abilityId = interaction.values[0];
+    console.log(abilityId);
 
-    combatInfo.current_action.skill = skillId;
+    combatInfo.current_action.ability = abilityId;
 
     const update = {
         $set: {
@@ -178,22 +215,22 @@ exports.receiveSkillSelector = async function(interaction) {
         thread: interaction.channel,
         casterPlayer: interaction.user,
         casterId: interaction.user.id,
-        skill: skillList[skillId],
+        ability: abilityList[abilityId],
         allyTeam: exports.getPlayerAlliedTeam(interaction.user.id, combatInfo),
         enemyTeam: exports.getPlayerEnemyTeam(interaction.user.id, combatInfo),
     }
 
     interaction.message.delete();
-    switch(skillList[skillId].aim.split('-')[0]) {
+    switch(abilityList[abilityId].aim.split('-')[0]) {
         case "self": // Aiming at self
             exeData.targets = [exports.getPlayerInCombat(interaction.user.id, combatInfo)];
-            exports.executeSkill(exeData)
+            exports.executeAbility(exeData)
         break;
         case "ally":
-            const remainingAllies = exeData.enemyTeam.filter(player => player.health > 0 && player.id != interaction.user.id);
-            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+            const remainingAllies = exeData.allyTeam.filter(player => player.health > 0 && player.id != interaction.user.id);
+            if(abilityList[abilityId].aim.split('-')[1] == "aoe") {
                 exeData.targets = remainingAllies;
-                exports.executeSkill(exeData);
+                exports.executeAbility(exeData);
             } else {
                 if(remainingAllies.length == 1) {
                     exeData.targets = [exeData.allyTeam[0]];
@@ -204,13 +241,13 @@ exports.receiveSkillSelector = async function(interaction) {
         break;
         case "ally+self":
             const remainingAlliesAndSelf = exeData.allyTeam.filter(player => player.health > 0);
-            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+            if(abilityList[abilityId].aim.split('-')[1] == "aoe") {
                 exeData.targets = remainingAlliesAndSelf;
-                exports.executeSkill(exeData);
+                exports.executeAbility(exeData);
             } else {
                 if(remainingAlliesAndSelf.length == 1) {
                     exeData.targets = [remainingAlliesAndSelf[0]];
-                    exports.executeSkill(exeData);
+                    exports.executeAbility(exeData);
                     break;
                 }
                 exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, remainingAlliesAndSelf);
@@ -218,13 +255,13 @@ exports.receiveSkillSelector = async function(interaction) {
         break;
         case "enemy":
             const remainingEnemies = exeData.enemyTeam.filter(player => player.health > 0);
-            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+            if(abilityList[abilityId].aim.split('-')[1] == "aoe") {
                 exeData.targets = remainingEnemies;
-                exports.executeSkill(exeData);
+                exports.executeAbility(exeData);
             } else {
                 if(remainingEnemies.length == 1) {
                     exeData.targets = [remainingEnemies[0]];
-                    exports.executeSkill(exeData);
+                    exports.executeAbility(exeData);
                     break;
                 }
                 exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, remainingEnemies);
@@ -232,20 +269,19 @@ exports.receiveSkillSelector = async function(interaction) {
         break;
         case "all":
             const remainingPlayers = exeData.allyTeam.concat(exeData.enemyTeam).filter(player => player.health > 0);
-            if(skillList[skillId].aim.split('-')[1] == "aoe") {
+            if(abilityList[abilityId].aim.split('-')[1] == "aoe") {
                 exeData.targets = remainingPlayers;
-                exports.executeSkill(exeData);
+                exports.executeAbility(exeData);
             } else {
                 if(remainingPlayers.length == 1) {
                     exeData.targets = [remainingPlayers[0]];
-                    exports.executeSkill(exeData);
+                    exports.executeAbility(exeData);
                     break;
                 }
                 exports.sendTargetSelector(combatInfo, interaction.user, interaction.channel, remainingPlayers);
             }
         break;
         default:
-
         break;
     }
 }
@@ -296,7 +332,7 @@ exports.receiveTargetSelector = async function(interaction) {
         thread: interaction.channel,
         casterPlayer: interaction.user,
         casterId: interaction.user.id,
-        skill: skillList[combatInfo.current_action.skill],
+        ability: abilityList[combatInfo.current_action.ability],
         allyTeam: exports.getPlayerAlliedTeam(interaction.user.id, combatInfo),
         enemyTeam: exports.getPlayerEnemyTeam(interaction.user.id, combatInfo),
         targets: [exports.getPlayerInCombat(interaction.values[0], combatInfo)]
@@ -306,12 +342,13 @@ exports.receiveTargetSelector = async function(interaction) {
 
     interaction.message.delete();
 
-    exports.executeSkill(exeData);
+    exports.executeAbility(exeData);
 }
 
-exports.executeSkill = async function(exeData) {
+exports.executeAbility = async function(exeData) {
     const { thread } = exeData;
-    let log = skillUtil.execute(exeData);
+    exeData.log = [];
+    abilityUtil.execute(exeData);
 
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
@@ -324,22 +361,52 @@ exports.executeSkill = async function(exeData) {
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
-    manager.finishTurn(exeData, log);
+    manager.finishTurn(exeData);
 }
 
-exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, targetId) {
+exports.executeMonsterAttack = async function(combatInfo, thread, monsterId) {
     let exeData = {
         combat: combatInfo,
         thread: thread,
+        allyTeam: exports.getPlayerAlliedTeam(monsterId, combatInfo),
+        enemyTeam: exports.getPlayerEnemyTeam(monsterId, combatInfo),
         casterId: monsterId,
-        targets: [exports.getPlayerInCombat(targetId, combatInfo)],
+        caster: exports.getPlayerInCombat(monsterId, combatInfo),
+        log: []
     }
 
-    let monster = exports.getPlayerInCombat(monsterId, combatInfo);
-    const random = Math.floor(Math.random() * (monster.skills.length));
-    exeData.skill = skillList[monster.skills[random]];
+    let monster = exeData.caster;
 
-    let log = skillUtil.execute(exeData);
+    let aliveAllies = [];
+    aliveAllies.push(...exeData.allyTeam.filter((e) => e.health > 0));
+    let aliveEnemies = [];
+    aliveEnemies.push(...exeData.enemyTeam.filter((e) => e.health > 0));
+
+    exeData.ability = abilityList[monster.abilities[Math.floor(Math.random() * (monster.abilities.length))]];
+
+    switch(exeData.ability.aim.split('-')[0]) {
+        case "self":
+            exeData.targets = [exeData.caster];
+        break;
+        case "ally":
+            if(exeData.ability.aim.split('-')[1] == "aoe")
+                exeData.targets = aliveAllies;
+            else
+                exeData.targets = [aliveAllies[Math.floor(Math.random() * (aliveAllies.length))]];
+        break;
+        case "enemy":
+            if(exeData.ability.aim.split('-')[1] == "aoe")
+                exeData.targets = aliveEnemies;
+            else 
+                exeData.targets = [aliveEnemies[Math.floor(Math.random() * (aliveEnemies.length))]];
+        break;
+        case "all":
+            exeData.targets = aliveEnemies.concat(aliveAllies);
+        break;
+        default:
+    }
+
+    abilityUtil.execute(exeData);
 
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
@@ -352,7 +419,7 @@ exports.executeMonsterAttack = async function(combatInfo, thread, monsterId, tar
 
     await combatCollection.updateOne({}, update, { upsert: true });
 
-    manager.finishTurn(exeData, log);
+    manager.finishTurn(exeData);
 }
 
 exports.getSoonestTimelineEntity = function(combatInfo) {
@@ -446,12 +513,13 @@ exports.createMonsterData = function(combat, monster) {
         stats: {
             vitality: mobData.base_stats.vitality + Math.floor(Math.random(mobData.mod_stats.vitality)),
             strength: mobData.base_stats.strength + Math.floor(Math.random(mobData.mod_stats.strength)),
-            dexterity: mobData.base_stats.dexterity + Math.floor(Math.random(mobData.mod_stats.dexterity)),
+            spirit: mobData.base_stats.spirit + Math.floor(Math.random(mobData.mod_stats.spirit)),
             resistance: mobData.base_stats.resistance + Math.floor(Math.random(mobData.mod_stats.resistance)),
             intelligence: mobData.base_stats.intelligence + Math.floor(Math.random(mobData.mod_stats.intelligence)),
             agility: mobData.base_stats.agility + Math.floor(Math.random(mobData.mod_stats.agility)),
         },
-        equipment: {}
+        equipment: {},
+        effects: {},
     }
 
     if(i > 0) {
@@ -463,15 +531,34 @@ exports.createMonsterData = function(combat, monster) {
     }
 
     dummy.health = dummy.stats.vitality;
+    dummy.max_health = dummy.stats.vitality;
 
-    // Set the skills
-    dummy.skills = [];
-    for (const skill of mobData.skills) {
-        dummy.skills.push(skill.id);
+    // Set the abilities
+    dummy.abilities = [];
+    for (const ability of mobData.abilities) {
+        dummy.abilities.push(ability.id);
     }
 
 
     return dummy;
+}
+
+exports.setInitialPassives = function(player) {
+    if(player.class != undefined) {
+        switch(player.class) {
+            case "warrior":
+                player.effects["solar-gauge"] = {
+                    situation: "before",
+                    value: 0,
+                }
+                break;
+            case "ranger":
+                player.effects["lunar-gauge"] = {
+                    situation: "before",
+                    value: 70,
+            }
+        }
+    }
 }
 
 exports.announceNewTurn = async function(thread, player) {
@@ -484,31 +571,46 @@ exports.announceNewTurn = async function(thread, player) {
             .setColor("#ffffff");
     } else {
         embed
-            .setDescription('It\'s ' + player.id + '\'s turn!')
+            .setDescription('It\'s ' + player.name + '\'s turn!')
             .setColor("#ffffff");
     }
     
 
-    thread.send({ embeds: [embed] });
+    return thread.send({ embeds: [embed] });
 }
 
-exports.getLogger = function(log, playerId) {
+exports.log.getPlayer = function(log, playerId) {
     let playerLog = log.find(player => player.id == playerId);
+
     if(playerLog == null || playerLog == undefined) {
         playerLog = {
             id: playerId,
         };
         log.push(playerLog);
     }
+
     return playerLog;
 }
 
-exports.addToValueTologger = function(log, playerId, valueName, value) {
-    let playerLog = this.getLogger(log, playerId);
+exports.log.getPlayerLog = function(log, playerId, logName) {
+    let playerLog = exports.getLogger(log, playerId);
+    if(playerLog[logName] == null || playerLog[logName] == undefined) {
+        return null;
+    }
+    return playerLog[logName];
+}
+
+exports.log.addInteger = function(log, playerId, valueName, value) {
+    let playerLog = exports.log.getPlayer(log, playerId);
     if(playerLog[valueName] == null || playerLog[valueName] == undefined) {
         playerLog[valueName] = 0;
     }
     playerLog[valueName] += value;
+}
+
+exports.log.addObject = function(log, playerId, object) {
+    let playerLog = exports.getLogger(log, playerId);
+    playerLog[object.name] = object;
 }
 
 /**
@@ -518,17 +620,13 @@ exports.addToValueTologger = function(log, playerId, valueName, value) {
  * @param {*} entity the entity that suffered the effects and is being logged
  * @returns true if the entity died, false otherwise
  */
-exports.logResults = function(embed, log, entity) {
+exports.log.print = function(embed, log, entity) {
     let description = "";
 
-    for (const [effect, value] of Object.entries(log.find(player => player.id == entity.id))) {
-        switch(effect) {
-            case "damage":
-                description += "Lost " + value + " HP (" + entity.health + " left) \n";
-                break;
-            case "heal":
-                description += "Gained " + value + " HP (" + entity.health + " left) \n";
-                break;
+    for(const [effect, value] of Object.entries(log)) {
+        const effectLogger = Object.values(logger).filter(logger => logger.id == effect)[0];
+        if(effectLogger != null) {
+            description += effectLogger.get(value, entity);
         }
     }
 
@@ -570,14 +668,20 @@ exports.checkForVictory = function(combat) {
 
 exports.rewardLoot = async function(combat, thread) {
     var lootTable = [];
+    var lootTotal = 0;
     var totalExp = 0;
     var totalMoney = 0;
+
+    const lootData = JSON.parse(fs.readFileSync('./data/items.json', 'utf8'));
 
     for(const enemy of combat.team2) {
         if(enemy.type == "monster") {
             const enemyType = enemy.id.split("-")[0];
             const enemyData = mobList[enemyType];
             lootTable.push(...enemyData.loots);
+            enemyData.loots.forEach(loot => {
+                lootTotal += loot.weight;
+            });
             totalExp = totalExp + enemyData.exp;
             totalMoney = totalMoney + enemyData.money;
         }   
@@ -596,18 +700,28 @@ exports.rewardLoot = async function(combat, thread) {
 
             var lootDescription = "";
 
-            for(const loot of lootTable) {
-                inventory.giveItem(victor.id, loot.id, loot.pack );
-                lootDescription += loot.id + " x" + loot.pack + "\n";
+            const lootNumber = Math.floor(Math.random() * 3) + 1;
+            
+
+            for(let i = 0; i < lootNumber; i++) {
+                const lootRoll = Math.floor(Math.random() * lootTotal);
+                var lootIndex = 0;
+                var lootSum = 0;
+                while(lootSum < lootRoll) {
+                    lootSum += lootTable[lootIndex].chance;
+                    lootIndex++;
+                }
+                const loot = lootTable[lootIndex];
+                const item = lootData[loot.id];
+                if(item != null && item != undefined && item.name != "none") {
+                    inventory.giveItem(victor.id, loot.id, loot.pack );
+                    lootDescription += item.name + " x" + loot.pack + "\n";
+                }
             }
 
             if(lootDescription != "") {
                 embed.addFields({name: "Loot", value: lootDescription});
             }
-            if(victor.health > 0)
-                player.health.set(victor.id, (victor.health > victor.vitality ? victor.vitality : victor.health));
-            else
-                player.health.set(victor.id, 0);
 
             thread.send({ embeds: [embed] });
         }
@@ -709,7 +823,7 @@ exports.updateMainMessage = function(combatInfo, message, state) {
         switch(combatInfo.type) {
             case "wild-encounter":
                 embed.addFields({name: "Players", value: team1Value});
-                if(team2.length > 0)
+                if(combatInfo.team2.length > 0)
                     embed.addFields({name: "Monsters", value: team2Value});
                 break;
             default:
@@ -719,4 +833,128 @@ exports.updateMainMessage = function(combatInfo, message, state) {
         }
 
     message.edit({ embeds: [embed], components: components}); 
+}
+
+exports.displayTimeline = async function(message) {
+    if(!message.channel.isThread()) {
+        message.reply("Please use this command in a combat thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const combat = await exports.getCombatCollection(message.channel.id);
+
+    if(combat == null) {
+        message.reply("There is no combat going on in this thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const timelines = [];
+
+    for(const player of combat.team1.concat(combat.team2).filter(player => player.health > 0)) {
+        timelines.push({
+            id: player.id,
+            name: player.name,
+            time: player.timeline
+        })
+    }
+
+    timelines.sort((a, b) => (a.time > b.time) ? 1 : -1);
+
+    const embed = new EmbedBuilder()
+        .setTitle("Timeline")
+        .setDescription("This timeline represents the turn " + combat.current_turn + " of the battle.")
+        .setFooter({text: "The timeline of the battle. The first action is at the top, the last at the bottom."});
+
+    for(const timeline of timelines) {
+        console.log(timeline);
+        embed.addFields({name: timeline.name, value: timeline.time + ' '});
+    }
+
+    message.reply({ embeds: [embed] });
+}
+
+exports.sendForfeit = async function(message) {
+
+    // check if the command is used in a thread
+    if(!message.channel.isThread()) {
+        message.reply("Please use this command in a combat thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const combat = await exports.getCombatCollection(message.channel.id);
+
+    // check if there is a combat going on in this thread
+    if(combat == null) {
+        message.reply("There is no combat going on in this thread.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    const player = combat.team1.find(player => player.id == message.author.id);
+
+    // check if the player is in the combat
+    if(player == null) {
+        message.reply("You are not in this combat.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    // check if the player is already KO
+    if(player.health <= 0) {
+        message.reply("You are already KO.").then(msg => {
+            setTimeout(() => {
+                message.delete();
+                msg.delete();
+            }, 5000);
+        });
+        return;
+    }
+
+    player.health = 0;
+
+    await exports.updateCombatCollection(message.channel.id, combat);
+
+    exports.updateMainMessage(combat, message.channel, "battle");
+
+    const result = exports.checkForVictory(combat)
+
+    if(result != 0) {
+        manager.callForVictory(combat, message.channel, result)
+    }
+}
+
+exports.purgeCombat = async function() {
+    Client.mongoDB.db("combat-data").listCollections().toArray(function(err, collections) {
+        if(err) {
+            console.log(err);
+            return;
+        }
+
+        for(const collection of collections) {
+            Client.mongoDB.db("combat-data").collection(collection.name).drop();
+        }
+    }); 
 }

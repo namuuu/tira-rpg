@@ -3,11 +3,21 @@ const inv = require('../utils/inventoryUtils.js');
 const selector = require('../utils/messageTemplateUtils.js');
 const { EmbedBuilder } = require('discord.js');
 const combat = require('../utils/combatUtils.js');
-const zoneData = require('../data/zones.json');
 const fs = require('fs');
+
+const sliders = new Map();
 
 module.exports = {
     name: 'interactionCreate',
+    async setupStringSelect() {
+        const eventFiles = fs.readdirSync("./interactions/stringSelect").filter(file => file.endsWith('.js'));
+
+        for (const file of eventFiles) {
+            const stringSelect = require(`./../interactions/stringSelect/${file}`);
+            sliders.set(stringSelect.name, stringSelect);
+        }
+
+    },
     async trigger(interaction) {
         if (!interaction.isStringSelectMenu()) return;
 	    
@@ -29,9 +39,9 @@ module.exports = {
                 if(!(await player.doesExists(user.id)) || user.id != args[0]) return;
                 inv.display(user, interaction, interaction.values[0], true);
                 break;
-            case 'combat_skill_selector':
+            case 'combat_ability_selector':
                 if(!(await player.doesExists(user.id))) return;
-                combat.receiveSkillSelector(interaction);
+                combat.receiveAbilitySelector(interaction);
                 break;
             case 'combat_target_selector':
                 if(!(await player.doesExists(user.id))) return;
@@ -53,31 +63,11 @@ module.exports = {
                 .setColor(0x0099FF)
                 .setTitle(`:crossed_swords:  ${interaction.user.username}, you are a ${playerClass[interaction.values[0]].name} now !  :crossed_swords:`)
                 .addFields( 
-                    { name: 'There it is... The beginning', value: "Are you ready for a whole new adventure ?" }
+                    { name: 'This is it... The beginning', value: "Are you ready for a whole new adventure ?" }
                 )
                 .setThumbnail(interaction.user.displayAvatarURL());
             
                 await interaction.channel.send({embeds: [displayEmbed]});
-                break;
-            case 'locationChoice':
-                if(args[0] != interaction.user.id) {
-                    interaction.channel.send("If you would like to move your own character, please use the t.move commande yourself ! " + "<@" + interaction.user.id + ">");
-                    return;
-                }
-
-                await interaction.message.delete();
-
-                player.setLocation(interaction.user.id, interaction.values[0]);
-
-                const displayEmbed2 = new EmbedBuilder()
-                .setColor(0x0099FF)
-                .setTitle(':crossed_swords: Tu as changé de lieu ! :crossed_swords:')
-                .addFields(
-                    { name: 'Tu es maintenant dans :', value: zoneData[interaction.values[0]].name }
-                )
-                .setThumbnail(interaction.user.displayAvatarURL());
-
-                await interaction.channel.send({embeds: [displayEmbed2]});
                 break;
             case 'shopChoice':
                 if(args[0] != interaction.user.id) {
@@ -127,9 +117,18 @@ module.exports = {
                 selector.generateShopItemsSelector(interaction, shop, item, interaction.values[0]);
                 break;
             default:
-                return;
+                break;
 
             
         }   
+
+        if(sliders.has(command)) {
+            try {
+                await sliders.get(command).interact(interaction, interaction.values, args);
+            } catch (error) {
+                interaction.deferUpdate();
+                console.error(error);
+            }
+        }
     }
 }

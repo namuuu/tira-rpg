@@ -4,7 +4,7 @@ const player = require('../utils/playerUtils.js');
 const classData = require('../data/classes.json');
 const { calculateExpToNextLevel } = require('../utils/rpgInfoUtils.js');
 const equip = require('./equipUtils.js');
-const skill = require('./skillUtils.js');
+const ability = require('./abilityUtils.js');
 
 exports.getInventoryString = function(inventory) {
     let rawdata = fs.readFileSync('./data/items.json');
@@ -34,13 +34,13 @@ exports.getInventoryString = function(inventory) {
  * @param {*} item item to give
  * @param {*} quantity quantity of the item to give
  */
-exports.giveItem = async function(playerId, item, quantity) {
+exports.giveItem = async function(playerId, item, quantity, channel) {
     const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
 
     // Querying the inventory in the database
     const inventory = await playerCollection.findOne(
         {name: "inventory"}, 
-        {projection: {_id: 0, skills: 0, activeSkills: 0}}
+        {projection: {_id: 0, abilities: 0, activeAbilities: 0, stats: 0, equipment: 0}}
     );
     
     // If the item is already in the inventory, we add the quantity to the existing one
@@ -60,7 +60,15 @@ exports.giveItem = async function(playerId, item, quantity) {
     }
 
     // Updating the inventory in the database
-    const result = await playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
+    playerCollection.updateOne({name: "inventory"}, { $set: { items: inventory.items } }, { upsert: true });
+
+    if(channel != undefined) {
+        const embed = new EmbedBuilder()
+            .setDescription(`<@${playerId}> received ${quantity} ${item}!`)
+            .setColor(0xFFFFFF);
+
+        channel.send({ embeds: [embed] });
+    }
 
     console.groupCollapsed("Item Given");
     console.log(`Given to: ${playerId}`);
@@ -86,8 +94,8 @@ exports.display = async function(player, interaction, type, ack) {
         case "items":
             embed = (await typeItems(embed, playerId)).embed;
             break;
-        case "skills":
-            ret = (await typeSkills(embed, playerId, player.username));
+        case "abilities":
+            ret = (await typeAbilities(embed, playerId, player.username));
             embed = ret.embed;
             buttons.addComponents(ret.components);
             break;
@@ -123,6 +131,7 @@ exports.typeMain = typeMain;
 async function typeMain(embed, playerId) {
     const playerInfo = await player.getData(playerId, "info");
     const playerStats = await player.getData(playerId, "stats");
+    const playerStory = await player.getData(playerId, "story");
 
      // Experience progress bar
      var expBar = "";
@@ -135,18 +144,28 @@ async function typeMain(embed, playerId) {
          expBar += "▱";
      }
 
-    const percHealth = Math.round((playerInfo.health / playerStats.vitality)*100);
+     var energyBar = "";
+     for(var i = 0; i < playerInfo.energy; i++) {
+            energyBar += "▰";
+    } 
+    for(var i = 0; i < 3-playerInfo.energy ; i++) {
+        energyBar += "▱";
+    }
 
-    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerInfo.location];
+
+    const percHealth = Math.round((playerInfo.health / playerInfo.max_health)*100);
+
+    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerStory.locations.current_zone];
     if(zone == undefined)
-        var zoneName = playerInfo.location;
+        var zoneName = playerStory.locations.current_zone;
     else
         var zoneName = zone.name;
 
     embed.addFields(
-        { name: 'HP', value: `${playerInfo.health}/${playerStats.vitality} (${percHealth}%)`, inline: true },
+        { name: 'HP', value: `${playerInfo.health}/${playerInfo.max_health} (${percHealth}%)`, inline: true },
         { name: 'Class', value: classData[playerInfo.class].name, inline: true },
         { name: 'Level ' + playerInfo.level, value: "Exp: " + playerInfo.exp + " / " + expToNextLevel + "\n" + expBar },
+        { name: 'Energy', value: energyBar },
         { name: 'Money', value: '$' + playerInfo.money, inline: true},
         { name: 'Location', value: zoneName }
     );
@@ -192,7 +211,7 @@ async function typeStats(embed, playerId) {
         {name: "Vitality", value: playerStats.vitality + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_vit")})`, inline: true},
         {name: "Strength", value: playerStats.strength + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_str")})`, inline: true},
         {name: "Resistance", value: playerStats.resistance + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_res")})`, inline: true},
-        {name: "Dexterity", value: playerStats.dexterity + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
+        {name: "Spirit", value: playerStats.spirit + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_dex")})`, inline: true},
         {name: "Agility", value: playerStats.agility + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_agi")})`, inline: true},
         {name: "Intelligence", value: playerStats.intelligence + ` (+${equip.stat.getCombined(playerEquip, "raw_buff_int")})`, inline: true},
     );
@@ -200,31 +219,31 @@ async function typeStats(embed, playerId) {
     return {embed: embed};
 }
 
-exports.typeSkills = typeSkills;
-async function typeSkills(embed, playerId, playername) {
-    var data = JSON.parse(fs.readFileSync('./data/skills.json'));
+exports.typeAbilities = typeAbilities;
+async function typeAbilities(embed, playerId, playername) {
+    var data = JSON.parse(fs.readFileSync('./data/abilities.json'));
     const playerData = await player.getData(playerId, "inventory");
-    const skills = playerData.skills.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
-    const activeSkills = playerData.activeSkills.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
+    const abilities = playerData.abilities.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
+    const activeAbilities = playerData.activeAbilities.sort((a, b) => (data[a].number > data[b].number) ? 1 : -1);
 
-    embed.setTitle(`${playername}'s Skills`)
-         .setFooter({text: 'Need to get more info about a specific skill ? Type t.skill <number>'})
+    embed.setTitle(`${playername}'s Abilities`)
+         .setFooter({text: 'Need to get more info about a specific ability ? Type t.ability <number>'})
 
     try {
-        embed.setDescription(skills.length != 0 ? skills.map(skill => `# ${data[skill].number} - ${data[skill].name}`).join(", ") : "No skills learned.");
+        embed.setDescription(abilities.length != 0 ? abilities.map(ability => `# ${data[ability].number} - ${data[ability].name}`).join(", ") : "No ability learned.");
     } catch (error) {
-        embed.setDescription("No skills learned. (There may be an error!)");
+        embed.setDescription("No ability learned. (There may be an error!)");
         console.error(error);
     }
 
     try {
-        embed.addFields({name: "Active Skills", value: skill.getStringActiveSkill(activeSkills)});
+        embed.addFields({name: "Active Abilities", value: ability.getStingActiveAbilities(activeAbilities)});
     } catch (error) {
         console.error(error);
-        embed.addFields({name: "Active Skills", value: "No active skills selected. (There may be an error!)"});
+        embed.addFields({name: "Active Abilities", value: "No active ability. (There may be an error!)"});
     }
 
-    return {embed: embed, components: sendButtonChangeSkill(playerId, skills.length != 0, activeSkills.length != 0)};
+    return {embed: embed, components: sendButtonAbility(playerId, abilities.length != 0, activeAbilities.length != 0)};
 }
 
 exports.typeEquipment = typeEquipment;
@@ -243,21 +262,21 @@ async function typeEquipment(embed, playerId) {
     return {embed: embed, components: components};
 }
 
-function sendButtonChangeSkill(userId, skillEnable, activeSkillEnable) {
+function sendButtonAbility(userId, abilityEnable, activeAbilityEnable) {
     const components = [];
     components.push(
         new ButtonBuilder()
-            .setCustomId("select_skill-" + userId)
-            .setLabel("Select Skill")
+            .setCustomId("selectAbility-" + userId)
+            .setLabel("Select Ability")
             .setStyle("Secondary")
-            .setDisabled(!skillEnable)
+            .setDisabled(!abilityEnable)
     )
     components.push(
         new ButtonBuilder()
-            .setCustomId("unselect_skill-" + userId)
-            .setLabel("Unselect Skill")
+            .setCustomId("unselectAbility-" + userId)
+            .setLabel("Unselect Ability")
             .setStyle("Secondary")
-            .setDisabled(!activeSkillEnable),
+            .setDisabled(!activeAbilityEnable),
     );
 
     return components;
@@ -272,7 +291,7 @@ function addSlider(playerId) {
                 [
                     {label: "Main", value: "main", description: "Display your main stats!"},
                     {label: "Items", value: "items", description: "Display every item you own!"},
-                    {label: "Skills", value: "skills", description: "Manage your skills!"},
+                    {label: "Abilities", value: "abilities", description: "Manage your abilities!"},
                     {label: "Stats", value: "stats", description: "Get a view of your stats!"},
                     {label: "Equipment", value: "equipment", description: "Showcase your stuff!"},
                 ]

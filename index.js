@@ -1,5 +1,5 @@
 // Require the necessary discord.js classes
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
@@ -9,23 +9,8 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent]});
 
-// Setup commands
-const { setupCommands } = require('./setup/commandSetup.js');
-setupCommands(client, process.env.BOT_TOKEN, process.env.APP_ID);
-
-// Setup events
-const { setupEvents } = require('./setup/eventSetup.js');
-setupEvents(client);
-
-// Setup Skills
-const { setupSkills } = require('./setup/skillSetup.js');
-setupSkills(client);
-
-const { setupEquipment } = require('./setup/equipSetup.js');
-setupEquipment(client);
-
-const { setupCaracteristics } = require('./setup/caracteristicsSetup.js');
-setupCaracteristics(client);
+const { setup } = require('./setup.js');
+setup(client);
 
 // Setup mongo
 Client.client = client;
@@ -35,7 +20,18 @@ Client.mongoDB = new MongoClient(process.env.MONGO_URI);
 client.once('ready', () => {
   console.log('\u001b[1;32mTira\'s RPG Bot is ready to execute.' + ' \u001b[0m');
 
-    client.user.setPresence({ activities: [{name: 'Battling'}], status: 'online'});
+  const statuses = [
+    'New to the game? Type t.help !',
+    'Currently in Beta!',
+  ]
+
+  client.user.setActivity("Starting...", { type: ActivityType.Playing });
+
+  let i = 0;
+  setInterval(() => {
+    client.user.setActivity(statuses[i], { type: ActivityType.Playing });
+    i = ++i % statuses.length;
+  }, 10000);
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN_NAMU_SHARD);

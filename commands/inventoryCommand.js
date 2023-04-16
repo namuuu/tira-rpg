@@ -3,7 +3,7 @@ const inv = require('../utils/inventoryUtils.js');
 
 module.exports = {
     name: "display",
-    aliases: [],
+    aliases: [ "inv", "inventory"],
     description: "",
     requireCharacter: true,
 
@@ -26,10 +26,10 @@ module.exports = {
                 case "inventory":
                     ret = (await inv.typeItems(embed, author.id)).embed;
                     break;
-                case "skills":
-                case "skill":
-                case "sk":
-                    ret = (await inv.typeSkills(embed, author.id));
+                case "abilities":
+                case "ability":
+                case "abi":
+                    ret = (await inv.typeAbilities(embed, author.id));
                     buttons.addComponents(ret.components);
                     ret = ret.embed;
                     break;

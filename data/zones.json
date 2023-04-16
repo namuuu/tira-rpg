@@ -1,11 +1,12 @@
 {
     "slime_lake": {
         "name": "Slime Lake",
-        "description": "A quiet place with only slimes roaming around. It's a good place to train your skills.",
+        "description": "A quiet place with only slimes roaming around. It's a good place to train your abilities.",
+        "color": [144, 238, 144],
         "required": {
-            "level": "",
-            "quests": "",
-            "items": ""  
+            "level": null,
+            "quests": null,
+            "items": []  
         },
         "monsters": {
             "group1": {
@@ -26,18 +27,19 @@
             },
             "group5": {
                 "m-names": ["king_slime"],
-                "spawn-chance": "5"
+                "spawn-chance": "10000000000000000000000",
+                "min_level": 10
             }
         },
-        "shops": [""]
+        "shops": []
     },
     "temple": {
         "name": "Forgotten Temple",
-        "description": "TEMPLE RUN",
+        "description": "A temple whose history is unknown.",
         "required": {
-            "level": "",
-            "quests": "",
-            "items": ""  
+            "level": null,
+            "quests": null,
+            "items": []  
         },
         "monsters": {
             "group1": {
@@ -53,11 +55,12 @@
     },
     "capital": {
         "name": "La Capitale",
-        "description": "Tutorial/20",
+        "description": "It served as the last bastion of humanity.",
+        "color": [210, 180, 140],
         "required": {
-            "level": "",
-            "quests": "",
-            "items": ""  
+            "level": null,
+            "quests": null,
+            "items": []  
         },
         "monsters": {
         },
@@ -67,20 +70,45 @@
         "name": "Forgotten Outpost",
         "description": "A small outpost that was abandoned a long time ago.",
         "required": {
-            "level": "10",
-            "quests": "",
+            "level": 10,
+            "quests": null,
             "items": ["warhandbook"]  
         },
         "monsters": {
             "group1": {
-                "m-names": ["bird", "slime", "bird"],
-                "spawn-chance": "50"
+                "m-names": ["shadow_rat", "shadow_rat"],
+                "spawn-chance": "20"
             },
             "group2": {
-                "m-names": ["bird"],
-                "spawn-chance": "1000000000000"
+                "m-names": ["fallen_knight"],
+                "spawn-chance": "20"
+            },
+            "group3": {
+                "m-names": ["fallen_archer"],
+                "spawn-chance": "20000"
+            },
+            "group4": {
+                "m-names": ["fallen_archer", "shadow_rat", "shadow_rat"],
+                "spawn-chance": "20"
+            },
+            "group5": {
+                "m-names": ["fallen_knight", "fallen_knight", "lost_soul"],
+                "spawn-chance": "20"
             }
         },
-        "shops": [""]
+        "shops": []
+    },
+    "cinder_valley":
+    {
+        "name": "Cinder Valley",
+        "description": "The base of the moutain.",
+        "required": {
+            "level": null,
+            "quests": null,
+            "items": []  
+        },
+        "monsters": {
+        },
+        "shops": []
     }
 }

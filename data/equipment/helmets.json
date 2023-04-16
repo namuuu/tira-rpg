@@ -31,5 +31,16 @@
             "raw_buff_vit": 4,
             "raw_buff_str": 2
         }
+    },
+    "admin_helmet": {
+        "id": "admin_helmet",
+        "name": "Admin Helmet",
+        "description": "A helmet made by the admin.",
+        "caracteristics": {
+            "raw_buff_vit": 1000,
+            "raw_buff_str": 1000,
+            "raw_buff_int": 1000,
+            "raw_buff_agi": 1000
+        }
     }
 }

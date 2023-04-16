@@ -1,0 +1,128 @@
+const abilityMap = new Map();
+const combatUtils = require('../utils/combatUtils.js');
+const abilityData = require('../utils/combat/abilityData.js');
+
+module.exports = {
+  map: abilityMap,
+  setupAbilities() {
+    console.groupCollapsed("-- Abilities --");
+    console.log("Setting up Abilities...");
+
+    for(const ability of Object.values(abilityData)) {
+      abilityMap.set(ability.id, ability.func);
+      console.log(`> Ability ${ability.name} setup !`);
+    }
+
+    abilityMap.set("mag_damage", mag_damage);
+    abilityMap.set("phys_to_mag_damage", phys_to_mag_damage);
+    abilityMap.set("mag_to_phys_damage", mag_to_phys_damage);
+    abilityMap.set("cooldown", cooldown);
+    abilityMap.set("debuff_stats", debuff_stats);
+    abilityMap.set("poison", poison);
+    abilityMap.set("burn", burn);
+
+    console.log("Abilities are all setup !");
+    console.groupEnd();
+  },
+  
+}
+
+function phys_to_mag_damage(exeData, power, log) {
+  const { combat, casterId, targets } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  for(const target of targets) {
+      const damage = Math.floor((power * (caster.stats.strength / target.stats.spirit) + 2) / 2);
+
+      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+      combatUtils.log.add(log, target.id, "damage", damage);
+  }
+}
+
+function mag_to_phys_damage(exeData, power, log) {
+  const { combat, casterId, targets } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  for(const target of targets) {
+      const damage = Math.floor((power * (caster.stats.intelligence / target.stats.resistance) + 2) / 2);
+
+      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+      combatUtils.log.add(log, target.id, "damage", damage);
+  }
+}
+
+function mag_damage(exeData, power, log) {
+  const { combat, casterId, targets } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  for(const target of targets) {
+      const damage = Math.floor((power * (caster.stats.intelligence / target.stats.spirit) + 2) / 2);
+
+      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+      combatUtils.log.add(log, target.id, "damage", damage);
+  }
+}
+
+function phys_low_health_damage(exeData, quantity, log) {
+  const { combat, casterId, targets } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  for(const target of targets) {
+      const damage = Math.floor((quantity * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+
+      if(target.health < target.max_health * 0.15) {
+        damage = Math.floor(damage * 2);
+      }
+
+      target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+      combatUtils.log.add(log, target.id, "damage", damage);
+  }
+}
+
+function earnSolarGauge(exeData, quantity, log) {
+  const { casterId } = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+  caster.effects["solar-gauge"] += quantity;
+}
+
+function cooldown(exeData, quantity, log) {
+  const { combat, casterId} = exeData;
+
+  const caster = combatUtils.getPlayerInCombat(casterId, combat);
+  caster.timeline += quantity;
+}
+
+function debuff_stats(exeData, debuffs, log) {
+  const { casterId, targets } = exeData;
+
+  const arrayDebuffs = Object.values(Object.values(debuffs));
+
+  for(const debuff of arrayDebuffs) {
+    for(const target of targets) {
+      target.stats[debuff.stat] -= debuff.value;
+      target.effects[debuff.stat] = debuff;
+    }
+  }
+}
+
+function poison(exeData, poison, log) {
+  const { targets } = exeData;
+
+  for(const target of targets) {
+    target.effects['poison'] = poison;
+  }
+}
+
+function burn(exeData, burn, log) {
+  const { targets } = exeData;
+
+  for(const target of targets) {
+    target.effects['burn'] = burn;
+  }
+}

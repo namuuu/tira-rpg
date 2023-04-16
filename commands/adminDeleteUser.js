@@ -4,9 +4,7 @@ module.exports = {
   name: "delete",
   aliases: [],
   description: "",
-  requiredPermission: [""],
   execute(message, args) {
-    console.log(args);
 
     if (args.length >= 1)
       var arg = message.mentions.members.first();

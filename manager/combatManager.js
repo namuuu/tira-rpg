@@ -4,6 +4,7 @@ const util = require('../utils/combatUtils.js');
 const embed = require('../utils/messageTemplateUtils.js');
 const playerUtils = require('../utils/playerUtils.js');
 const equip = require('../utils/equipUtils.js');
+const passives = require('../utils/combat/passiveUtil.js');
 
 
 /**
@@ -24,9 +25,18 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     }
 
     const playerInfo = await playerUtils.getData(creator.id, "info");
+    const playerStory = await playerUtils.getData(creator.id, "story");
 
     if(playerInfo == null) {
         console.log("[ERROR] Tried to instanciate a combat with a non-existent player.");
+        return;
+    }
+
+    if(playerInfo.energy == 0) {
+        console.log("[ERROR] Tried to instanciate a combat with 0 energy.");
+        orderMessage.reply("You don't have enough energy to start a combat.").then(msg => {
+            setTimeout(() => msg.delete(), 5000);
+        });
         return;
     }
     
@@ -40,7 +50,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         return;
     }
     
-    const location = JSON.parse(fs.readFileSync('./data/zones.json', 'utf8'))[playerInfo.location];
+    const location = JSON.parse(fs.readFileSync('./data/zones.json', 'utf8'))[playerStory.locations.current_zone];
 
     if(location == null) {
         console.log("[ERROR] Tried to instanciate a combat in a non-existent location.");
@@ -57,6 +67,12 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         return;
     }
 
+    orderMessage.reply("You consumed 1 energy!").then(msg => {
+        setTimeout(() => msg.delete(), 5000);
+    });
+
+    playerUtils.energy.add(creator.id, -1);
+
     const searchEmbed = new EmbedBuilder()
         .setTitle("Searching for an encounter...")
 
@@ -64,12 +80,11 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     const messageId = message.id;
 
     await util.createThread(message, creator, playerInfo.location);
-
     
     const combatCollection = Client.mongoDB.db('combat-data').collection(messageId);
     const combatData = [
         {
-            zone: playerInfo.location,
+            zone: playerStory.locations.current_zone,
             type: 'wild-encounter',
             creator: creator.id,
             current_turn: 0,
@@ -78,7 +93,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
                 current_player_id: null,
                 current_player_team: null,
                 aim_at: null,
-                skill: null,
+                ability: null,
             },
             team1: [],
             team2: [],
@@ -88,6 +103,8 @@ exports.instanciateCombat = async function(orderMessage, creator) {
     await combatCollection.insertMany(combatData, { ordered: true});
     await embed.sendEncounterMessage(message, 'wild-encounter');
 
+    orderMessage.delete();
+
     return messageId;
 }
 
@@ -96,7 +113,7 @@ exports.deleteCombat = async function(channel) {
     const combatCollection = Client.mongoDB.db('combat-data').collection(channel.id);
     const combatData = await util.getCombatCollection(channel.id);
 
-    if(combatData == null) {
+    if(combatData == null || combatData == undefined || combatData.team1 == null || combatData.team2 == null) {
         console.log("[DEBUG] Attempted to delete a non-existent combat. (NON_EXISTENT_COMBAT_DELETE_ATTEMPT)");
         return;
     }
@@ -107,7 +124,12 @@ exports.deleteCombat = async function(channel) {
         }
     }
 
-    util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
+    try {
+        util.updateMainMessage(combatData, await channel.fetchStarterMessage(), "cancelled");
+    } catch (error) {
+        console.log("[ERROR] Tried to update a non-existent main message.");
+    }
+    
     util.deleteThread(channel);
 
     await combatCollection.drop(function(err, res) {
@@ -150,10 +172,12 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
 
     if (info == null) {
         console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
+        interaction.deferUpdate();
         return;
     }
     if(team != 1 && team != 2) {
         console.log("[DEBUG] Attempted to join a non-existent team. (NON_EXISTENT_TEAM_JOIN_ATTEMPT)");
+        interaction.deferUpdate();
         return;
     }
 
@@ -188,20 +212,24 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
         name: playerDiscord.username,
         type: "human",
         class: playerInfo.class,
-        health: playerInfo.health + equip.stat.getCombined(playerEquip, "raw_buff_vit"),
+        health: playerInfo.health,
+        max_health: playerInfo.max_health,
         timeline: 0,
         stats: {
             vitality: playerStats.vitality + equip.stat.getCombined(playerEquip, "raw_buff_vit"),
             strength: playerStats.strength + equip.stat.getCombined(playerEquip, "raw_buff_str"),
-            dexterity: playerStats.dexterity + equip.stat.getCombined(playerEquip, "raw_buff_dex"),
+            spirit: playerStats.spirit + equip.stat.getCombined(playerEquip, "raw_buff_spi"),
             resistance: playerStats.resistance + equip.stat.getCombined(playerEquip, "raw_buff_res"),
             intelligence: playerStats.intelligence + equip.stat.getCombined(playerEquip, "raw_buff_int"),
             agility: playerStats.agility + equip.stat.getCombined(playerEquip, "raw_buff_agi"),
         },
         equipment: {},
-        skills: playerInv.activeSkills,
+        effects: {},
+        abilities: playerInv.activeAbilities,
         items: playerInv.items,
     }
+
+    util.setInitialPassives(player);
 
     team == 1 ? info.team1.push(player) : info.team2.push(player); // Adds a player to their corresponding team.
 
@@ -279,7 +307,21 @@ exports.removePlayerFromCombat = async function(playerId, combatId, interaction)
 }
 
 exports.searchForMonsters = async function(interaction, combat) {
-    var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone];
+    var bestPlayer;
+
+    for(player of combat.team1) {
+        if(bestPlayer == null) {
+            bestPlayer = player;
+        } else {
+            if(player.max_health > bestPlayer.max_health) {
+                bestPlayer = player;
+            }
+        }
+    }
+
+    bestPlayer = await playerUtils.getData(bestPlayer.id, "info");
+
+    var zone = JSON.parse(fs.readFileSync('./data/zones.json'))[combat.zone]; // Gets the zone data from the JSON file.
 
     if(zone == null) {
         console.log("[DEBUG] Attempted to spawn monsters in a non-existent zone. (NON_EXISTENT_ZONE_SPAWN_ATTEMPT)");
@@ -291,6 +333,12 @@ exports.searchForMonsters = async function(interaction, combat) {
     if(monsters == null || monsters == undefined || monsters.length == 0) {
         console.log("[DEBUG] Attempted to spawn monsters in a zone with no monsters. (ZONE_WITH_NO_MONSTERS_SPAWN_ATTEMPT)");
         return false;
+    }
+
+    for(var m in monsters) {
+        if(monsters[m].min_level != undefined && monsters[m].min_level > bestPlayer.level) {
+            monsters.splice(m, 1);
+        }
     }
 
     var maxRange = 0;
@@ -305,19 +353,25 @@ exports.searchForMonsters = async function(interaction, combat) {
         currentRange += parseInt(monsters[i]["spawn-chance"]);
         if (random <= currentRange) {
             for(var j in monsters[i]["m-names"]) {
-                await exports.addEntityToCombat(interaction.channel, monsters[i]["m-names"][j]);
+                combat = await exports.addEntityToCombat(interaction.channel, monsters[i]["m-names"][j]);
             }
             break;
         }
     }
 
-    return true;
+    const startMessage = await interaction.channel.fetchStarterMessage();
+    util.updateMainMessage(combat, startMessage, "battle");
+
+    if(combat.team2.length == 0) {
+        return false;
+    }
+
+    return combat;
 }
 
 exports.addEntityToCombat = async function(thread, entity) {
     let combatId = thread.id;
     let combatCollection = await util.getCombatCollection(combatId);
-    let originMessage = await thread.fetchStarterMessage();
 
     if (combatCollection == null) {
         console.log("[DEBUG] Attempted to join a non-existent combat. (NON_EXISTENT_COMBAT_JOIN_ATTEMPT)");
@@ -339,12 +393,11 @@ exports.addEntityToCombat = async function(thread, entity) {
         }
     };
 
-    // Modifying the main embed to represent the players
-    util.updateMainMessage(info, originMessage, "prebattle");
-
     await combatCollection.updateOne({}, update, { upsert: true });
 
     console.log("[DEBUG] " + entity + " joined combat " + combatId); 
+
+    return info;
 }
 
 exports.startCombat = async function(interaction) {
@@ -376,10 +429,10 @@ exports.startCombat = async function(interaction) {
                 interaction.reply({ content: "You need at least one player in your team!", ephemeral: true });
                 return;
             }
-            const ret = exports.searchForMonsters(interaction, combatData);
-            if(!ret) {
+            const ret = await exports.searchForMonsters(interaction, combatData);
+            if(ret == false)
                 return;
-            }
+            combatData = ret;
             break;
         case "pvp":
             if (combatData.team1.length == 0 || combatData.team2.length == 0) {
@@ -400,19 +453,23 @@ exports.startCombat = async function(interaction) {
 
 exports.combatLoop = async function(thread, combatData) {
     const soonestFighter = util.getSoonestTimelineEntity(combatData);
+    const exeData = {
+        combat: combatData,
+    }
 
-    await util.announceNewTurn(thread, soonestFighter);
+    this.updateEffects(soonestFighter, "before", exeData, thread);
 
     if(soonestFighter.type == "human") {
+        await new Promise(r => setTimeout(r, 1500));
         combatData.current_action.current_player_id = soonestFighter.id;
         combatData.current_action.aim_at = null;
-        combatData.current_action.skill = null;
-        util.sendSkillSelector(soonestFighter, thread);
+        combatData.current_action.ability = null;
+        util.sendAbilitySelector(soonestFighter, thread);
         console.log("[DEBUG] This is the player's turn. Waiting for player input.");
     } else {
         console.log("[DEBUG] This is the monster's turn. Simulating a turn.");
-        //util.executeSkill(combatData, thread, "default", soonestFighter.id, combatData.team1[0].id);
-        await util.executeMonsterAttack(combatData, thread, soonestFighter.id, combatData.team1[0].id);
+        await new Promise(r => setTimeout(r, 2500));
+        await util.executeMonsterAttack(combatData, thread, soonestFighter.id);
     }
 
     combatData.current_turn++;
@@ -421,33 +478,35 @@ exports.combatLoop = async function(thread, combatData) {
         $set: {
             current_turn: combatData.current_turn,
             current_action: combatData.current_action,
+
         }
     };
-    
-    const startMessage = await thread.fetchStarterMessage();
-    util.updateMainMessage(combatData, startMessage, "battle");
 
     combatCollection = Client.mongoDB.db('combat-data').collection(thread.id);
 
     await combatCollection.updateOne({}, update, { upsert: true });
 }
 
-exports.finishTurn = async function(exeData, log) {
-    const { combat, thread, casterId, targetId, skill } = exeData;
+exports.finishTurn = async function(exeData) {
+    const { combat, thread, casterId, targetId, ability, log } = exeData;
     const caster = util.getPlayerInCombat(casterId, combat);
     const target = util.getPlayerInCombat(targetId, combat);
     let embed = new EmbedBuilder();
 
+    this.updateEffects(caster, "after", exeData, thread);
 
-    let casterName = caster.type == "human" ? "<@" + caster.id + ">" : caster.id;
-    //let targetName = target.type == "human" ? "<@" + target.id + ">" : target.id;
-    
-    embed.setDescription(casterName + " used " + skill.name/* + " on " + targetName + " !"*/);
+    if(caster.type == "human") {
+        const user = await Client.client.users.fetch(caster.id);
+        const avatar = "https://cdn.discordapp.com/avatars/" + user.id + "/" + user.avatar + ".png";
+        embed.setAuthor({ name: caster.name + " used " + ability.name + "!", iconURL: avatar });
+    } else {
+        embed.setAuthor({ name: caster.name + " used " + ability.name + "!" });
+    }
 
     let hasDied = false;
 
     for(player of log) {
-        if(util.logResults(embed, log, util.getPlayerInCombat(player.id, combat)) == true) {
+        if(util.log.print(embed, player, util.getPlayerInCombat(player.id, combat)) == true) {
             hasDied = true;
         }
     }
@@ -463,6 +522,87 @@ exports.finishTurn = async function(exeData, log) {
     } 
     this.combatLoop(thread, combat);
 }
+
+exports.updateEffects = function(player, situation, exeData, thread) {
+    const { combat } = exeData;
+    var update = false;
+
+    //console.log(Object.values(player.effects));
+    //console.log(Object.keys(player.effects));
+
+    for (const [key, value] of Object.entries(player.effects)) {
+        if(situation != value.situation) {
+            continue;
+        }
+
+        //console.log("Effect: " + key + " | Situation: " + value.situation + " | Proc: " + value.proc + " | Value: " + value.value);
+
+        update = true;
+
+        for(const passive of Object.values(passives)) {
+            if(passive.id == key) {
+                passive.proc(exeData, player, value);
+            }
+        }
+
+        if(player.effects[key].duration != undefined) {
+            player.effects[key].duration--;
+            if (player.effects[key].duration <= 0) {
+                if(player.effects[key].onEnd != undefined) {
+                    player.effects[key].onEnd(exeData, player, value);
+                }
+                delete player.effects[key];
+            }
+            continue;
+        }
+    }
+
+    if(!update) {
+        return;
+    }
+
+    if(combat.team1.includes(player)) {
+        combat.team1[combat.team1.indexOf(player)] = player;
+    }
+
+    if(combat.team2.includes(player)) {
+        combat.team2[combat.team2.indexOf(player)] = player;
+    }
+
+
+
+    util.updateTeamData(thread, combat, combat.team1, combat.team2);
+    
+    /*if(Object.keys(player.effects).length > 0) {
+        for(var i = 0; i < Object.keys(player.effects).length; i++) {
+            if(player.effects[Object.keys(player.effects)[i]].proc.split('-')[0] == 'damage') {
+                if(situation == "after") {
+                    if(player.effects[Object.keys(player.effects)[i]].proc.split('-')[1] == 'after') {
+                        console.log("Damage effect: " + player.effects[Object.keys(player.effects)[i]].value);
+                        player.stats.vitality -= player.effects[Object.keys(player.effects)[i]].value;
+                    }
+                } else if(situation == "before") {
+                    if(player.effects[Object.keys(player.effects)[i]].proc.split('-')[1] == 'before') {
+                        player.stats.vitality -= player.effects[Object.keys(player.effects)[i]].value;
+                    }
+                }
+            }
+
+            if(player.effects[Object.keys(player.effects)[i]].proc == "buff" || player.effects[Object.keys(player.effects)[i]].duration == 1 || situation == "after") {
+                player.stats[player.effects[Object.keys(player.effects)[i]].stat] -= player.effects[Object.keys(player.effects)[i]].value;
+            }
+                
+            if (situation == "after") {
+                console.log("Duration: " + player.effects[Object.keys(player.effects)[i]].duration);
+                if(player.effects[Object.keys(player.effects)[i]].duration > 1) {
+                    player.effects[Object.keys(player.effects)[i]].duration = player.effects[Object.keys(player.effects)[i]].duration - 1;
+                } else {
+                    delete player.effects[Object.keys(player.effects)[i]];
+                }
+            }
+        }
+    }*/
+    }
 
 exports.callForVictory = async function(combat, thread, victor) {
     switch(combat.type) {
@@ -483,6 +623,14 @@ exports.callForVictory = async function(combat, thread, victor) {
     for(player of combat.team1.concat(combat.team2)) {
         if(player.type == "human") {
             playerUtils.setState(null, player.id, {name: "idle"});
+            const asyncedData = await playerUtils.getData(player.id, "info");
+            if(player.health > asyncedData.max_health) {
+                playerUtils.health.set(player.id, asyncedData.max_health);
+            } else if(player.health < 0) {
+                playerUtils.health.set(player.id, 0);
+            } else {
+                playerUtils.health.set(player.id, player.health);
+            }
         }
     }
 

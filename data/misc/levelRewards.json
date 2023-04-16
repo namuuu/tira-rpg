@@ -1,17 +1,25 @@
 {
+    "all": {
+        "10": [
+            {
+                "name": "Forgotten Outpost",
+                "type": "location"
+            }
+        ]
+    },
     "warrior":{
         "0": [
             {
                 "id": "slash",
                 "name": "Slash",
-                "type": "skill"
+                "type": "ability"
             }
         ],
         "4": [
             {
                 "id": "bite",
                 "name": "Bite",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     },
@@ -19,15 +27,15 @@
         "0": [
             {
                 "id": "slash",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     },
-    "mage":{
+    "magician":{
         "0": [
             {
                 "id": "slash",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     },
@@ -35,7 +43,7 @@
         "0": [
             {
                 "id": "slash",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     },
@@ -43,7 +51,7 @@
         "0": [
             {
                 "id": "slash",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     }

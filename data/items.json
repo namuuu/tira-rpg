@@ -7,6 +7,10 @@
     "name": "Slime Juice",
     "description": "A weird slimy liquid, with a pale blue color. It could be useful for sticking things together."
   },
+  "slimy_crown": {
+    "name": "Slimy Crown",
+    "description": "A crown made of slime. It's very sticky."
+  },
   "basic_fang": {
     "name": "Basic Fang",
     "description": "A basic fang. It's not very sharp."

@@ -1,7 +1,30 @@
 {
     "serene": {
+        "id": "serene",
         "name": "Serene",
+        "short_description": "A serene place to relax and enjoy the view.",
         "description": "A serene place to relax and enjoy the view.",
-        "zones": ["capital", "temple", "slime_lake"]
+        "zones": ["capital", "temple", "slime_lake","forgotten_outpost"]
+    },
+    "amethyst_forest": {
+        "id": "amethyst_forest",
+        "name": "The Amethyst Forest",
+        "short_description": "A forest whose trees vary in color from green to purple.",
+        "description": "A forest whose trees vary in color from green to purple. It is said that the trees are infused with mana, however no one has been able to extract it.",
+        "zones": []
+    },
+    "moondust_mountain": {
+        "id": "moondust_mountain",
+        "name": "Moondust Mountain",
+        "short_description": "A pale looking moutain.",
+        "description": "A pale looking moutain, shining with a faint blue light when exposed to the moonlight.",
+        "zones": ["cinder_valley"]
+    },
+    "constellation_peak": {
+        "id": "constellation_peak",
+        "name": "Constellation Peak",
+        "short_description": "The peak of Moondust Moutain.",
+        "description": "The peak of Moondust Moutain, many legends take place here.",
+        "zones": []
     }
 }

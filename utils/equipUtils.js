@@ -1,5 +1,6 @@
-const { Client, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Client, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } = require('discord.js');
 const equipSetup = require('../setup/equipSetup.js');
+const playerUtils = require('./playerUtils.js');
 
 exports.stat = {};
 
@@ -23,9 +24,30 @@ exports.display = async function(playerId, channel) {
             makeButton("Equip", "equip-equip"),
             makeButton("Unequip", "equip-unequip"),
             makeButton("List"  , "equip-list"));
+        
+    const slider = new ActionRowBuilder()
+        .addComponents(
+            addSlider(playerId));
 
 
-    channel.send({ embeds: [embed], components: [row] });
+    channel.send({ embeds: [embed], components: [slider, row] });
+}
+
+function addSlider(playerId) {    
+    const invSelector = new StringSelectMenuBuilder()
+        .setCustomId('inventory_selector-' + playerId)
+        .setPlaceholder('Nothing selected')
+            .addOptions(
+                [
+                    {label: "Main", value: "main", description: "Display your main stats!"},
+                    {label: "Items", value: "items", description: "Display every item you own!"},
+                    {label: "Abilities", value: "abilities", description: "Manage your abilities!"},
+                    {label: "Stats", value: "stats", description: "Get a view of your stats!"},
+                    {label: "Equipment", value: "equipment", description: "Showcase your stuff!"},
+                ]
+        )
+
+    return invSelector;
 }
 
 
@@ -95,7 +117,7 @@ exports.obtain = async function(playerId, equipId, type) {
 
     playerCollection.updateOne(query, update, options);
 
-    console.log("DEBUG: " + equip.name + " added to " + playerId + "'s inventory.");
+    console.log("[DEBUG] " + equip.name + " added to " + playerId + "'s inventory.");
 }
 
 exports.trash = async function(playerId, equipId, type) {
@@ -130,18 +152,13 @@ exports.trash = async function(playerId, equipId, type) {
     console.log("DEBUG: " + equip.name + " trashed from " + playerId + "'s inventory.");
 }
 
-exports.equip = async function(playerId, equipId, type) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
+exports.equip = async function(playerId, query, type) {
+    const data = await playerUtils.getData(playerId, "info");
+    const inv = await playerUtils.getData(playerId, "inventory");
 
-    const query = { name: "inventory" };
-    const options = { 
-        projection: {equipItems: 1, equiped: 1},
-        upsert: true,
-    };
+    inv.equipItems = inv.equipItems.filter(item => item.type == type);
 
-    const inv = await playerCollection.findOne(query, options);
-
-    const equip = inv.equipItems.filter(item => item.id == equipId).filter(item => item.type == type)[0];
+    const equip = exports.leveinsteinSearch(query, inv.equipItems)[0].equip;
     
     if(equip == null) {
         console.log("ERROR: Tried to equip an item that the user doesn't possess.");
@@ -154,37 +171,100 @@ exports.equip = async function(playerId, equipId, type) {
         return "invalidtype";
     }
 
+    // Remove old max health
+    if(inv.equiped[type] != null && inv.equiped[type].caracteristics.raw_buff_vit != undefined) {
+        data.max_health -= inv.equiped[type].caracteristics.raw_buff_vit;
+    }
+
+    // Add new max health
+    if(equip.caracteristics.raw_buff_vit != undefined) {
+        data.max_health += equip.caracteristics.raw_buff_vit;
+    }
+
+    console.log("New max health: " + data.max_health);
+
+    // Check if health is over max health
+    if(data.health > data.max_health) {
+        data.health = data.max_health;
+    }
+
     inv.equiped[type] = equip;
 
-    const update = { $set: { equiped: inv.equiped }};
-
-    playerCollection.updateOne(query, update, options);
+    await playerUtils.updateData(playerId, {equiped: inv.equiped},  "inventory");
+    await playerUtils.updateData(playerId, {max_health: data.max_health, health: data.health}, "info");
 
     return true;
 }
 
 exports.unequip = async function(playerId, type) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
+    const data = await playerUtils.getData(playerId, "info");
+    const inv = await playerUtils.getData(playerId, "inventory");
 
-    const query = { name: "inventory" };
-    const options = { 
-        projection: {equiped: 1},
-        upsert: true,
-    };
-
-    const inv = await playerCollection.findOne(query, options);
     if(inv.equiped[type] == null) {
+        console.log(inv);
+        console.log(type);
         console.log("ERROR: Tried to unequip an item that the user hasn't equipped.");
         return "notequip";
     }
 
+    // Remove old max health
+    if(inv.equiped[type].caracteristics.raw_buff_vit != undefined) {
+        data.max_health -= inv.equiped[type].caracteristics.raw_buff_vit;
+    }
+
+    // Check if health is over max health
+    if(data.health > data.max_health) {
+        data.health = data.max_health;
+    }
+
     inv.equiped[type] = null;
 
-    const update = { $set: { equiped: inv.equiped }};
-
-    playerCollection.updateOne(query, update, options);
+    await playerUtils.updateData(playerId, {equiped: inv.equiped},  "inventory");
+    await playerUtils.updateData(playerId, {max_health: data.max_health, health: data.health}, "info");
 
     return true;
+}
+
+exports.getEquipData = function(equip) {
+    if(typeof equip == "string")
+        equip = equipSetup.equipmentList.filter(item => item.id == equip)[0];
+
+    const embed = new EmbedBuilder()
+        .setTitle(equip.name)
+        .setDescription(equip.description)
+        .setFooter({text: "ID: " + equip.id})
+
+    if(equip.image != undefined)
+        embed.setImage(equip.image);
+
+    return embed;
+}
+
+exports.leveinsteinSearch = function(query, data) {
+    const list = [];
+    var minLev = 999;
+
+    for(equip of data) {
+        const levName = levenshteinDistance(query, equip.name);
+        const levId = levenshteinDistance(query, equip.id);
+        const lev = levName < levId ? levName : levId;
+        
+        list.push({lev: lev, equip: equip});
+
+        if(lev < minLev)
+            minLev = lev;
+    }
+
+    if(minLev == 0) {
+        return list.filter(item => item.lev == 0).sort((a, b) => a.lev - b.lev);
+    }
+
+    minLev = minLev + 2;
+
+    if(minLev > 1.5*(query.length))
+        return [];
+
+    return list.filter(item => item.lev < minLev).sort((a, b) => a.lev - b.lev);
 }
 
 exports.receiveButton = async function(interaction, playerId, args) {
@@ -259,6 +339,7 @@ exports.receiveButton = async function(interaction, playerId, args) {
             } else {
                 console.log("DEBUG: " + result);
                 interaction.reply({content: "You don't have a helmet equipped.", ephemeral: true});
+                return;
             };
             break;
         case "unequipchestplate":
@@ -272,6 +353,7 @@ exports.receiveButton = async function(interaction, playerId, args) {
                         makeButton("List"  , "equip-list"));
                 } else {
                     interaction.reply({content: "You don't have a chestplate equipped.", ephemeral: true});
+                    return;
                 }});
                 break;
         case "unequipboots":
@@ -285,6 +367,7 @@ exports.receiveButton = async function(interaction, playerId, args) {
                         makeButton("List"  , "equip-list"));
                 } else {
                     interaction.reply({content: "You don't have boots equipped.", ephemeral: true});
+                    return;
                 }});
                 break;
         default:
@@ -294,10 +377,19 @@ exports.receiveButton = async function(interaction, playerId, args) {
             break;
     }
 
+
+
+    const slider = new ActionRowBuilder()
+            .addComponents(
+                addSlider(playerId));
+
+    if(row.components.length == 0)
+        return;
+
     if(embed != null) {
-        interaction.update({embeds: [embed], components: [row]});
+        interaction.update({embeds: [embed], components: [slider, row]});
     } else {
-        interaction.update({components: [row]});
+        interaction.update({components: [slider, row]});
     }
 
 }
@@ -417,3 +509,25 @@ exports.stat.getCombined = function(equips, stat) {
 
     return total;
 }
+
+const levenshteinDistance = (str1 = '', str2 = '') => {
+    const track = Array(str2.length + 1).fill(null).map(() =>
+    Array(str1.length + 1).fill(null));
+    for (let i = 0; i <= str1.length; i += 1) {
+       track[0][i] = i;
+    }
+    for (let j = 0; j <= str2.length; j += 1) {
+       track[j][0] = j;
+    }
+    for (let j = 1; j <= str2.length; j += 1) {
+       for (let i = 1; i <= str1.length; i += 1) {
+          const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+          track[j][i] = Math.min(
+             track[j][i - 1] + 1, // deletion
+             track[j - 1][i] + 1, // insertion
+             track[j - 1][i - 1] + indicator, // substitution
+          );
+       }
+    }
+    return track[str2.length][str1.length];
+  };
