@@ -4,7 +4,7 @@
         "description": "Solar Warriors are balanced units, having viable options in most situations.",
         "base_stats": {
             "strength": 15,
-            "vitality": 12,
+            "vitality": 25,
             "resistance": 14,
             "spirit": 8,
             "agility": 6,
@@ -12,7 +12,7 @@
         },
         "mult_stats": {
             "strength": 2,
-            "vitality": 1.5,
+            "vitality": 2.5,
             "resistance": 1.7,
             "spirit": 0.5,
             "agility": 0.5,
@@ -24,7 +24,7 @@
         "description": "Lurkers can create very advantageous situations if they manage to execute their plan.",
         "base_stats": {
             "strength": 12,
-            "vitality": 6,
+            "vitality": 16,
             "resistance": 6,
             "spirit": 14,
             "agility": 14,
@@ -32,7 +32,7 @@
         },
         "mult_stats": {
             "strength": 1.2,
-            "vitality": 0.5,
+            "vitality": 1.5,
             "resistance": 0.8,
             "spirit": 2,
             "agility": 1.8,
@@ -44,7 +44,7 @@
         "description": "Paint Mages use their mastery of paintcraft to create powerful spells.",
         "base_stats": {
             "strength": 4,
-            "vitality": 8,
+            "vitality": 18,
             "resistance": 12,
             "spirit": 10,
             "agility": 8,
@@ -52,7 +52,7 @@
         },
         "mult_stats": {
             "strength": 0.3,
-            "vitality": 1.0,
+            "vitality": 2.0,
             "resistance": 1.4,
             "spirit": 1.2,
             "agility": 1.0,
@@ -64,7 +64,7 @@
         "description": "Lunar need to manage resources carefully to deal a lot of damage.",
         "base_stats": {
             "strength": 6,
-            "vitality": 5,
+            "vitality": 15,
             "resistance": 8,
             "spirit": 15,
             "agility": 14,
@@ -72,7 +72,7 @@
         },
         "mult_stats": {
             "strength": 0.7,
-            "vitality": 0.5,
+            "vitality": 1.5,
             "resistance": 1.0,
             "spirit": 2,
             "agility": 1.2,
@@ -84,7 +84,7 @@
         "description": "Divine Lights are a very versatile class, able to heal and deal damage.",
         "base_stats": {
             "strength": 6,
-            "vitality": 12,
+            "vitality": 22,
             "resistance": 14,
             "spirit": 8,
             "agility": 8,
@@ -92,7 +92,7 @@
         },
         "mult_stats": {
             "strength": 0.6,
-            "vitality": 1.5,
+            "vitality": 2.5,
             "resistance": 1.7,
             "spirit": 0.8,
             "agility": 0.8,
