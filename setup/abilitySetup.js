@@ -20,6 +20,7 @@ module.exports = {
     abilityMap.set("debuff_stats", debuff_stats);
     abilityMap.set("poison", poison);
     abilityMap.set("burn", burn);
+    abilityMap.set("phys_low_health_damage", phys_low_health_damage);
 
     console.log("Abilities are all setup !");
     console.groupEnd();
@@ -27,8 +28,8 @@ module.exports = {
   
 }
 
-function phys_to_mag_damage(exeData, power, log) {
-  const { combat, casterId, targets } = exeData;
+function phys_to_mag_damage(exeData, power) {
+  const { combat, casterId, targets, log} = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
@@ -40,8 +41,8 @@ function phys_to_mag_damage(exeData, power, log) {
   }
 }
 
-function mag_to_phys_damage(exeData, power, log) {
-  const { combat, casterId, targets } = exeData;
+function mag_to_phys_damage(exeData, power) {
+  const { combat, casterId, targets, log } = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
@@ -53,8 +54,8 @@ function mag_to_phys_damage(exeData, power, log) {
   }
 }
 
-function mag_damage(exeData, power, log) {
-  const { combat, casterId, targets } = exeData;
+function mag_damage(exeData, power) {
+  const { combat, casterId, targets, log } = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
@@ -66,8 +67,8 @@ function mag_damage(exeData, power, log) {
   }
 }
 
-function phys_low_health_damage(exeData, quantity, log) {
-  const { combat, casterId, targets } = exeData;
+function phys_low_health_damage(exeData, quantity) {
+  const { combat, casterId, targets, log} = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
@@ -79,11 +80,11 @@ function phys_low_health_damage(exeData, quantity, log) {
       }
 
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
-      combatUtils.log.add(log, target.id, "damage", damage);
+      combatUtils.log.addInteger(log, target.id, "damage", damage);
   }
 }
 
-function earnSolarGauge(exeData, quantity, log) {
+function earnSolarGauge(exeData, quantity) {
   const { casterId } = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
@@ -91,14 +92,14 @@ function earnSolarGauge(exeData, quantity, log) {
   caster.effects["solar-gauge"] += quantity;
 }
 
-function cooldown(exeData, quantity, log) {
+function cooldown(exeData, quantity) {
   const { combat, casterId} = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
   caster.timeline += quantity;
 }
 
-function debuff_stats(exeData, debuffs, log) {
+function debuff_stats(exeData, debuffs) {
   const { casterId, targets } = exeData;
 
   const arrayDebuffs = Object.values(Object.values(debuffs));
@@ -111,7 +112,7 @@ function debuff_stats(exeData, debuffs, log) {
   }
 }
 
-function poison(exeData, poison, log) {
+function poison(exeData, poison) {
   const { targets } = exeData;
 
   for(const target of targets) {
@@ -119,7 +120,7 @@ function poison(exeData, poison, log) {
   }
 }
 
-function burn(exeData, burn, log) {
+function burn(exeData, burn) {
   const { targets } = exeData;
 
   for(const target of targets) {

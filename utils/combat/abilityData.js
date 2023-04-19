@@ -172,9 +172,9 @@ exports.decoloration = {
         for(const target of targets) {
             if(target.effects["paint"] != undefined) {
                 if(target.effects["paint"].value == 1) {
-                    exports.buffStats(data, [{}, {resistance: {value: -13, duration: 1}}], log);
+                    exports.buffStats.func(data, [{}, {resistance: {value: -13, duration: 1}}], log);
                 } else {
-                    exports.buffStats(data, [{}, {resistance: {value: -13, duration: 2}}], log);
+                    exports.buffStats.func(data, [{}, {resistance: {value: -13, duration: 2}}], log);
                 }
 
                 delete target.effects["paint"];
