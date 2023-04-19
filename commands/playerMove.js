@@ -1,6 +1,6 @@
 const { Client, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const player = require("../utils/playerUtils.js");
-const locationJSON = require('../data/location.json');
+const regionsData = require('../data/regions.json');
 const zonesData = require('../data/zones.json');
 
 module.exports = {
@@ -13,16 +13,16 @@ module.exports = {
         const playerStory = await player.getData(message.author.id, "story");
         const playerInventory = await player.getData(message.author.id, "inventory");
 
-        const location = locationJSON[playerStory.locations.current_location]; // Data of the location the player is in
-        const playerZone = zonesData[playerStory.locations.current_zone]; // Data of the zone the player is in
+        const playerRegion = regionsData[playerStory.location.region]; // Data of the location the player is in
+        const playerZone = zonesData[playerStory.location.zone]; // Data of the zone the player is in
 
-        if(location == undefined)
+        if(playerRegion == undefined)
             return;
 
-        for(const zone of location.zones) {
+        for(const zone of playerRegion.zones) {
             const zoneData = zonesData[zone]; // Data of the specific zone
 
-            if(playerStory.locations.current_zone == zone) {
+            if(playerStory.location.zone == zone) {
                 continue;
             }
 
@@ -78,7 +78,7 @@ module.exports = {
                     .setStyle(ButtonStyle.Secondary)
             );
     
-        if(playerStory.locations.unlocked_locations.length <= 1) {
+        if(playerStory.location.unlocked_regions.length <= 1) {
             await message.reply({embeds: [embed], components: [slider] });
             message.delete();
         } else {

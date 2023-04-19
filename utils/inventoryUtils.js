@@ -155,9 +155,9 @@ async function typeMain(embed, playerId) {
 
     const percHealth = Math.round((playerInfo.health / playerInfo.max_health)*100);
 
-    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerStory.locations.current_zone];
+    const zone = JSON.parse(fs.readFileSync('./data/zones.json'))[playerStory.location.zone];
     if(zone == undefined)
-        var zoneName = playerStory.locations.current_zone;
+        var zoneName = playerStory.location.zone;
     else
         var zoneName = zone.name;
 
