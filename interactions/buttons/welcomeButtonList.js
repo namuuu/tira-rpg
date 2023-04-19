@@ -57,7 +57,7 @@ module.exports = {
                     .setDescription("You're almost ready to go! Before you can start your adventure, you need to choose a class using the selection menu below!")
                     .setColor(0xFF7F50)
                     .addFields(
-                        {name: "What is a class?", value: "A class is a set of statistics and abilities that will define your character. You can find more information about them in the [Classes](https://tira-rpg.gitbook.io/tira-quest/lore/classes) page."},
+                        {name: "What is a class?", value: "A class is a set of statistics and abilities that will define your character. You can find more information about them in the [classes](https://tira-rpg.gitbook.io/tira-quest/guides/classes) page."},
                     )
 
                     list = [];
