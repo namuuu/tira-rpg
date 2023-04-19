@@ -297,8 +297,11 @@ exports.receiveButton = async function(interaction, playerId, args) {
                 makeButton("Boots"     , "equip-unequipboots"));
             break;
         case "list":
+            embed = new EmbedBuilder();
+            embed = await exports.getList(playerId);
             row.addComponents(
-                makeButton("←", "equip-backmain"),);
+                makeButton("←", "equip-backmain"),
+                makeButton("Display an equipement", "equip-display"));
             break;
         case "equipweapon":
             sendModal(interaction, playerId, "weapon", true);
@@ -391,6 +394,43 @@ exports.receiveButton = async function(interaction, playerId, args) {
     }
 
 }
+
+exports.getList = async function (playerId) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
+
+    const query = { name: "inventory" };
+    const options = {
+        projection: {equipItems: 1},
+        upsert: true,
+    };
+
+    const inv = await playerCollection.findOne(query, options);
+
+    var embed = new EmbedBuilder();
+
+    embed.setTitle("Equiment Inventory");
+    embed.setColor(0x00ff00);
+
+    console.log(inv.equipItems);
+
+    if(Object.values(inv.equipItems).length == 0) {
+        embed.setDescription("You don't have any equipements in your inventory.");
+        return embed;
+    }
+
+    var items = "";
+
+    for (var i = 0; i < Object.values(inv.equipItems).length; i++) {
+        const item = Object.values(inv.equipItems)[i];
+        items += Object.keys(inv.equipItems)[i] + " x" + item.quantity + "\n";
+    }
+
+
+    embed.setDescription(items);
+    return embed;
+}
+
+    
 
 exports.getDisplay = async function (playerId, embed, equipment) {
     if(equipment == null) {

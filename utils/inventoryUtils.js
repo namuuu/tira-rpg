@@ -77,6 +77,42 @@ exports.giveItem = async function(playerId, item, quantity, channel) {
     console.groupEnd();
 }
 
+exports.giveEquipment = async function(playerId, equipment, quantity) {
+    const playerCollection = Client.mongoDB.db('player-data').collection(playerId);
+
+    // Querying the inventory in the database
+    const inventory = await playerCollection.findOne(
+        {name: "inventory"},
+        {projection: {equipItems : 1}}
+    );
+
+    // If the item is already in the inventory, we add the quantity to the existing one
+    // Else, we create a new entry for the item
+    if(inventory.equipItems[equipment] != undefined) {
+        var int1 = parseInt(quantity);
+        var int2 = parseInt(inventory.equipItems[equipment].quantity);
+        var int3 = int1 + int2;
+        inventory.equipItems[equipment].quantity = int3;
+    } else {
+        inventory.equipItems = {
+            ...inventory.equipItems,
+            [equipment]: {
+                quantity: 1
+            }
+        }
+    }
+
+    // Updating the inventory in the database
+    playerCollection.updateOne({name: "inventory"}, { $set: { equipItems: inventory.equipItems  } }, { upsert: true });
+
+    console.groupCollapsed("Equipment Given");
+    console.log(`Given to: ${playerId}`);
+    console.log(`Equipment: ${equipment}`);
+    console.groupEnd();
+
+    return inventory.equipItems[equipment].quantity;
+}
+
 exports.display = async function(player, interaction, type, ack) {
     let embed = new EmbedBuilder();
     const playerId = player.id;
