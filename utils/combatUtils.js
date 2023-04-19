@@ -631,7 +631,7 @@ exports.log.print = function(embed, log, entity) {
     }
 
     if(entity.health <= 0) {
-        description += "Died\n";
+        description += "Died :skull:\n";
         embed.addFields({name: entity.name, value: description});
         return true;
     }
