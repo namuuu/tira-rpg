@@ -384,7 +384,7 @@
   "paint_festival": {
     "name": "Paint Festival",
     "number":"30",
-    "aim": "all",
+    "aim": "all-aoe",
     "description": "Sends paint in every direction, painting everyone on the battlefield",
     "effects": {
       "paint_festival": 1
