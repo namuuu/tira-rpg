@@ -91,7 +91,7 @@ exports.holyThrust = {
       
         for(const target of targets) {
 
-            const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+            const damage = Math.floor((power * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
 
             caster.effects["solar-gauge"].value += Math.floor(damage / 3);
       
@@ -110,7 +110,7 @@ exports.restlessStab = {
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
         for(const target of targets) {
-            const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+            const damage = Math.floor((power * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
 
             if(caster.timeline > target.timeline + 40)
                 damage *= 1.7;
@@ -149,10 +149,10 @@ exports.brushCut = {
         for(const target of targets) {
             if(target.effects["paint"] == undefined) {
                 target.effects["paint"] = {value: 1};
-                damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+                damage = Math.floor((power * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
             } else {
                 delete target.effects["paint"];
-                damage = Math.floor((power + 3 * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+                damage = Math.floor((power + 3 * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
             }
 
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
@@ -202,7 +202,7 @@ exports.splatter = {
                     delete target.effects["paint"];
                 }
 
-                const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+                const damage = Math.floor((power * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
 
                 target.health = (target.health - damage < 0) ? 0 : target.health - damage;
 
