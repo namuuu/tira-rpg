@@ -1,28 +1,27 @@
 const combatUtils = require("../combatUtils.js");
 
-
-
-
-
 exports.heal = {
     id: "heal",
     name: "Heal",
-    func: function (data, params, log) {
-        const { casterId, targets } = data;
+    func: function (data, params) {
+        const { casterId, targets, log } = data;
       
         for(const target of targets) {
-            const quantity = params.value;
+            var quantity = params[1].value;
 
-            if(params.type == "percentage-full")
-                quantity = Math.floor(target.max_health * params.value / 100);
+            if(params[1].type == "percentage-full")
+                quantity = Math.floor(target.max_health * params[1].value / 100);
 
-            if(params.type == "percentage-current")
-                quantity = Math.floor(target.health * params.value / 100);
+            if(params[1].type == "percentage-current")
+                quantity = Math.floor(target.health * params[1].value / 100);
+
+            quantity =  Math.max(1, quantity);
 
             target.health = (target.health + quantity > target.max_health) ? target.stats.vitality : target.health + quantity;
+
+            combatUtils.log.addInteger(log, target.id, "heal", quantity);
         }
       
-        // combatUtils.addToValueTologger(log, casterId, "heal", quantity);
     }
 }
 
@@ -31,13 +30,11 @@ exports.physDamage = {
     name: "Physical Damage",
     func: function (data, power) {
         const { combat, casterId, targets, log } = data;
-
-        console.log(data);
       
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
       
         for(const target of targets) {
-            const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+            const damage = Math.floor((power * (Math.max(1, caster.stats.strength) / Math.max(1,target.stats.resistance)) + 2) / 2);
       
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
             combatUtils.log.addInteger(log, target.id, "damage", damage);
@@ -51,6 +48,9 @@ exports.buffStats = {
     func: function (data, parameters) {
         const { combat, casterId, targets } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
+
+        console.log("Buffing stats:");
+        console.log(parameters);
 
         for(const target of targets) {
             if(target.effects["buff-stats"] == undefined) {
@@ -94,7 +94,7 @@ exports.holyThrust = {
       
         for(const target of targets) {
 
-            const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+            const damage = Math.floor((power * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
 
             caster.effects["solar-gauge"].value += Math.floor(damage / 3);
       
@@ -108,17 +108,19 @@ exports.restlessStab = {
     id: "restless_stab",
     name: "Restless Stab",
     func: function (data, power ) {
-        const { combat, casterId, targets } = data;
+        const { combat, casterId, targets, log } = data;
       
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
         for(const target of targets) {
-            const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+            const damage = Math.floor((power * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
 
             if(caster.timeline > target.timeline + 40)
                 damage *= 1.7;
 
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+
+            combatUtils.log.addInteger(log, target.id, "damage", damage);
         }
     }
 }
@@ -150,10 +152,10 @@ exports.brushCut = {
         for(const target of targets) {
             if(target.effects["paint"] == undefined) {
                 target.effects["paint"] = {value: 1};
-                damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+                damage = Math.floor((power * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
             } else {
                 delete target.effects["paint"];
-                damage = Math.floor((power + 3 * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+                damage = Math.floor(((power + 3) * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
             }
 
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
@@ -173,9 +175,9 @@ exports.decoloration = {
         for(const target of targets) {
             if(target.effects["paint"] != undefined) {
                 if(target.effects["paint"].value == 1) {
-                    exports.buffStats(data, [{}, {resistance: {value: -13, duration: 1}}], log);
+                    exports.buffStats.func(data, [{}, {resistance: {value: -13, duration: 1}}], log);
                 } else {
-                    exports.buffStats(data, [{}, {resistance: {value: -13, duration: 2}}], log);
+                    exports.buffStats.func(data, [{}, {resistance: {value: -13, duration: 2}}], log);
                 }
 
                 delete target.effects["paint"];
@@ -191,7 +193,7 @@ exports.splatter = {
         const { combat, casterId, targets, log } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
-        const effective = false;
+        let effective = false;
 
         for(const target of targets) {
             if(target.effects["paint"] != undefined && target.effects["paint"].value >= 2) {
@@ -203,7 +205,7 @@ exports.splatter = {
                     delete target.effects["paint"];
                 }
 
-                const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+                const damage = Math.floor((power * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
 
                 target.health = (target.health - damage < 0) ? 0 : target.health - damage;
 
@@ -244,14 +246,16 @@ exports.selfDamage = {
         if(params.until != undefined && caster.max_health * (params.until / 100) > caster.health)
             return;
 
-        const damage = params.value;
+        console.log(params);
 
-        if(params.type = "percentage")
-            damage = Math.floor(caster.max_health * (damage / 100));
+        var damage = params[1].value;
+
+        if(params[1].type = "percentage")
+            damage = Math.floor(caster.max_health * (damage / 100)) + 1;
 
         caster.health = caster.health - damage;
 
-        if(params.untilDeath == false && caster.health < 0) {
+        if(params[1].untilDeath == false && caster.health < 0) {
             damage += caster.health;
             caster.health = 1;
         }

@@ -350,7 +350,7 @@ exports.searchForMonsters = async function(interaction, combat) {
 
     var currentRange = 0;
     for (var i in monsters) {
-        currentRange += parseInt(monsters[i]["spawn-chance"]);
+        currentRange += parseFloat(monsters[i]["spawn-chance"]);
         if (random <= currentRange) {
             for(var j in monsters[i]["m-names"]) {
                 combat = await exports.addEntityToCombat(interaction.channel, monsters[i]["m-names"][j]);
