@@ -32,7 +32,7 @@ exports.instanciateCombat = async function(orderMessage, creator) {
         return;
     }
 
-    if(playerInfo.energy == 0) {
+    if(playerInfo.energy <= 0) {
         console.log("[ERROR] Tried to instanciate a combat with 0 energy.");
         orderMessage.reply("You don't have enough energy to start a combat.").then(msg => {
             setTimeout(() => msg.delete(), 5000);
