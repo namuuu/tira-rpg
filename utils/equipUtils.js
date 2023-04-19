@@ -30,7 +30,7 @@ exports.display = async function(playerId, channel) {
             addSlider(playerId));
 
 
-    channel.send({ embeds: [embed], components: [row, slider] });
+    channel.send({ embeds: [embed], components: [slider, row] });
 }
 
 function addSlider(playerId) {    
@@ -41,7 +41,7 @@ function addSlider(playerId) {
                 [
                     {label: "Main", value: "main", description: "Display your main stats!"},
                     {label: "Items", value: "items", description: "Display every item you own!"},
-                    {label: "Skills", value: "skills", description: "Manage your skills!"},
+                    {label: "Abilities", value: "abilities", description: "Manage your abilities!"},
                     {label: "Stats", value: "stats", description: "Get a view of your stats!"},
                     {label: "Equipment", value: "equipment", description: "Showcase your stuff!"},
                 ]
@@ -152,11 +152,13 @@ exports.trash = async function(playerId, equipId, type) {
     console.log("DEBUG: " + equip.name + " trashed from " + playerId + "'s inventory.");
 }
 
-exports.equip = async function(playerId, equipId, type) {
+exports.equip = async function(playerId, query, type) {
     const data = await playerUtils.getData(playerId, "info");
     const inv = await playerUtils.getData(playerId, "inventory");
 
-    const equip = inv.equipItems.filter(item => item.id == equipId).filter(item => item.type == type)[0];
+    inv.equipItems = inv.equipItems.filter(item => item.type == type);
+
+    const equip = exports.leveinsteinSearch(query, inv.equipItems)[0].equip;
     
     if(equip == null) {
         console.log("ERROR: Tried to equip an item that the user doesn't possess.");
@@ -388,9 +390,9 @@ exports.receiveButton = async function(interaction, playerId, args) {
         return;
 
     if(embed != null) {
-        interaction.update({embeds: [embed], components: [row, slider]});
+        interaction.update({embeds: [embed], components: [slider, row]});
     } else {
-        interaction.update({components: [row, slider]});
+        interaction.update({components: [slider, row]});
     }
 
 }

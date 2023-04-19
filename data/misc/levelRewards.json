@@ -3,7 +3,7 @@
         "10": [
             {
                 "name": "Forgotten Outpost",
-                "type": "location"
+                "type": "region"
             }
         ]
     },
@@ -12,14 +12,14 @@
             {
                 "id": "slash",
                 "name": "Slash",
-                "type": "skill"
+                "type": "ability"
             }
         ],
         "4": [
             {
                 "id": "bite",
                 "name": "Bite",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     },
@@ -27,7 +27,7 @@
         "0": [
             {
                 "id": "slash",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     },
@@ -35,7 +35,7 @@
         "0": [
             {
                 "id": "slash",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     },
@@ -43,7 +43,7 @@
         "0": [
             {
                 "id": "slash",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     },
@@ -51,7 +51,7 @@
         "0": [
             {
                 "id": "slash",
-                "type": "skill"
+                "type": "ability"
             }
         ]
     }

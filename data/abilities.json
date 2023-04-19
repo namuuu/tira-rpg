@@ -1,9 +1,9 @@
 {
   "debugger": {
     "name": "The Debugger",
-    "number":"0",
+    "number":0,
     "aim": "enemy-single",
-    "description": "A skill only used when the developers need to test something. Unobtainable.",
+    "description": "A ability only used when the developers need to test something. Unobtainable.",
     "effects": {
       "cooldown": 10,
       "phys_damage": 40
@@ -11,7 +11,7 @@
   },
   "front_attack": {
     "name": "Front Attack",
-    "number":"2",
+    "number":2,
     "aim": "enemy-single",
     "description": "A basic attack where the caster charges forward.",
     "effects": {
@@ -21,7 +21,7 @@
   },
   "acid_spin": {
     "name": "Acid Spin",
-    "number":"6",
+    "number":6,
     "aim": "enemy-aoe",
     "description": "A spin attack that spits acid.",
     "effects": {
@@ -31,7 +31,7 @@
   },
   "acid_flame": {
     "name": "Acid Flame",
-    "number":"7",
+    "number":7,
     "aim": "enemy-single",
     "description": "An acid flame attack.",
     "effects": {
@@ -41,7 +41,7 @@
   },
   "bite": {
     "name": "Bite",
-    "number":"3",
+    "number":3,
     "aim": "enemy-single",
     "description": "A strong bite.",
     "effects": {
@@ -51,7 +51,7 @@
   },
   "peck": {
     "name": "Peck",
-    "number":"4",
+    "number":4,
     "aim": "enemy-single",
     "description": "A small peck.",
     "effects": {
@@ -61,7 +61,7 @@
   },
   "default": {
     "name": "Struggle",
-    "number":"1",
+    "number":1,
     "aim": "self",
     "description": "Is just struggling",
     "effects": {
@@ -70,7 +70,7 @@
   },
   "slash": {
     "name": "Slash",
-    "number":"5",
+    "number":5,
     "aim": "enemy-single",
     "description": "A simple vertical slash, classic but reliable.",
     "effects": {
@@ -80,36 +80,37 @@
   },
   "light_heal": {
     "name": "Light Heal",
-    "number":"8",
+    "number":8,
     "aim": "ally+self-single",
     "description": "A basic heal.",
     "effects": {
       "cooldown": 20,
-      "heal": 10
+      "heal": {
+        "value": 10
+      }
     }
   },
   "purification": {
     "name": "Purification",
-    "number":"9",
+    "number":9,
     "aim": "ally-aoe",
     "description": "A purification spell that heals all allies.",
     "effects": {
       "cooldown": 30,
-      "heal": 20
+      "heal": {
+        "value": 20
+      }
     }
   }, 
   "gust": {
     "name": "Gust",
-    "number":"10",
+    "number":10,
     "aim": "ally-single",
     "description": "A buff that increases the caster's speed.",
     "effects": {
       "cooldown": 15,
       "buff_stats": {
         "agility": {
-          "proc": "buff",
-          "situation": "after",
-          "stat": "agility",
           "value": 8,
           "duration": 3
         }
@@ -118,16 +119,13 @@
   },
   "haste": {
     "name": "Haste",
-    "number":"11",
+    "number":11,
     "aim": "ally+self-aoe",
     "description": "A buff that increases the speed of all allies.",
     "effects": {
       "cooldown": 30,
       "buff_stats": {
         "agility": {
-          "proc": "buff",
-          "situation": "after",
-          "stat": "agility",
           "value": 5,
           "duration": 3
         }
@@ -228,10 +226,180 @@
     "name": "Holy Guard",
     "number":"19",
     "aim": "ally-single",
-    "description": "[TBD] A buff that increases the target's defense.",
+    "description": "A buff that increases the target's defense.",
     "effects": {
       "cooldown": 15,
-      "earn_solar_gauge": 7
+      "earn_solar_gauge": 7,
+      "buff_stats": {
+        "defense": {
+          "type": "percentage",
+          "value": 5,
+          "duration": 3
+        }
+      }
+    }
+  },
+  "holy_thrust": {
+    "name": "Holy Thrust",
+    "number":"20",
+    "aim": "enemy-single",
+    "description": "Consumes 10 holy gauge to increase its damage",
+    "effects": {
+      "cooldown": 15,
+      "holy_thrust": 1,
+      "buff_stats": {
+        "strength": {
+          "type": "percentage",
+          "value": 5,
+          "duration": 3
+        }
+      }
+    }
+  },
+  "restless_stab": {
+    "name": "Restless Stab",
+    "number":"21",
+    "aim": "enemy-single",
+    "description": "A flashing stab that deals more damage if the caster is faster than the target.",
+    "effects": {
+      "cooldown": 15,
+      "restless_stab": 13
+    }
+  },
+  "sand_sweep": {
+    "name": "Sand Sweep",
+    "number":"22",
+    "aim": "enemy-single",
+    "description": "The caster sends a sand wave that slows the enemy.",
+    "effects": {
+      "slow": 10
+    }
+  },
+  "thrust": {
+    "name": "Thrust",
+    "number":"23",
+    "aim": "enemy-single",
+    "description": "A basic thrust attack.",
+    "effects": {
+      "cooldown": 8,
+      "phys_damage": 8
+    }
+  },
+  "quick_slash": {
+    "name": "Quick Slash",
+    "number":"24",
+    "aim": "enemy-single",
+    "description": "A slash optimized to surprise the enemy by its speed.",
+    "effects": {
+      "cooldown": 6,
+      "phys_damage": 6
+    }
+  },
+  "poison_bite": {
+    "name": "Poison Bite",
+    "number":"25",
+    "aim": "enemy-single",
+    "description": "An attack designed to poison the target.",
+    "effects": {
+      "cooldown": 10,
+      "poison": {
+        "situation": "after",
+        "value": 5,
+        "duration": 3
+      }
+    }
+  },
+  "wind_spell": {
+    "name": "Wind Spell",
+    "number":"26",
+    "aim": "enemy-single",
+    "description": "The most basic magic spell, deals damage.",
+    "effects": {
+      "cooldown": 15,
+      "phys_damage": 10
+    }
+  },
+  "brush_cut": {
+    "name": "Brush Cut",
+    "number":"27",
+    "aim": "enemy-single",
+    "description": "A basic paint ability that uses paint to increase its damage.",
+    "effects": {
+      "cooldown": 15,
+      "brush_cut": 8
+    }
+  },
+  "decoloration": {
+    "name": "Decoloration",
+    "number":"28",
+    "aim": "enemy-single",
+    "description": "Uses a paint technique to remove paint from the target and lower its intelligence.",
+    "effects": {
+      "cooldown": 15,
+      "decoloration": 1
+    }
+  },
+  "splatter": {
+    "name": "Splatter",
+    "number":"29",
+    "aim": "enemy-single",
+    "description": "An all-out paint attack that deals damage if the target has a least 2 paint layers.",
+    "effects": {
+      "cooldown": 15,
+      "splatter": 20
+    }
+  },
+  "paint_festival": {
+    "name": "Paint Festival",
+    "number":"30",
+    "aim": "all",
+    "description": "Sends paint in every direction, painting everyone on the battlefield",
+    "effects": {
+      "paint_festival": 1
+    }
+  },
+  "blood_needle": {
+    "name": "Blood Needle",
+    "number":"31",
+    "aim": "enemy-single",
+    "description": "Sacrifices some of your health for damage",
+    "effects": {
+      "cooldown": 15,
+      "phys_damage": 10,
+      "self_damage": {
+        "value": 4,
+        "type": "percentage",
+        "until": 40,
+        "untilDeath": false
+      }
+    }
+  },
+  "life_bulb": {
+    "name": "Life Bulb",
+    "number":"32",
+    "aim": "self",
+    "description": "A healing spell that heals lightly the caster.",
+    "effects": {
+      "cooldown": 15,
+      "heal": {
+        "value": 10,
+        "type": "percentage-full"
+      }
+    }
+  },
+  "hemoglojab": {
+    "name": "Hemoglojab",
+    "number":"33",
+    "aim": "enemy-single",
+    "description": "A basic magic attack that deals damage and lowers the target's defense.",
+    "effects": {
+      "cooldown": 15,
+      "phys_damage": 16,
+      "self_damage": {
+        "value": 9,
+        "type": "percentage",
+        "untilDeath": true
+      }
     }
   }
 }

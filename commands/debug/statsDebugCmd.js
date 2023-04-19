@@ -1,5 +1,4 @@
 const player = require('../../utils/playerUtils.js');
-const skill = require('../../utils/skillUtils.js');
 
 module.exports = {
   name: "debug-stat",

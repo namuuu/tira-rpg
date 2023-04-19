@@ -3,7 +3,6 @@ const inv = require('../utils/inventoryUtils.js');
 const selector = require('../utils/messageTemplateUtils.js');
 const { EmbedBuilder } = require('discord.js');
 const combat = require('../utils/combatUtils.js');
-const zoneData = require('../data/zones.json');
 const fs = require('fs');
 
 const sliders = new Map();
@@ -40,9 +39,9 @@ module.exports = {
                 if(!(await player.doesExists(user.id)) || user.id != args[0]) return;
                 inv.display(user, interaction, interaction.values[0], true);
                 break;
-            case 'combat_skill_selector':
+            case 'combat_ability_selector':
                 if(!(await player.doesExists(user.id))) return;
-                combat.receiveSkillSelector(interaction);
+                combat.receiveAbilitySelector(interaction);
                 break;
             case 'combat_target_selector':
                 if(!(await player.doesExists(user.id))) return;
@@ -64,7 +63,7 @@ module.exports = {
                 .setColor(0x0099FF)
                 .setTitle(`:crossed_swords:  ${interaction.user.username}, you are a ${playerClass[interaction.values[0]].name} now !  :crossed_swords:`)
                 .addFields( 
-                    { name: 'There it is... The beginning', value: "Are you ready for a whole new adventure ?" }
+                    { name: 'This is it... The beginning', value: "Are you ready for a whole new adventure ?" }
                 )
                 .setThumbnail(interaction.user.displayAvatarURL());
             

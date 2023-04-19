@@ -4,7 +4,6 @@ module.exports = {
   name: "delete",
   aliases: [],
   description: "",
-  requirePerm : true,
   execute(message, args) {
 
     if (args.length >= 1)

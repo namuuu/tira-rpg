@@ -41,6 +41,9 @@ module.exports = {
                 else
                     message.reply("No combat data found.");
                 break;
+            case "purge":
+                combatUtil.purgeCombat();
+                break;
             default:
                 message.reply("Debug Command not found. Please specify a debug command according to the document.");
                 break;

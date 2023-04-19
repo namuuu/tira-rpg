@@ -25,7 +25,7 @@
             "chestplate": [],
             "boots": []
         },
-        "skills": [{
+        "abilities": [{
             "id": "default",
             "weight": 1
         }],
@@ -61,7 +61,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "bite",
             "weight": 1
         }],
@@ -97,7 +97,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "peck",
             "weight": 1
         }],
@@ -133,7 +133,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "front_attack",
             "weight": 1
         }],
@@ -174,7 +174,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "front_attack",
             "weight": 3
         },
@@ -214,7 +214,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "front_attack",
             "weight": 4
         },
@@ -254,7 +254,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "front_attack",
             "weight": 3
         },
@@ -304,7 +304,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "bite",
             "weight": 2
         },
@@ -348,7 +348,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "slash",
             "weight": 2
         },
@@ -411,7 +411,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "arrow",
             "weight": 2
         },
@@ -474,7 +474,7 @@
             "chestplate": null,
             "boots": null
         },
-        "skills": [{
+        "abilities": [{
             "id": "shadow_slash",
             "weight": 2
         },

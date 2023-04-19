@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('@discordjs/builders');
 const player = require('../../utils/playerUtils.js');
-const locationJSON = require('../../data/location.json');
+const regionsData = require('../../data/regions.json');
 const zonesData = require('../../data/zones.json');
 const { ActionRowBuilder, StringSelectMenuBuilder, ButtonStyle, ButtonBuilder } = require('discord.js');
 
@@ -28,7 +28,7 @@ module.exports = {
                     return;
                 }
 
-                const locationData = Object.values(locationJSON);
+                const locationData = Object.values(regionsData);
                 const zonesOptions = [];
 
                 const location = locationData.find(location => location.id == values[0]);

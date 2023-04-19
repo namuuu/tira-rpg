@@ -8,9 +8,9 @@ module.exports = {
     const { setupEvents } = require('./setup/eventSetup.js');
     setupEvents(client);
 
-    // Setup Skills
-    const { setupSkills } = require('./setup/skillSetup.js');
-    setupSkills(client);
+    // Setup Abilities
+    const { setupAbilities } = require('./setup/abilitySetup.js');
+    setupAbilities(client);
 
     const { setupEquipment } = require('./setup/equipSetup.js');
     setupEquipment(client);
