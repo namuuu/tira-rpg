@@ -1,9 +1,5 @@
 const combatUtils = require("../combatUtils.js");
 
-
-
-
-
 exports.heal = {
     id: "heal",
     name: "Heal",
