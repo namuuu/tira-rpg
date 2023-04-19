@@ -147,7 +147,10 @@ async function editDisplayer(interaction, type, combat) {
             let abilityString = "";
             const abilityData = JSON.parse(fs.readFileSync("./data/abilities.json", "utf8"));
 
+            console.log(getHealthBar(player.health, player.stats.vitality));
+            console.log(player.health + "/" + player.stats.vitality);
             embed.addFields({ name: "HP: " + player.health + "/" + player.stats.vitality, value: getHealthBar(player.health, player.stats.vitality) });
+     
 
             if(player.abilities.length == 0)
                 abilityString = "*No ability currently active.*";
@@ -182,7 +185,7 @@ function getHealthBar(health, maxHealth) {
             healthBar += "▰";
         }
     
-        for(let i = 0; i < healthBarNumber - 10; i++) {
+        for(let i = 0; i < 10 - healthBarNumber; i++) {
             healthBar += "▱";
         }
     }
