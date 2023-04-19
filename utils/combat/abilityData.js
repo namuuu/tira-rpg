@@ -152,7 +152,7 @@ exports.brushCut = {
                 damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
             } else {
                 delete target.effects["paint"];
-                damage = Math.floor((power + 3 * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+                damage = Math.floor(((power + 3) * (caster.stats.strength / target.stats.resistance) + 2) / 2);
             }
 
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
