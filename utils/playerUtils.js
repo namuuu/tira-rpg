@@ -2,6 +2,8 @@ const { Client, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const rpgInfoUtils = require('./rpgInfoUtils.js');
 const classes = require('../data/classes.json');
+const abilities = require('../data/abilities.json');
+const zones = require('../data/zones.json');
 const abilitySetup = require('../setup/abilitySetup.js');
 
 // Player data management
@@ -294,10 +296,10 @@ exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
 
     const rewards = JSON.parse(fs.readFileSync("./data/misc/levelRewards.json", "utf8"))["all"];
     if(rewards != undefined && rewards[level] != undefined) {
-        for(reward of Object.values(rewards[level])) {
+        for(const reward of Object.values(rewards[level])) {
             switch(reward.type) {
                 case "location":
-                    field += `Tu as maintenant accès à la zone ${reward.name}.\n`
+                    field += `Tu as maintenant accès à la zone ${zones[reward.id].name}.\n`
                     break;
             }
         }
@@ -313,7 +315,7 @@ exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
                 case "ability":
                     const { learnAbility } = require("./abilityUtils.js");
                     learnAbility(id, reward.id);
-                    field += `Ability: ${reward.name}\n`;
+                    field += `Ability: ${abilities[reward.id].name}\n`;
                     break;
             }
         }

@@ -1,8 +1,14 @@
 {
     "all": {
-        "10": [
+        "8": [
             {
                 "name": "Forgotten Outpost",
+                "type": "region"
+            }
+        ],
+        "4": [
+            {
+                "name": "Slime Lake",
                 "type": "region"
             }
         ]
@@ -11,7 +17,18 @@
         "0": [
             {
                 "id": "slash",
-                "name": "Slash",
+                "type": "ability"
+            }
+        ],
+        "3": [
+            {
+                "id": "machette",
+                "type": "ability"
+            }
+        ],
+        "5": [
+            {
+                "id": "circular_swing",
                 "type": "ability"
             }
         ]
@@ -22,12 +39,54 @@
                 "id": "restless_stab",
                 "type": "ability"
             }
+        ],
+        "3": [
+            {
+                "id": "quick_slash",
+                "type": "ability"
+            }
+        ],
+        "5": [
+            {
+                "id": "sand_sweep",
+                "type": "ability"
+            }
+        ],
+        "7": [
+            {
+                "id": "poison_bite",
+                "type": "ability"
+            }
         ]
     },
     "magician":{
         "0": [
             {
                 "id": "wind_spell",
+                "type": "ability"
+            }
+        ],
+        "3": [
+            {
+                "id": "brush_cut",
+                "type": "ability"
+            }
+        ],
+        "5": [
+            {
+                "id": "decoloration",
+                "type": "ability"
+            }
+        ],
+        "7": [
+            {
+                "id": "paint_festival",
+                "type": "ability"
+            }
+        ],
+        "9": [
+            {
+                "id": "splatter",
                 "type": "ability"
             }
         ]
@@ -44,6 +103,18 @@
         "0": [
             {
                 "id": "blood_needle",
+                "type": "ability"
+            }
+        ],
+        "3": [
+            {
+                "id": "life_bulb",
+                "type": "ability"
+            }
+        ],
+        "5": [
+            {
+                "id": "hemoglojab",
                 "type": "ability"
             }
         ]
