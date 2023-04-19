@@ -56,7 +56,39 @@
     "description": "A small peck.",
     "effects": {
       "cooldown": 16,
-      "phys_damage": 2
+      "phys_damage": 4
+    }
+  },
+  "roll": {
+    "name": "Roll",
+    "number":12,
+    "aim": "enemy-single",
+    "description": "A roll that increases the caster's defense.",
+    "effects": {
+      "cooldown": 20,
+      "phys_damage": 3,
+      "buff_stats": {
+        "defense": {
+          "value": 5,
+          "duration": 3
+        }
+      }
+    }
+  },
+  "double_roll": {
+    "name": "Double Roll",
+    "number":13,
+    "aim": "enemy-aoe",
+    "description": "A double roll that increases the caster's defense.",
+    "effects": {
+      "cooldown": 30,
+      "phys_damage": 6,
+      "buff_stats": {
+        "defense": {
+          "value": 10,
+          "duration": 3
+        }
+      }
     }
   },
   "default": {

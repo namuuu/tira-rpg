@@ -35,14 +35,54 @@
             "weight": 1
         }]
     },
+    "sheep": {
+        "name": "Sheep",
+        "exp": 3,
+        "money": 5,
+        "base_stats": {
+            "strength": 4,
+            "vitality": 8,
+            "resistance": 10,
+            "spirit": 5,
+            "agility": 8,
+            "intelligence": 4
+        },
+        "mod_stats": {
+            "strength": 0,
+            "vitality": 0,
+            "resistance": 0,
+            "spirit": 0,
+            "agility": 2,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "boots": null
+        },
+        "abilities": [{
+            "id": "bite",
+            "weight": 1
+        },
+        {
+            "id": "roll",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "wool",
+            "pack": 1,
+            "weight": 1
+        }]
+    },
     "wolf": {
         "name": "Wolf",
         "exp": 5,
         "money": 3,
         "base_stats": {
             "strength": 9,
-            "vitality": 5,
-            "resistance": 4,
+            "vitality": 10,
+            "resistance": 6,
             "spirit": 7,
             "agility": 10,
             "intelligence": 2
@@ -73,13 +113,13 @@
     },
     "bird": {
         "name": "Bird",
-        "exp": 40,
+        "exp": 4,
         "money": 8,
         "base_stats": {
             "strength": 5,
-            "vitality": 3,
-            "resistance": 2,
-            "spirit": 3,
+            "vitality": 8,
+            "resistance": 5,
+            "spirit": 6,
             "agility": 10,
             "intelligence": 4
         },
@@ -107,15 +147,59 @@
             "weight": 1
         }]
     },
+    "sheepSheep_boss": {
+        "name": "Sheep Sheep",
+        "exp": 20,
+        "money": 50,
+        "base_stats": {
+            "strength": 15,
+            "vitality": 30,
+            "resistance": 20,
+            "spirit": 12,
+            "agility": 20,
+            "intelligence": 6
+        },
+        "mod_stats": {
+            "strength": 0,
+            "vitality": 0,
+            "resistance": 0,
+            "spirit": 0,
+            "agility": 0,
+            "intelligence": 0
+        },
+        "equipment": {
+            "weapon": null,
+            "helmet": null,
+            "chestplate": null,
+            "boots": null
+        },
+        "abilities": [{
+            "id": "bite",
+            "weight": 1
+        },
+        {
+            "id": "roll",
+            "weight": 1
+        },
+        {
+            "id": "double_roll",
+            "weight": 1
+        }],
+        "loots": [{
+            "id": "wool",
+            "pack": 1,
+            "weight": 1
+        }]
+    },
     "slime": {
         "name": "Basic Slime",
         "exp": 4,
         "money": 9,
         "base_stats": {
             "strength": 4,
-            "vitality": 7,
-            "resistance": 3,
-            "spirit": 15,
+            "vitality": 12,
+            "resistance": 8,
+            "spirit": 10,
             "agility": 7,
             "intelligence": 1
         },
@@ -154,8 +238,8 @@
         "money": 12,
         "base_stats": {
             "strength": 5,
-            "vitality": 8,
-            "resistance": 4,
+            "vitality": 13,
+            "resistance": 8,
             "spirit": 18,
             "agility": 8,
             "intelligence": 2
@@ -194,8 +278,8 @@
         "money": 15,
         "base_stats": {
             "strength": 12,
-            "vitality": 6,
-            "resistance": 4,
+            "vitality": 15,
+            "resistance": 8,
             "spirit": 12,
             "agility": 12,
             "intelligence": 2
@@ -234,8 +318,8 @@
         "money": 50,
         "base_stats": {
             "strength": 15,
-            "vitality": 20,
-            "resistance": 5,
+            "vitality": 35,
+            "resistance": 10,
             "spirit": 15,
             "agility": 15,
             "intelligence": 3
@@ -284,8 +368,8 @@
         "money": 8,
         "base_stats": {
             "strength": 13,
-            "vitality": 8,
-            "resistance": 5,
+            "vitality": 10,
+            "resistance": 7,
             "spirit": 10,
             "agility": 15,
             "intelligence": 8
@@ -330,7 +414,7 @@
             "strength": 18,
             "vitality": 15,
             "resistance": 10,
-            "spirit": 5,
+            "spirit": 7,
             "agility": 7,
             "intelligence": 2
         },
@@ -391,7 +475,7 @@
         "money": 15,
         "base_stats": {
             "strength": 14,
-            "vitality": 8,
+            "vitality": 10,
             "resistance": 6,
             "spirit": 8,
             "agility": 19,
@@ -454,7 +538,7 @@
         "money": 100,
         "base_stats": {
             "strength": 25,
-            "vitality": 18,
+            "vitality": 70,
             "resistance": 15,
             "spirit": 15,
             "agility": 12,
