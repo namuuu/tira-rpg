@@ -105,7 +105,7 @@ exports.restlessStab = {
     id: "restless_stab",
     name: "Restless Stab",
     func: function (data, power ) {
-        const { combat, casterId, targets } = data;
+        const { combat, casterId, targets, log } = data;
       
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
@@ -116,6 +116,8 @@ exports.restlessStab = {
                 damage *= 1.7;
 
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
+
+            combatUtils.log.addInteger(log, target.id, "damage", damage);
         }
     }
 }

@@ -36,4 +36,4 @@ client.once('ready', () => {
   }, 10000);
 });
 
-client.login(process.env.FIR_SHARD);
+client.login(process.env.BOT_TOKEN_NAMU_SHARD);
