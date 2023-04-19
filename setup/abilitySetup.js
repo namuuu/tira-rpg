@@ -28,63 +28,63 @@ module.exports = {
   
 }
 
-function phys_to_mag_damage(exeData, power, log) {
-  const { combat, casterId, targets } = exeData;
+function phys_to_mag_damage(exeData, power) {
+  const { combat, casterId, targets, log} = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
   for(const target of targets) {
-      const damage = Math.floor((power * (caster.stats.strength / target.stats.spirit) + 2) / 2);
+      const damage = Math.floor((power * (caster.stats.strength / Math.max(1,target.stats.spirit) + 2)) / 2);
 
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
       combatUtils.log.add(log, target.id, "damage", damage);
   }
 }
 
-function mag_to_phys_damage(exeData, power, log) {
-  const { combat, casterId, targets } = exeData;
+function mag_to_phys_damage(exeData, power) {
+  const { combat, casterId, targets, log } = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
   for(const target of targets) {
-      const damage = Math.floor((power * (caster.stats.intelligence / target.stats.resistance) + 2) / 2);
+      const damage = Math.floor((power * (caster.stats.intelligence / Math.max(1,target.stats.resistance)) + 2) / 2);
 
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
       combatUtils.log.add(log, target.id, "damage", damage);
   }
 }
 
-function mag_damage(exeData, power, log) {
-  const { combat, casterId, targets } = exeData;
+function mag_damage(exeData, power) {
+  const { combat, casterId, targets, log } = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
   for(const target of targets) {
-      const damage = Math.floor((power * (caster.stats.intelligence / target.stats.spirit) + 2) / 2);
+      const damage = Math.floor((power * (caster.stats.intelligence / Math.max(1,target.stats.spirit)) + 2) / 2);
 
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
       combatUtils.log.add(log, target.id, "damage", damage);
   }
 }
 
-function phys_low_health_damage(exeData, quantity, log) {
-  const { combat, casterId, targets } = exeData;
+function phys_low_health_damage(exeData, quantity) {
+  const { combat, casterId, targets, log} = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
   for(const target of targets) {
-      const damage = Math.floor((quantity * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+      const damage = Math.floor((quantity * (caster.stats.strength / Math.max(1,target.stats.resistance)) + 2) / 2);
 
       if(target.health < target.max_health * 0.15) {
         damage = Math.floor(damage * 2);
       }
 
       target.health = (target.health - damage < 0) ? 0 : target.health - damage;
-      combatUtils.log.add(log, target.id, "damage", damage);
+      combatUtils.log.addInteger(log, target.id, "damage", damage);
   }
 }
 
-function earnSolarGauge(exeData, quantity, log) {
+function earnSolarGauge(exeData, quantity) {
   const { casterId } = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
@@ -92,14 +92,14 @@ function earnSolarGauge(exeData, quantity, log) {
   caster.effects["solar-gauge"] += quantity;
 }
 
-function cooldown(exeData, quantity, log) {
+function cooldown(exeData, quantity) {
   const { combat, casterId} = exeData;
 
   const caster = combatUtils.getPlayerInCombat(casterId, combat);
   caster.timeline += quantity;
 }
 
-function debuff_stats(exeData, debuffs, log) {
+function debuff_stats(exeData, debuffs) {
   const { casterId, targets } = exeData;
 
   const arrayDebuffs = Object.values(Object.values(debuffs));
@@ -112,7 +112,7 @@ function debuff_stats(exeData, debuffs, log) {
   }
 }
 
-function poison(exeData, poison, log) {
+function poison(exeData, poison) {
   const { targets } = exeData;
 
   for(const target of targets) {
@@ -120,7 +120,7 @@ function poison(exeData, poison, log) {
   }
 }
 
-function burn(exeData, burn, log) {
+function burn(exeData, burn) {
   const { targets } = exeData;
 
   for(const target of targets) {
