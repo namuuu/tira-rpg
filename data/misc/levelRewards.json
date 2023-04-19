@@ -14,19 +14,12 @@
                 "name": "Slash",
                 "type": "ability"
             }
-        ],
-        "4": [
-            {
-                "id": "bite",
-                "name": "Bite",
-                "type": "ability"
-            }
         ]
     },
     "assassin":{
         "0": [
             {
-                "id": "slash",
+                "id": "restless_stab",
                 "type": "ability"
             }
         ]
@@ -34,7 +27,7 @@
     "magician":{
         "0": [
             {
-                "id": "slash",
+                "id": "wind_spell",
                 "type": "ability"
             }
         ]
@@ -50,7 +43,7 @@
     "healer":{
         "0": [
             {
-                "id": "slash",
+                "id": "blood_needle",
                 "type": "ability"
             }
         ]

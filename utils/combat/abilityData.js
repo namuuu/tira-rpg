@@ -27,8 +27,6 @@ exports.physDamage = {
     name: "Physical Damage",
     func: function (data, power) {
         const { combat, casterId, targets, log } = data;
-
-        console.log(data);
       
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
       
@@ -243,14 +241,16 @@ exports.selfDamage = {
         if(params.until != undefined && caster.max_health * (params.until / 100) > caster.health)
             return;
 
-        const damage = params.value;
+        console.log(params);
 
-        if(params.type = "percentage")
-            damage = Math.floor(caster.max_health * (damage / 100));
+        var damage = params[1].value;
+
+        if(params[1].type = "percentage")
+            damage = Math.floor(caster.max_health * (damage / 100)) + 1;
 
         caster.health = caster.health - damage;
 
-        if(params.untilDeath == false && caster.health < 0) {
+        if(params[1].untilDeath == false && caster.health < 0) {
             damage += caster.health;
             caster.health = 1;
         }

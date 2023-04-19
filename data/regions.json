@@ -4,7 +4,7 @@
         "name": "Serene",
         "short_description": "A serene place to relax and enjoy the view.",
         "description": "A serene place to relax and enjoy the view.",
-        "zones": ["capital", "temple", "slime_lake","forgotten_outpost"]
+        "zones": ["capital", "vertchamps_plains", "temple", "slime_lake","forgotten_outpost"]
     },
     "amethyst_forest": {
         "id": "amethyst_forest",
