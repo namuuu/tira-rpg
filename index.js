@@ -16,6 +16,8 @@ setup(client);
 Client.client = client;
 Client.mongoDB = new MongoClient(process.env.MONGO_URI);
 
+// Prevents a weird node warning
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 1;
 
 client.once('ready', () => {
   console.log('\u001b[1;32mTira\'s RPG Bot is ready to execute.' + ' \u001b[0m');
@@ -34,4 +36,4 @@ client.once('ready', () => {
   }, 10000);
 });
 
-client.login(process.env.BOT_TOKEN_NAMU_SHARD);
+client.login(process.env.FIR_SHARD);

@@ -714,7 +714,11 @@ exports.rewardLoot = async function(combat, thread) {
                 const loot = lootTable[lootIndex];
                 const item = lootData[loot.id];
                 if(item != null && item != undefined && item.name != "none") {
+                    if(item.type != undefined) {
+                    inventory.giveEquipement(victor.id, loot.id, loot.pack);
+                    } else {
                     inventory.giveItem(victor.id, loot.id, loot.pack );
+                    }
                     lootDescription += item.name + " x" + loot.pack + "\n";
                 }
             }

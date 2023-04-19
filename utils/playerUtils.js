@@ -43,10 +43,10 @@ exports.create = async function(id, className) {
             boots: null,
         } },
         { name: "misc", lastRegen: Date.now(), lastEnergy: Date.now(), party: { owner: id, members: [] }},
-        { name : "story", locations: {
-            current_location: "serene",
-            current_zone: "capital",
-            unlocked_locations: ["serene"],
+        { name : "story", location: {
+            region: "serene",
+            zone: "capital",
+            unlocked_regions: ["serene"],
         }, quests:[] }
     ]
 
@@ -368,7 +368,7 @@ exports.setLocation = async function(id, zone) {
     const query = { name: "story" };
     
     var update = { 
-        $set: { "locations.current_zone": zone } 
+        $set: { "location.zone": zone } 
     };
     
     const options = { upsert: true };

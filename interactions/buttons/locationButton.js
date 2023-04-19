@@ -1,6 +1,6 @@
 const { ActionRowBuilder, StringSelectMenuBuilder } = require("@discordjs/builders");
 const player = require("../../utils/playerUtils.js");
-const locationJSON = require("../../data/location.json");
+const regionsData = require("../../data/regions.json");
 
 module.exports = {
     name: "location",
@@ -12,18 +12,17 @@ module.exports = {
                     return;
                 }
 
-                const locationInfo = (await player.getData(interaction.user.id, "story")).locations;
+                const locationInfo = (await player.getData(interaction.user.id, "story")).location;
                 console.log(locationInfo);
-                const availableLocations = locationInfo.unlocked_locations;
+                const availableLocations = locationInfo.unlocked_regions;
 
-                const locationData = Object.values(locationJSON);
                 const locationOptions = [];
-                for(const location of locationData) {
-                    if(availableLocations.includes(location.id) && location.id != locationInfo.current_location)
+                for(const region of Object.values(regionsData)) {
+                    if(availableLocations.includes(region.id) && region.id != locationInfo.region)
                         locationOptions.push({
-                            label: location.name,
-                            value: location.id,
-                            description: location.short_description
+                            label: region.name,
+                            value: region.id,
+                            description: region.short_description
                         })
                 }
 

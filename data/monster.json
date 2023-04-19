@@ -274,7 +274,8 @@
         {
             "id": "slimy_crown",
             "pack": 1,
-            "weight": 0.5
+            "weight": 0.5,
+            "type": "equip"
         }]
     },
     "shadow_rat": {
@@ -362,22 +363,26 @@
         "loots": [{
             "id": "broken_sword",
             "pack": 1,
-            "weight": 0.2
+            "weight": 0.2,
+            "type": "equip"
         },
         {
             "id": "old_helmet",
             "pack": 1,
-            "weight": 0.1
+            "weight": 0.1,
+            "type": "equip"
         },
         {
             "id": "old_chestplate",
             "pack": 1,
-            "weight": 0.1
+            "weight": 0.1,
+            "type": "equip"
         },
         {
             "id": "old_boots",
             "pack": 1,
-            "weight": 0.1
+            "weight": 0.1,
+            "type": "equip"
         }]
     },
     "fallen_archer": {
@@ -421,22 +426,26 @@
         "loots": [{
             "id": "broken_bow",
             "pack": 1,
-            "weight": 0.2
+            "weight": 0.2,
+            "type": "equip"
         },
         {
             "id": "old_helmet",
             "pack": 1,
-            "weight": 0.1
+            "weight": 0.1, 
+            "type": "equip"
         },
         {
             "id": "old_chestplate",
             "pack": 1,
-            "weight": 0.1
+            "weight": 0.1,
+            "type": "equip"
         },
         {
             "id": "old_boots",
             "pack": 1,
-            "weight": 0.1
+            "weight": 0.1,
+            "type": "equip"
         }]
     },
     "lost_soul": {
@@ -484,7 +493,8 @@
         "loots": [{
             "id": "lionheart_sword",
             "pack": 1,
-            "weight": 1
+            "weight": 1,
+            "type": "equip"
         }]
     }
 }

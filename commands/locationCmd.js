@@ -1,5 +1,5 @@
 const player = require("../utils/playerUtils.js");
-const locationData = require("../data/location.json");
+const regionsData = require("../data/regions.json");
 const zoneData = require("../data/zones.json");
 const { EmbedBuilder } = require("@discordjs/builders");
 
@@ -9,14 +9,14 @@ module.exports = {
     description: "Get information about where you are.",
     requireCharacter: true,
     async execute(message, args) {
-        const locationInfo = (await player.getData(message.author.id, "story")).locations;
-        const zone = zoneData[locationInfo.current_zone];
+        const locationInfo = (await player.getData(message.author.id, "story")).location;
+        const zone = zoneData[locationInfo.zone];
 
         const embed = new EmbedBuilder()
             .setTitle(zone.name)
             .setDescription(zone.description)
             .addFields(
-                { name: "Situated in:", value: locationData[locationInfo.current_location].name, inline: true },
+                { name: "Situated in:", value: regionsData[locationInfo.region].name, inline: true },
                 { name: "Monster Presence", value: (Object.values(zone.monsters).length > 0) ? "Yes" : "No", inline: true },
             )
 
