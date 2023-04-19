@@ -31,7 +31,7 @@ exports.physDamage = {
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
       
         for(const target of targets) {
-            const damage = Math.floor((power * (caster.stats.strength / target.stats.resistance) + 2) / 2);
+            const damage = Math.floor((power * (Math.max(1, caster.stats.strength) / Math.max(1,target.stats.resistance)) + 2) / 2);
       
             target.health = (target.health - damage < 0) ? 0 : target.health - damage;
             combatUtils.log.addInteger(log, target.id, "damage", damage);
