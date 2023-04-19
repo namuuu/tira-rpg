@@ -52,6 +52,9 @@ exports.buffStats = {
         const { combat, casterId, targets } = data;
         const caster = combatUtils.getPlayerInCombat(casterId, combat);
 
+        console.log("Buffing stats:");
+        console.log(parameters);
+
         for(const target of targets) {
             if(target.effects["buff-stats"] == undefined) {
                 target.effects["buff-stats"] = {situation: "after"};

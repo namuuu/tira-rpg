@@ -33,11 +33,43 @@
         },
         "shops": []
     },
+    "vertchamps_plains": {
+        "name": "Vertchamps Plains",
+        "description": "A vast landscape with fresh grass ondulating in the wind.",
+        "required": {
+            "level": null,
+            "quests": null,
+            "items": []  
+        },
+        "monsters": {
+            "group1": {
+                "m-names": ["slime"],
+                "spawn-chance": "1"
+            },
+            "group2": {
+                "m-names": ["bird", "bird"],
+                "spawn-chance": "2"
+            },
+            "group3": {
+                "m-names": ["bird", "sheep"],
+                "spawn-chance": "2"
+            },
+            "group4": {
+                "m-names": ["bird", "slime"],
+                "spawn-chance": "2"
+            },
+            "group5": {
+                "m-names": ["sheepSheep_boss"],
+                "spawn-chance": "0.1"
+            }
+        },
+        "shops": [""]
+    },
     "temple": {
         "name": "Forgotten Temple",
         "description": "A temple whose history is unknown.",
         "required": {
-            "level": null,
+            "level": 320,
             "quests": null,
             "items": []  
         },
