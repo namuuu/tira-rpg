@@ -20,6 +20,7 @@ module.exports = {
     abilityMap.set("debuff_stats", debuff_stats);
     abilityMap.set("poison", poison);
     abilityMap.set("burn", burn);
+    abilityMap.set("phys_low_health_damage", phys_low_health_damage);
 
     console.log("Abilities are all setup !");
     console.groupEnd();

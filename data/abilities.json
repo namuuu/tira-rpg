@@ -295,7 +295,7 @@
     "description": "A flashing stab that deals more damage if the caster is faster than the target.",
     "effects": {
       "cooldown": 15,
-      "restless_stab": 13
+      "restless_stab": 10
     }
   },
   "sand_sweep": {
@@ -397,7 +397,7 @@
     "description": "Sacrifices some of your health for damage",
     "effects": {
       "cooldown": 15,
-      "phys_damage": 10,
+      "phys_damage": 12,
       "self_damage": {
         "value": 4,
         "type": "percentage",
