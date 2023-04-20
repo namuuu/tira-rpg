@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "install": "npm i && npm install discord.js && npm install mongodb && echo Installed!",
+    "install": "npm i -y && npm install discord.js && npm install mongodb && echo Installed!",
     "update": "git pull && npm update discord.js && npm update mongodb && echo Updated!"
   },
   "repository": {
