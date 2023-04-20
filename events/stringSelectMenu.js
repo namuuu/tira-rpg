@@ -126,7 +126,6 @@ module.exports = {
             try {
                 await sliders.get(command).interact(interaction, interaction.values, args);
             } catch (error) {
-                interaction.deferUpdate();
                 console.error(error);
             }
         }
