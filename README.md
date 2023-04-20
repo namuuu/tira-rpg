@@ -29,12 +29,17 @@ git clone https://github.com/namuuu/tira-rpg.git
 
 ### Installing packages
 
-Some packages are required in order for the bot to work. Make sure the Command Prompt is in the correct folder (named by default tira-rpg), and type :
+Some packages are required in order for the bot to work. Make sure the Command Prompt is in the correct folder (named by default tira-rpg), and type:
 
 ```
-npm init -y
-npm install discord.js
-npm install mongodb@4.10
+npm run install
+```
+
+#### Updating those packages
+
+In the future, you may find yourself in the need to update those packages. To do that, run:
+```
+npm run update
 ```
 
 ### Setting up the different tokens
