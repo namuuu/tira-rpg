@@ -91,7 +91,7 @@ exports.generateShopSelector = async function(message) {
 		});
 	}
 
-	const row = new ActionRowBuilder()
+	var row = new ActionRowBuilder()
 		.addComponents(
 			new StringSelectMenuBuilder()
 				.setCustomId('shopChoice-' + message.author.id)
@@ -100,6 +100,14 @@ exports.generateShopSelector = async function(message) {
 					list
 				),
 		);
+
+	if(list.length == 0) {
+		var row = new EmbedBuilder() 
+			.setColor(0x1be118)
+			.setTitle('No shop available')	
+			.setDescription('There is no shop available in this zone !');
+	}
+				
 
 	return message.reply({content: 'Choose the shop you want to visit !', components: [row] });
 }

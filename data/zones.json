@@ -4,7 +4,7 @@
         "description": "A quiet place with only slimes roaming around. It's a good place to train your abilities.",
         "color": [144, 238, 144],
         "required": {
-            "level": 5,
+            "level": 4,
             "quests": null,
             "items": []  
         },
@@ -27,7 +27,7 @@
             },
             "group5": {
                 "m-names": ["king_slime"],
-                "spawn-chance": "10000000000000000000000",
+                "spawn-chance": "1",
                 "min_level": 10
             }
         },
@@ -52,7 +52,7 @@
             },
             "group3": {
                 "m-names": ["bird", "sheep"],
-                "spawn-chance": "200"
+                "spawn-chance": "2"
             },
             "group4": {
                 "m-names": ["bird", "slime"],
