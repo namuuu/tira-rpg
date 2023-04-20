@@ -67,14 +67,14 @@ exports.sendEncounterMessage = async function(message, type) {
 
 exports.generateShopSelector = async function(message) {
 	list = [];
-	const currentLocation = await player.getData(message.author.id, "info");
+	const currentLocation = await player.getData(message.author.id, "story");
 	for(var i = 0; i < Object.keys(shopsData).length; i++) {
 
 		//zone verification
 		var isOkay = false;
 		
-		for (var j = 0; j < zonesData[currentLocation.location].shops.length; j++) {
-			if (zonesData[currentLocation.location].shops[j] == Object.keys(shopsData)[i]) {
+		for (var j = 0; j < zonesData[currentLocation.location.zone].shops.length; j++) {
+			if (zonesData[currentLocation.location.zone].shops[j] == Object.keys(shopsData)[i]) {
 				isOkay = true;
 			}
 		}

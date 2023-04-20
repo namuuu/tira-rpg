@@ -4,7 +4,7 @@
         "description": "A quiet place with only slimes roaming around. It's a good place to train your abilities.",
         "color": [144, 238, 144],
         "required": {
-            "level": 7,
+            "level": 5,
             "quests": null,
             "items": []  
         },
@@ -102,7 +102,7 @@
         "name": "Forgotten Outpost",
         "description": "A small outpost that was abandoned a long time ago.",
         "required": {
-            "level": 10,
+            "level": 8,
             "quests": null,
             "items": ["warhandbook"]  
         },
