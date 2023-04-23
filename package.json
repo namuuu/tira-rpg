@@ -4,7 +4,9 @@
   "description": "Tira's RPG is a discord bot that aims to provide a great experiences around an entire game that fits in the code of a simple discord bot. This adventure will contain a variety of armors, skills, items and activities to discover. As we implement new features frequently, we want to keep your perception of the game as fresh as possible, always having something new to do.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "install": "npm i -y && npm install discord.js && npm install mongodb && echo Installed!",
+    "update": "git pull && npm update discord.js && npm update mongodb && echo Updated!"
   },
   "repository": {
     "type": "git",
@@ -22,7 +24,7 @@
     "discord-api-types": "^0.37.28",
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.1",
-    "mongodb": "4.10"
+    "mongodb": "^4.10"
   },
   "devDependencies": {
     "eslint": "^8.22.0"

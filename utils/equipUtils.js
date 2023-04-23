@@ -158,12 +158,14 @@ exports.equip = async function(playerId, query, type) {
 
     inv.equipItems = inv.equipItems.filter(item => item.type == type);
 
-    const equip = exports.leveinsteinSearch(query, inv.equipItems)[0].equip;
-    
-    if(equip == null) {
+    const equip = exports.leveinsteinSearch(query, inv.equipItems)[0];
+
+    if(equip == null || equip.size == 0) {
         console.log("ERROR: Tried to equip an item that the user doesn't possess.");
         return "nopossess";
     }
+
+    equip = equip.equip;
     if(type == undefined)
         type = equip.type;
     if(equip.type != type) {
@@ -515,7 +517,7 @@ function sendModal(interaction, playerid, type, isEquip) {
 }
 
 exports.receiveModal = async function(interaction, playerId, equip, type) {
-    var result = await this.equip(playerId, equip, type);
+    var result = await exports.equip(playerId, equip, type);
 
     switch (result) {
         case true:
@@ -525,7 +527,7 @@ exports.receiveModal = async function(interaction, playerId, equip, type) {
             interaction.reply({content: "Invalid type!", ephemeral: true});
             break;
         case "nopossess":
-            interaction.reply({content: "You don't possess this item!", ephemeral: true});
+            interaction.reply({content: "No equipment matched your query.", ephemeral: true});
             break;
         default:
             interaction.reply({content: "Something went wrong!", ephemeral: true});

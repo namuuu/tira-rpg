@@ -1,4 +1,4 @@
-const { prefix } = require('./../config.json');
+const { prefix } = require('../config.json');
 const { EmbedBuilder } = require('discord.js');
 const player = require('../utils/playerUtils.js');
 const template = require('../utils/messageTemplateUtils.js');
@@ -32,7 +32,7 @@ module.exports = {
         const executeCmd = client.commands.get(command);
         
         // Check if the command requires a character to exist in the database
-        if(executeCmd.requireCharacter && await !player.doesExists(message.author.id)) {
+        if(executeCmd.requireCharacter && !(await player.doesExists(message.author.id))) {
             // If it doesn't exist, send a message to the user
             const noCharacterEmbed = new EmbedBuilder()
                 .setColor('F08080')

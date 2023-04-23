@@ -6,7 +6,6 @@ module.exports = {
     aliases: [ "inv", "inventory"],
     description: "",
     requireCharacter: true,
-
     async execute(message, args) {
         const author = message.author;
         

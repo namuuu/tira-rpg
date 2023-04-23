@@ -61,8 +61,12 @@ exports.create = async function(id, className) {
 exports.remove = async function(id) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
-    const result = await playerCollection.drop();
-    console.log("[DEBUG] User ID " + id + " removed.");
+    try {
+        await playerCollection.drop();
+        console.log("[DEBUG] User ID " + id + " removed.");
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 exports.getData = async function(id, name) {
@@ -248,6 +252,8 @@ exports.exp.award = async function(id, exp, channel) {
 
     const newExp = info.exp + exp;
     const newLevel = rpgInfoUtils.calculateNewLevelExp(info.level, newExp);
+
+    console.log(`[DEBUG] User ID ${id} gained ${exp} exp and is now level ${newLevel.level} with ${newLevel.exp} exp`);
     
     await playerCollection.updateOne({ name: "info" }, { $set: { exp: newLevel.exp, level: newLevel.level } }, { upsert: true });
 
@@ -283,7 +289,6 @@ exports.levelUpStats = async function(id, level) {
 }
 
 exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
-    const info = await exports.getData(id, "info");
     if(!channel)
         return;
 
