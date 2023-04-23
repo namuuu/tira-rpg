@@ -1,4 +1,4 @@
-const { prefix } = require('./../config.json');
+const { prefix } = require('../config.json');
 const { EmbedBuilder } = require('discord.js');
 const player = require('../utils/playerUtils.js');
 const template = require('../utils/messageTemplateUtils.js');

@@ -61,8 +61,12 @@ exports.create = async function(id, className) {
 exports.remove = async function(id) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
-    const result = await playerCollection.drop();
-    console.log("[DEBUG] User ID " + id + " removed.");
+    try {
+        await playerCollection.drop();
+        console.log("[DEBUG] User ID " + id + " removed.");
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 exports.getData = async function(id, name) {

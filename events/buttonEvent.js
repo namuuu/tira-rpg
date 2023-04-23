@@ -8,6 +8,7 @@ const { startCombat, addPlayerToCombat, removePlayerFromCombat } = require('../m
 const { acceptInvitation } = require('../utils/partyUtils.js');
 const { sendStringAllAbilities, sendModal } = require('../utils/abilityUtils.js');
 const { receiveButton } = require('../utils/equipUtils.js');
+const { EmbedBuilder } = require("discord.js");
 
 const buttons = new Map();
 
@@ -71,6 +72,16 @@ module.exports = {
                 return;
             case 'equip':	
                 receiveButton(interaction, userId, args); // Personal button handler (equipUtils.js)
+                return;
+            case 'delete_character_confirm':
+                await player.remove(userId);
+                
+                const embed = new EmbedBuilder()
+                    .setColor('F08080')
+                    .setAuthor({name: 'Your character has been deleted.'})
+                    .setDescription('You can create a new one with the t.begin command.')
+
+                interaction.update({embeds: [embed], components: []});
                 return;
             case 'buyItem':
 
