@@ -693,15 +693,13 @@ exports.rewardLoot = async function(combat, thread) {
         if(victor.type == "human") {
             const embed = new EmbedBuilder()
                 .setTitle( Client.client.users.cache.get(victor.id).username + '\'s earnings!')
-            player.exp.award(victor.id, totalExp);
+            player.exp.award(victor.id, totalExp, thread);
             player.giveMoney(victor.id, totalMoney);
             embed.setDescription("You earned a total of " + totalExp + " experience points and " + totalMoney + " $ !");
-            
 
             var lootDescription = "";
 
             const lootNumber = Math.floor(Math.random() * 3) + 1;
-            
 
             for(let i = 0; i < lootNumber; i++) {
                 const lootRoll = Math.floor(Math.random() * lootTotal);
@@ -715,9 +713,9 @@ exports.rewardLoot = async function(combat, thread) {
                 const item = lootData[loot.id];
                 if(item != null && item != undefined && item.name != "none") {
                     if(item.type != undefined) {
-                    inventory.giveEquipement(victor.id, loot.id, loot.pack);
+                        inventory.giveEquipment(victor.id, loot.id, loot.pack);
                     } else {
-                    inventory.giveItem(victor.id, loot.id, loot.pack );
+                        inventory.giveItem(victor.id, loot.id, loot.pack );
                     }
                     lootDescription += item.name + " x" + loot.pack + "\n";
                 }
