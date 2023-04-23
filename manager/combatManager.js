@@ -195,6 +195,12 @@ exports.addPlayerToCombat = async function(playerDiscord, combatId, team, intera
         interaction.reply({ content:"Your character is not able to go in combat!", ephemeral: true});
         return;
     }
+    if(playerInfo.health <= 0) {
+        console.log("[DEBUG] Attempted to join a combat with a dead player. (DEAD_PLAYER_JOIN_ATTEMPT)");
+        interaction.reply({ content:"Your character is unable to go in combat! Type t.regen if you need to!", ephemeral: true});
+        return; 
+    }
+    console.log(playerInfo.health);
 
     const playerStats = await playerCollection.findOne({ name: "stats" }, { _id: 0 });
     const playerInv = await playerCollection.findOne({ name: "inventory" }, { _id: 0 });
