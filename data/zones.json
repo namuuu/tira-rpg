@@ -69,7 +69,7 @@
         "name": "Forgotten Temple",
         "description": "A temple whose history is unknown.",
         "required": {
-            "level": 320,
+            "level": null,
             "quests": null,
             "items": []  
         },

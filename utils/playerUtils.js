@@ -265,8 +265,8 @@ exports.exp.award = async function(id, exp, channel) {
 exports.levelUpStats = async function(id, level) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
-    var query = { name: "info" };
-    const info = await playerCollection.findOne(query);
+    var info = await exports.getData(id, "info");
+    var stats = await exports.getData(id, "stats");
     const userClass = info.class;
 
     const strength = classes[userClass].base_stats.strength*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.strength)*0.5);
@@ -276,16 +276,22 @@ exports.levelUpStats = async function(id, level) {
     const agility = classes[userClass].base_stats.agility*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.agility)*0.5);
     const intelligence = classes[userClass].base_stats.intelligence*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.intelligence)*0.5);
 
-    query = { name: "stats" };
-    const update = { $set: { strength: strength,
+    const newMaxHealth = (info.max_health - stats.vitality) + vitality;
+    const newHealth = info.health + (newMaxHealth - info.max_health);
+    console.log(`[DEBUG] User ID ${id} Old Health: ${info.max_health} New Health: ${newMaxHealth}, for ${newMaxHealth - info.max_health} gain`);
+
+    var query = { name: "stats" };
+    var update = { $set: { strength: strength,
                              vitality: vitality,
                              resistance: resistance,
                              spirit: spirit,
                              agility: agility,
                              intelligence: intelligence, }};
-    const result = await playerCollection.updateOne(query, update, {upsert: false});
+    await playerCollection.updateOne(query, update, {upsert: false});
 
-    
+    query = { name: "info" };
+    update = { $set: { health: newHealth, max_health: newHealth }};
+    await playerCollection.updateOne(query, update, {upsert: false});
 }
 
 exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
@@ -331,7 +337,7 @@ exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
 
     channel.send({ embeds: [embed] });
 
-    exports.levelUpStats(id, level);
+    await exports.levelUpStats(id, level);
 }
 
 
@@ -363,7 +369,7 @@ exports.updateStats = async function(id, className) {
                              spirit: spirit,
                              agility: agility,
                              intelligence: intelligence, }};
-    const result = await playerCollection.updateOne(query, update, {upsert: false});
+    await playerCollection.updateOne(query, update, {upsert: false});
 
     return true;
     
