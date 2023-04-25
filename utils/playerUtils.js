@@ -131,7 +131,6 @@ exports.health.add = async function(userID, health) {
 }
 
 exports.health.passiveRegen = async function(userID) {
-    //Math.floor(Date.now()/1000)
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
     let lastRegen = await exports.getData(userID, "misc");
@@ -243,6 +242,74 @@ exports.energy.passiveRegen = async function(userID) {
     await playerCollection.updateOne(query, update, {upsert: true});
 
     return result;
+}
+
+exports.passiveRegen = async function(userID) {
+    const info = await exports.getData(userID, "info");
+    const misc = await exports.getData(userID, "misc");
+
+    const lastHealthRegen = misc.lastRegen;
+    const lastEnergyRegen = misc.lastEnergy;
+
+    let returnVal = {};
+
+    if((Date.now() - lastHealthRegen) < 1800000 && (Date.now() - lastEnergyRegen) < 3600000) {
+        returnVal.error = "You have already regenerated health and energy in the last 30 minutes";
+        return returnVal;
+    }
+
+    let infoUpdate = {$set: {}};
+    let miscUpdate = {$set: {}};
+        
+
+    if((Date.now() - lastHealthRegen) > 1800000 && info.health < info.max_health) {
+        const gainedHealth = (Date.now() - lastHealthRegen) / 1000000 * 17.778;
+        console.log(gainedHealth);
+
+        if(info.health < 0 && gainedHealth < 30)
+            returnVal.error = "You may only revive by gaining at least 30% of your health";
+        else {
+            const newHealth = info.health + info.max_health*(gainedHealth/100);
+            returnVal.health = newHealth;
+
+            if(newHealth > info.max_health)
+                returnVal.health = info.max_health;
+
+            returnVal.gainedHealth = returnVal.health - info.health;
+        
+            infoUpdate.$set.health = returnVal.health;
+            miscUpdate.$set.lastRegen = Date.now();
+        }
+    }
+
+    if((Date.now() - lastEnergyRegen) > 3600000) {
+        const gainedEnergy = Math.floor((Date.now() - lastEnergyRegen) / 3600000);
+        console.log(gainedEnergy);
+
+        if(info.energy < 0 && gainedEnergy < 1)
+            returnVal.error = "You may only revive by gaining at least 1 energy";
+        else {
+            const newEnergy = info.energy + gainedEnergy;
+            returnVal.energy = newEnergy;
+
+            if(newEnergy > 3)
+                returnVal.energy = 3;
+
+            returnVal.gainedEnergy = returnVal.energy - info.energy;
+        
+            infoUpdate.$set.energy = returnVal.energy;
+            miscUpdate.$set.lastEnergy = Date.now();
+        }
+    }
+
+    if(returnVal.health || returnVal.energy) {
+        const playerCollection = Client.mongoDB.db('player-data').collection(userID);
+
+        playerCollection.updateOne({ name: "info" }, infoUpdate, { upsert: true });
+        playerCollection.updateOne({ name: "misc" }, miscUpdate, { upsert: true });
+    }
+
+    return returnVal;
 }
 
 exports.exp.award = async function(id, exp, channel) {
