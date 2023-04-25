@@ -14,23 +14,28 @@ module.exports = {
         const args = customId.split('-');
         const command = args.shift();
 
-        if(!(await player.doesExists(user.id))) return;
+        try {
+            if(!(await player.doesExists(user.id))) return;
 
-        switch(command) {
-            case 'selectAbility':
-                skill.receiveModal(interaction, true);
-                break;
-            case 'unselectAbility':
-                skill.receiveModal(interaction, false);
-                break;
-            case 'equip':
-                equip.receiveModal(interaction, userId, interaction.fields.getTextInputValue('text-input'), args[0], true);
-                break;
-            case 'unequip':
-                equip.receiveModal(interaction, userId, interaction.fields.getTextInputValue('text-input'), args[0], false);
-                break;
-            default:
-                break;
+            switch(command) {
+                case 'selectAbility':
+                    skill.receiveModal(interaction, true);
+                    break;
+                case 'unselectAbility':
+                    skill.receiveModal(interaction, false);
+                    break;
+                case 'equip':
+                    equip.receiveModal(interaction, userId, interaction.fields.getTextInputValue('text-input'), args[0], true);
+                    break;
+                case 'unequip':
+                    equip.receiveModal(interaction, userId, interaction.fields.getTextInputValue('text-input'), args[0], false);
+                    break;
+                default:
+                    break;
+            }
+        } catch (error) {
+            console.error(error);
+            interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
         }
     }
 }

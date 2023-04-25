@@ -7,8 +7,6 @@ module.exports = {
     description: "Gives you the link to get Tira onto your server!",
     requireCharacter: true,
     execute(message, args) {
-        console.log("invite command executed");
-
         const embed = new EmbedBuilder()
             .setTitle("Invite Tira to your server!")
             .addFields(

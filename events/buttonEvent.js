@@ -33,94 +33,99 @@ module.exports = {
         const args = customId.split('-');
         const command = args.shift();
 
-        // The only button supported without a player is the welcome button
-        if(command == "welcome") {
-            buttons.get(command).interact(interaction, args);
-            return;
-        }
+        try {
+            // The only button supported without a player is the welcome button
+            if(command == "welcome") {
+                buttons.get(command).interact(interaction, args);
+                return;
+            }
 
-        if(!(await player.doesExists(user.id))) return;
+            if(!(await player.doesExists(user.id))) return;
 
-        // console.log("Command: " + command);
-        // console.log("Args: " + args);
+            // console.log("Command: " + command);
+            // console.log("Args: " + args);
 
-        switch(command) {
-            case 'displayInventory':
-                displayInventory(userId, interaction); // Displays the inventory of a player (inventoryUtils.js)
-                return;
-            case 'displayAbilities':
-                const ret = await sendStringAllAbilities(user.username, userId); // Displays all the abilities of a player (abilityUtils.js)
-                interaction.reply(ret);
-                return;
-            case 'selectAbility':
-                sendModal(interaction, true, args[0]);
-                return;
-            case 'unselectAbility':
-                sendModal(interaction, false, args[0]);
-                return;
-            case 'joinFight':
-                await addPlayerToCombat(user, args[0], args[1], interaction); // Adds a player to a combat (combatManager.js)
-                return;
-            case 'leaveFight':
-                await removePlayerFromCombat(userId, args[0], interaction); // Removes a player from a combat (combatManager.js)
-                return;
-            case 'combat_start':
-                await startCombat(interaction); // Starts a combat (combatManager.js)
-                return;
-            case 'party_accept':
-                await acceptInvitation(userId, args[0], interaction); // Accepts a party invitation (partyUtils.js)
-                return;
-            case 'equip':	
-                receiveButton(interaction, userId, args); // Personal button handler (equipUtils.js)
-                return;
-            case 'delete_character_confirm':
-                await player.remove(userId);
-                
-                const embed = new EmbedBuilder()
-                    .setColor('F08080')
-                    .setAuthor({name: 'Your character has been deleted.'})
-                    .setDescription('You can create a new one with the t.begin command.')
-
-                interaction.update({embeds: [embed], components: []});
-                return;
-            case 'buyItem':
-
-                if(args[0] != interaction.user.id) {
-                    interaction.channel.send("If you would like to shop with your own character, please use the t.shop commande yourself ! " + "<@" + interaction.user.id + ">");
+            switch(command) {
+                case 'displayInventory':
+                    displayInventory(userId, interaction); // Displays the inventory of a player (inventoryUtils.js)
                     return;
-                }
-
-                if (interaction.message.components[1] != undefined) {
-                    interaction.channel.send("Please select an item and a quantity to buy ! " + "<@" + interaction.user.id + ">");
+                case 'displayAbilities':
+                    const ret = await sendStringAllAbilities(user.username, userId); // Displays all the abilities of a player (abilityUtils.js)
+                    interaction.reply(ret);
                     return;
-                }
+                case 'selectAbility':
+                    sendModal(interaction, true, args[0]);
+                    return;
+                case 'unselectAbility':
+                    sendModal(interaction, false, args[0]);
+                    return;
+                case 'joinFight':
+                    await addPlayerToCombat(user, args[0], args[1], interaction); // Adds a player to a combat (combatManager.js)
+                    return;
+                case 'leaveFight':
+                    await removePlayerFromCombat(userId, args[0], interaction); // Removes a player from a combat (combatManager.js)
+                    return;
+                case 'combat_start':
+                    await startCombat(interaction); // Starts a combat (combatManager.js)
+                    return;
+                case 'party_accept':
+                    await acceptInvitation(userId, args[0], interaction); // Accepts a party invitation (partyUtils.js)
+                    return;
+                case 'equip':	
+                    receiveButton(interaction, userId, args); // Personal button handler (equipUtils.js)
+                    return;
+                case 'delete_character_confirm':
+                    await player.remove(userId);
+                    
+                    const embed = new EmbedBuilder()
+                        .setColor('F08080')
+                        .setAuthor({name: 'Your character has been deleted.'})
+                        .setDescription('You can create a new one with the t.begin command.')
 
-                var currentQuantity = interaction.message.components[0].components[0].customId.split('-')[4];
-                var currentItem = interaction.message.components[0].components[0].customId.split('-')[3];
-                var shop = interaction.message.components[0].components[0].customId.split('-')[2];
+                    interaction.update({embeds: [embed], components: []});
+                    return;
+                case 'buyItem':
 
-                var buy = await player.takeMoney(interaction.user.id, shopsData[shop].items[currentItem].cost * currentQuantity, interaction.message);
+                    if(args[0] != interaction.user.id) {
+                        interaction.channel.send("If you would like to shop with your own character, please use the t.shop commande yourself ! " + "<@" + interaction.user.id + ">");
+                        return;
+                    }
 
-                if(!buy) {
+                    if (interaction.message.components[1] != undefined) {
+                        interaction.channel.send("Please select an item and a quantity to buy ! " + "<@" + interaction.user.id + ">");
+                        return;
+                    }
+
+                    var currentQuantity = interaction.message.components[0].components[0].customId.split('-')[4];
+                    var currentItem = interaction.message.components[0].components[0].customId.split('-')[3];
+                    var shop = interaction.message.components[0].components[0].customId.split('-')[2];
+
+                    var buy = await player.takeMoney(interaction.user.id, shopsData[shop].items[currentItem].cost * currentQuantity, interaction.message);
+
+                    if(!buy) {
+                        await interaction.message.delete(); 
+                        selector.generateShopItemsSelector(interaction, shop, "0", "0");
+                        break;
+                    }
+
+                    await inventory.giveItem(interaction.user.id, currentItem, currentQuantity);
+
+                    interaction.channel.send("You bought " + currentQuantity + " " + shopsData[shop].items[currentItem].name + " ! " + "<@" + interaction.user.id + ">");
+
                     await interaction.message.delete(); 
+
                     selector.generateShopItemsSelector(interaction, shop, "0", "0");
+                return;
+                default:
                     break;
-                }
+            }
 
-                await inventory.giveItem(interaction.user.id, currentItem, currentQuantity);
-
-                interaction.channel.send("You bought " + currentQuantity + " " + shopsData[shop].items[currentItem].name + " ! " + "<@" + interaction.user.id + ">");
-
-                await interaction.message.delete(); 
-
-                selector.generateShopItemsSelector(interaction, shop, "0", "0");
-            return;
-            default:
-                break;
-        }
-
-        if(buttons.has(command)) {
-            buttons.get(command).interact(interaction, args);
+            if(buttons.has(command)) {
+                buttons.get(command).interact(interaction, args);
+            }
+        } catch (error) {
+            console.error(error);
+            interaction.reply({ content: 'There was an error while executing this button!', ephemeral: true });
         }
     }
 }

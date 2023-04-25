@@ -158,7 +158,7 @@ exports.equip = async function(playerId, query, type) {
 
     inv.equipItems = inv.equipItems.filter(item => item.type == type);
 
-    const equip = exports.leveinsteinSearch(query, inv.equipItems)[0];
+    var equip = exports.leveinsteinSearch(query, inv.equipItems)[0];
 
     if(equip == null || equip.size == 0) {
         console.log("ERROR: Tried to equip an item that the user doesn't possess.");

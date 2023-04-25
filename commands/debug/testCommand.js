@@ -56,6 +56,7 @@ module.exports = {
 
       message.channel.send({ embeds: [serverRuleEmbed] });*/
 
+      message.channel.send({ content: "test" });
       console.log(message.author.avatarURL({format: "png", size: 1024}));
 
       //discussion.send(message.author, message.channel, "welcome_capital", "welcome_capital_1");

@@ -102,16 +102,7 @@ exports.updateData = async function(id, data, name) {
 exports.health.set = async function(userID, health) {
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
-    const query = { name: "info" };
-    let options = { 
-        projection: {_id: 0, class: 0, level: 0, exp: 0, money: 0, state: 0, energy: 0, location: 0},
-    };
-
-    const info = await playerCollection.findOne(query, options);
-
-    const update = { $set: { health: health } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne({ name: "info" }, { $set: { health: health } }, { upsert: true });
 }
 
 exports.health.add = async function(userID, health) {
@@ -127,62 +118,14 @@ exports.health.add = async function(userID, health) {
     
     const update = { $set: { health: newHealth } };
     options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
-}
-
-exports.health.passiveRegen = async function(userID) {
-    //Math.floor(Date.now()/1000)
-    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
-
-    let lastRegen = await exports.getData(userID, "misc");
-    lastRegen = lastRegen.lastRegen;
-
-    let health = await exports.getData(userID, "info");
-    let maxHealth = health.max_health;
-    health = health.health;
-
-    if((Date.now() - lastRegen) < 1800000)
-        return 0;
-
-    const percHealth = (Date.now() - lastRegen) / 1000000 * 17.778;
-    let newHealth = Math.round(health + maxHealth*(percHealth/100));
-    if(newHealth > maxHealth)
-        newHealth = maxHealth;
-
-    //const newHealth = maxHealth.health + health;
-
-    let query = { name: "info" };
-    
-    let update = { $set: { health: newHealth } };
-    let options = { upsert: true };
     await playerCollection.updateOne(query, update, options);
-
-    console.log(`[DEBUG] User ID ${userID} regenerated ${newHealth - health} through ${(Math.round((Date.now() - lastRegen)/60000))} minutes`);
-
-    query = { name: "misc" };
-    
-    update = { $set: { lastRegen: Date.now() } };
-    await playerCollection.updateOne(query, update, {upsert: true});
-
-    return newHealth - health;
 }
 
 exports.energy.set = async function(userID, energy) {
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
-    if(energy > 3)
-        energy = 3;
-
-    const query = { name: "info" };
-    let options = { 
-        projection: {_id: 0, class: 0, level: 0, exp: 0, money: 0, state: 0, health: 0, location: 0},
-    };
-
-    const info = await playerCollection.findOne(query, options);
-
-    const update = { $set: { energy: energy } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    const update = { $set: { energy: Math.max(3, energy) } };
+    await playerCollection.updateOne({ name: "info" }, update, { upsert: true });
 }
 
 exports.energy.add = async function(userID, energy) {
@@ -200,49 +143,68 @@ exports.energy.add = async function(userID, energy) {
         newEnergy = 3;
 
     const update = { $set: { energy: newEnergy } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne(query, update, { upsert: true });
 }
 
-exports.energy.passiveRegen = async function(userID) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
+exports.passiveRegen = async function(userID) {
+    const info = await exports.getData(userID, "info");
+    const misc = await exports.getData(userID, "misc");
 
-    let maxEnergy = 3;
+    const lastHealthRegen = misc.lastRegen;
+    const lastEnergyRegen = misc.lastEnergy;
 
-    let lastRegen = await exports.getData(userID, "misc");
-    lastRegen = lastRegen.lastEnergy;
+    let returnVal = {health: info.health, energy: info.energy, gainedEnergy: 0, gainedHealth: 0};
 
-    let energy = await exports.getData(userID, "info");
-    energy = energy.energy;
-
-    if(energy >= maxEnergy)
-        return 0;
-
-    if((Date.now() - lastRegen) < 3600000) {
-        return 0;
-    } else if ( (Date.now() - lastRegen) < 7200000) {
-        energy = energy + 1;
-        var result = 1;
-    } else if ( (Date.now() - lastRegen) < 10800000) {
-        energy = energy + 2;
-        var result = 2;
-    } else {
-        energy = 3;
-        var result = 3;
+    if((Date.now() - lastHealthRegen) < 1800000 && (Date.now() - lastEnergyRegen) < 3600000) {
+        returnVal.error = "You have already regenerated health and energy in the last 30 minutes";
+        return returnVal;
     }
 
-    if (energy > maxEnergy)
-        energy = maxEnergy;
+    let infoUpdate = {$set: {}};
+    let miscUpdate = {$set: {}};
+        
 
-    await exports.energy.set(userID, energy);
+    if((Date.now() - lastHealthRegen) > 1800000 && info.health < info.max_health) {
+        const gainedHealth = (Date.now() - lastHealthRegen) / 1000000 * 17.778;
 
-    query = { name: "misc" };
+        if(info.health < 0 && gainedHealth < 30)
+            returnVal.error = "You may only revive by gaining at least 30% of your health";
+        else {
+            const newHealth = info.health + info.max_health*(gainedHealth/100);
+            returnVal.health = newHealth;
+
+            if(newHealth > info.max_health)
+                returnVal.health = info.max_health;
+
+            returnVal.gainedHealth = returnVal.health - info.health;
+        
+            infoUpdate.$set.health = returnVal.health;
+            miscUpdate.$set.lastRegen = Date.now();
+        }
+    }
+
+    if((Date.now() - lastEnergyRegen) > 3600000) {
+        const gainedEnergy = Math.floor((Date.now() - lastEnergyRegen) / 3600000);
+        const newEnergy = info.energy + gainedEnergy;
+        returnVal.energy = newEnergy;
+
+        if(newEnergy > 3)
+            returnVal.energy = 3;
+
+        returnVal.gainedEnergy = returnVal.energy - info.energy;
     
-    update = { $set: { lastEnergy: Date.now() } };
-    
-    await playerCollection.updateOne(query, update, {upsert: true});
+        infoUpdate.$set.energy = returnVal.energy;
+        miscUpdate.$set.lastEnergy = Date.now();
+    }
 
-    return result;
+    if(returnVal.health || returnVal.energy) {
+        const playerCollection = Client.mongoDB.db('player-data').collection(userID);
+
+        playerCollection.updateOne({ name: "info" }, infoUpdate, { upsert: true });
+        playerCollection.updateOne({ name: "misc" }, miscUpdate, { upsert: true });
+    }
+
+    return returnVal;
 }
 
 exports.exp.award = async function(id, exp, channel) {
@@ -265,8 +227,8 @@ exports.exp.award = async function(id, exp, channel) {
 exports.levelUpStats = async function(id, level) {
     const playerCollection = Client.mongoDB.db('player-data').collection(id);
 
-    var query = { name: "info" };
-    const info = await playerCollection.findOne(query);
+    var info = await exports.getData(id, "info");
+    var stats = await exports.getData(id, "stats");
     const userClass = info.class;
 
     const strength = classes[userClass].base_stats.strength*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.strength)*0.5);
@@ -276,16 +238,22 @@ exports.levelUpStats = async function(id, level) {
     const agility = classes[userClass].base_stats.agility*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.agility)*0.5);
     const intelligence = classes[userClass].base_stats.intelligence*1 + Math.floor(((level*1 + (Math.random() * level)*0.1)*classes[userClass].mult_stats.intelligence)*0.5);
 
-    query = { name: "stats" };
-    const update = { $set: { strength: strength,
+    const newMaxHealth = (info.max_health - stats.vitality) + vitality;
+    const newHealth = info.health + (newMaxHealth - info.max_health);
+    console.log(`[DEBUG] User ID ${id} Old Health: ${info.max_health} New Health: ${newMaxHealth}, for ${newMaxHealth - info.max_health} gain`);
+
+    var query = { name: "stats" };
+    var update = { $set: { strength: strength,
                              vitality: vitality,
                              resistance: resistance,
                              spirit: spirit,
                              agility: agility,
                              intelligence: intelligence, }};
-    const result = await playerCollection.updateOne(query, update, {upsert: false});
+    await playerCollection.updateOne(query, update, {upsert: false});
 
-    
+    query = { name: "info" };
+    update = { $set: { health: newHealth, max_health: newHealth }};
+    await playerCollection.updateOne(query, update, {upsert: false});
 }
 
 exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
@@ -331,7 +299,7 @@ exports.exp.getLevelRewards = async function(id, level, channel, userClass) {
 
     channel.send({ embeds: [embed] });
 
-    exports.levelUpStats(id, level);
+    await exports.levelUpStats(id, level);
 }
 
 
@@ -363,7 +331,7 @@ exports.updateStats = async function(id, className) {
                              spirit: spirit,
                              agility: agility,
                              intelligence: intelligence, }};
-    const result = await playerCollection.updateOne(query, update, {upsert: false});
+    await playerCollection.updateOne(query, update, {upsert: false});
 
     return true;
     
