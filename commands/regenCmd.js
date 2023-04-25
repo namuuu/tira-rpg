@@ -11,50 +11,17 @@ module.exports = {
 
     const returnVal = await player.passiveRegen(authorId);
 
-    console.log(returnVal);
-
     const embed = new EmbedBuilder()
       .setColor(0xF898AA)
+      .setTimestamp();
 
-    let field = "";
-
-    if (returnVal.health > 0 || returnVal.energy > 0) {
-      
-
-      if (returnVal.gainedHealth > 0)
-        field += `• ${returnVal.health} HP (+${returnVal.gainedHealth})\n`;
-
-      if (returnVal.gainedEnergy > 0)
-        field +=  `• ${returnVal.energy} energy (+${returnVal.gainedEnergy})\n`;
+    if (returnVal.gainedHealth > 0 || returnVal.gainedEnergy > 0) {
+      embed.addFields({name: ":hibiscus: Regeneration", value: `You now have ${returnVal.health} health :heart: (+${returnVal.gainedHealth}) and  ${returnVal.energy} energy :battery: (+${returnVal.gainedEnergy})`});
     }
 
     if (returnVal.error != null)
       embed.setDescription(returnVal.error);
 
-    if (field != "")
-      embed.addFields({ name: " :hibiscus: Passive Regeneration", value: field })
-
     message.channel.send({ embeds: [embed] });
-
-
-
-  //   player.health.passiveRegen(message.author.id).then(health => {
-  //     player.energy.passiveRegen(message.author.id).then(energy => {
-  //       player.getData(authorId, "info").then(info => {
-
-  //       var actualHealth = info.health;
-  //       var actualEnergy = info.energy;
-
-  //       const embed = new EmbedBuilder()
-  //         .setTitle(" :hibiscus: Passive Regeneration :hibiscus:")
-  //         .setDescription("You have recovered " + health + " health :heart: and " + energy + " energy :battery:")
-  //         .setColor(0xF898AA)
-  //         .setFooter({text: "You now have " + actualHealth + " health and " + actualEnergy + " energy."})
-  //         .setTimestamp();
-
-  //       message.channel.send({ embeds: [embed] });
-  //     })
-  //   })
-  // })
   }
 }

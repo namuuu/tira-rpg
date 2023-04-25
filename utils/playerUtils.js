@@ -130,42 +130,6 @@ exports.health.add = async function(userID, health) {
     const result = await playerCollection.updateOne(query, update, options);
 }
 
-exports.health.passiveRegen = async function(userID) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
-
-    let lastRegen = await exports.getData(userID, "misc");
-    lastRegen = lastRegen.lastRegen;
-
-    let health = await exports.getData(userID, "info");
-    let maxHealth = health.max_health;
-    health = health.health;
-
-    if((Date.now() - lastRegen) < 1800000)
-        return 0;
-
-    const percHealth = (Date.now() - lastRegen) / 1000000 * 17.778;
-    let newHealth = Math.round(health + maxHealth*(percHealth/100));
-    if(newHealth > maxHealth)
-        newHealth = maxHealth;
-
-    //const newHealth = maxHealth.health + health;
-
-    let query = { name: "info" };
-    
-    let update = { $set: { health: newHealth } };
-    let options = { upsert: true };
-    await playerCollection.updateOne(query, update, options);
-
-    console.log(`[DEBUG] User ID ${userID} regenerated ${newHealth - health} through ${(Math.round((Date.now() - lastRegen)/60000))} minutes`);
-
-    query = { name: "misc" };
-    
-    update = { $set: { lastRegen: Date.now() } };
-    await playerCollection.updateOne(query, update, {upsert: true});
-
-    return newHealth - health;
-}
-
 exports.energy.set = async function(userID, energy) {
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
@@ -173,15 +137,9 @@ exports.energy.set = async function(userID, energy) {
         energy = 3;
 
     const query = { name: "info" };
-    let options = { 
-        projection: {_id: 0, class: 0, level: 0, exp: 0, money: 0, state: 0, health: 0, location: 0},
-    };
-
-    const info = await playerCollection.findOne(query, options);
 
     const update = { $set: { energy: energy } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne(query, update, { upsert: true });
 }
 
 exports.energy.add = async function(userID, energy) {
@@ -203,47 +161,6 @@ exports.energy.add = async function(userID, energy) {
     const result = await playerCollection.updateOne(query, update, options);
 }
 
-exports.energy.passiveRegen = async function(userID) {
-    const playerCollection = Client.mongoDB.db('player-data').collection(userID);
-
-    let maxEnergy = 3;
-
-    let lastRegen = await exports.getData(userID, "misc");
-    lastRegen = lastRegen.lastEnergy;
-
-    let energy = await exports.getData(userID, "info");
-    energy = energy.energy;
-
-    if(energy >= maxEnergy)
-        return 0;
-
-    if((Date.now() - lastRegen) < 3600000) {
-        return 0;
-    } else if ( (Date.now() - lastRegen) < 7200000) {
-        energy = energy + 1;
-        var result = 1;
-    } else if ( (Date.now() - lastRegen) < 10800000) {
-        energy = energy + 2;
-        var result = 2;
-    } else {
-        energy = 3;
-        var result = 3;
-    }
-
-    if (energy > maxEnergy)
-        energy = maxEnergy;
-
-    await exports.energy.set(userID, energy);
-
-    query = { name: "misc" };
-    
-    update = { $set: { lastEnergy: Date.now() } };
-    
-    await playerCollection.updateOne(query, update, {upsert: true});
-
-    return result;
-}
-
 exports.passiveRegen = async function(userID) {
     const info = await exports.getData(userID, "info");
     const misc = await exports.getData(userID, "misc");
@@ -251,7 +168,7 @@ exports.passiveRegen = async function(userID) {
     const lastHealthRegen = misc.lastRegen;
     const lastEnergyRegen = misc.lastEnergy;
 
-    let returnVal = {};
+    let returnVal = {health: info.health, energy: info.energy, gainedEnergy: 0, gainedHealth: 0};
 
     if((Date.now() - lastHealthRegen) < 1800000 && (Date.now() - lastEnergyRegen) < 3600000) {
         returnVal.error = "You have already regenerated health and energy in the last 30 minutes";
@@ -264,7 +181,6 @@ exports.passiveRegen = async function(userID) {
 
     if((Date.now() - lastHealthRegen) > 1800000 && info.health < info.max_health) {
         const gainedHealth = (Date.now() - lastHealthRegen) / 1000000 * 17.778;
-        console.log(gainedHealth);
 
         if(info.health < 0 && gainedHealth < 30)
             returnVal.error = "You may only revive by gaining at least 30% of your health";
@@ -284,22 +200,16 @@ exports.passiveRegen = async function(userID) {
 
     if((Date.now() - lastEnergyRegen) > 3600000) {
         const gainedEnergy = Math.floor((Date.now() - lastEnergyRegen) / 3600000);
-        console.log(gainedEnergy);
+        const newEnergy = info.energy + gainedEnergy;
+        returnVal.energy = newEnergy;
 
-        if(info.energy < 0 && gainedEnergy < 1)
-            returnVal.error = "You may only revive by gaining at least 1 energy";
-        else {
-            const newEnergy = info.energy + gainedEnergy;
-            returnVal.energy = newEnergy;
+        if(newEnergy > 3)
+            returnVal.energy = 3;
 
-            if(newEnergy > 3)
-                returnVal.energy = 3;
-
-            returnVal.gainedEnergy = returnVal.energy - info.energy;
-        
-            infoUpdate.$set.energy = returnVal.energy;
-            miscUpdate.$set.lastEnergy = Date.now();
-        }
+        returnVal.gainedEnergy = returnVal.energy - info.energy;
+    
+        infoUpdate.$set.energy = returnVal.energy;
+        miscUpdate.$set.lastEnergy = Date.now();
     }
 
     if(returnVal.health || returnVal.energy) {
