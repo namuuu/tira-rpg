@@ -22,6 +22,19 @@ module.exports = {
             .setStyle(ButtonStyle.Danger));
 
       message.reply({embeds: [embed], components: [row]});
+    } else {
+      const failEmbed = new EmbedBuilder()
+        .setColor('F08080')
+        .setDescription('You don\'t have a character to delete.')
+        .setFooter({text: 'Use the command t.begin to create one.'});
+
+      const reply = message.reply({embeds: [failEmbed]});
+
+      setTimeout(() => {
+        message.delete();
+        reply.then(msg => msg.delete());
+      }
+      , 5000);
     }
   }
 }
