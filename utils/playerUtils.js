@@ -102,16 +102,7 @@ exports.updateData = async function(id, data, name) {
 exports.health.set = async function(userID, health) {
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
-    const query = { name: "info" };
-    let options = { 
-        projection: {_id: 0, class: 0, level: 0, exp: 0, money: 0, state: 0, energy: 0, location: 0},
-    };
-
-    const info = await playerCollection.findOne(query, options);
-
-    const update = { $set: { health: health } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne({ name: "info" }, { $set: { health: health } }, { upsert: true });
 }
 
 exports.health.add = async function(userID, health) {
@@ -127,19 +118,14 @@ exports.health.add = async function(userID, health) {
     
     const update = { $set: { health: newHealth } };
     options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne(query, update, options);
 }
 
 exports.energy.set = async function(userID, energy) {
     const playerCollection = Client.mongoDB.db('player-data').collection(userID);
 
-    if(energy > 3)
-        energy = 3;
-
-    const query = { name: "info" };
-
-    const update = { $set: { energy: energy } };
-    await playerCollection.updateOne(query, update, { upsert: true });
+    const update = { $set: { energy: Math.max(3, energy) } };
+    await playerCollection.updateOne({ name: "info" }, update, { upsert: true });
 }
 
 exports.energy.add = async function(userID, energy) {
@@ -157,8 +143,7 @@ exports.energy.add = async function(userID, energy) {
         newEnergy = 3;
 
     const update = { $set: { energy: newEnergy } };
-    options = { upsert: true };
-    const result = await playerCollection.updateOne(query, update, options);
+    await playerCollection.updateOne(query, update, { upsert: true });
 }
 
 exports.passiveRegen = async function(userID) {
