@@ -2,6 +2,7 @@
     "slime_lake": {
         "name": "Slime Lake",
         "description": "A quiet place with only slimes roaming around. It's a good place to train your abilities.",
+        "long_description": "A quiet place with only slimes roaming around. The ground is ever so slightly sticky, making a weird sound when you walk on it, probably due to all the slimes passing by. It's a good place to train your abilities.",
         "color": [144, 238, 144],
         "required": {
             "level": 4,
@@ -36,6 +37,7 @@
     "vertchamps_plains": {
         "name": "Vertchamps Plains",
         "description": "A vast landscape with fresh grass ondulating in the wind.",
+        "long_description": "A vast landscape with fresh grass ondulating in the wind. This place is pretty peaceful and harmonious, making anyone who comes here feel at ease.",
         "required": {
             "level": null,
             "quests": null,
@@ -88,6 +90,7 @@
     "capital": {
         "name": "La Capitale",
         "description": "It served as the last bastion of humanity.",
+        "long_description": "It served as the last bastion of humanity. Situated in a giant fault, this location aimed to hide its inhabitants from the roaming monsters, while still being able to see a little bit of sunlight.",
         "color": [210, 180, 140],
         "required": {
             "level": null,

@@ -252,7 +252,7 @@ exports.levelUpStats = async function(id, level) {
     await playerCollection.updateOne(query, update, {upsert: false});
 
     query = { name: "info" };
-    update = { $set: { health: newHealth, max_health: newHealth }};
+    update = { $set: { health: newHealth, max_health: newMaxHealth }};
     await playerCollection.updateOne(query, update, {upsert: false});
 }
 

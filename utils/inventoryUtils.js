@@ -266,7 +266,7 @@ async function typeAbilities(embed, playerId, playername) {
          .setFooter({text: 'Need to get more info about a specific ability ? Type t.ability <number>'})
 
     try {
-        embed.setDescription(abilities.length != 0 ? abilities.map(ability => `# ${data[ability].number} - ${data[ability].name}`).join(", ") : "No ability learned.");
+        embed.setDescription(abilities.length != 0 ? abilities.map(ability => `\# ${data[ability].number} - ${data[ability].name}`).join(", ") : "No ability learned.");
     } catch (error) {
         embed.setDescription("No ability learned. (There may be an error!)");
         console.error(error);

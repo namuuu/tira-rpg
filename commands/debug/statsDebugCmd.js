@@ -36,6 +36,7 @@ module.exports = {
                 player.energy.add(authorId, query);
                 message.reply("Added " + query + " energy to " + author.username + ".");
                 break;
+            case "award-exp":
             case "add-exp":
                 player.exp.award(authorId, query, message.channel);
                 break;
